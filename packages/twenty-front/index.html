@@ -29,6 +29,41 @@
     <meta name="twitter:description" content="A modern open-source CRM" />
     <meta name="twitter:title" content="Twenty" />
     <title>Twenty</title>
+    <script>
+      // Set dir/lang before the bundle loads so an RTL locale doesn't get a
+      // left-to-right first paint. Mirrors the resolution order in
+      // initialI18nActivate and the RTL list in getLocaleTextDirection
+      // (twenty-shared), which stay the source of truth after boot.
+      (function () {
+        try {
+          var RTL_LANGUAGES = [
+            'ar',
+            'dv',
+            'fa',
+            'he',
+            'ps',
+            'sd',
+            'ug',
+            'ur',
+            'yi',
+          ];
+          var locale =
+            new URLSearchParams(window.location.search).get('locale') ||
+            window.localStorage.getItem('locale') ||
+            window.navigator.language;
+          if (locale) {
+            document.documentElement.lang = locale;
+            document.documentElement.dir =
+              RTL_LANGUAGES.indexOf(locale.split(/[-_]/)[0].toLowerCase()) !==
+              -1
+                ? 'rtl'
+                : 'ltr';
+          }
+        } catch (error) {
+          // dir/lang are reconciled by dynamicActivate once the bundle runs.
+        }
+      })();
+    </script>
     <!-- BEGIN: Twenty Config -->
     <script id="twenty-env-config">
       window._env_ = {

@@ -10,6 +10,8 @@ import {
 } from '@floating-ui/react';
 import { useMemo } from 'react';
 import { isDefined } from 'twenty-shared/utils';
+import { useTextDirection } from '@/localization/hooks/useTextDirection';
+import { flipPlacementForDirection } from '@/localization/utils/flipPlacementForDirection';
 
 export const useGraphWidgetTooltipFloating = (
   referenceElement: Element | VirtualElement | null,
@@ -26,16 +28,23 @@ export const useGraphWidgetTooltipFloating = (
 
   const rootBoundary = document.querySelector('#root') ?? undefined;
 
+  // Anchor on the inline-start side: physical left in LTR, right in RTL.
+  const direction = useTextDirection();
+
   const { refs, x, y, isPositioned } = useFloating({
     elements: {
       reference: virtualElement,
     },
-    placement: 'left',
+    placement: flipPlacementForDirection('left', direction),
     strategy: 'fixed',
     middleware: [
       offset(tooltipOffsetFromAnchorInPx),
       flip({
-        fallbackPlacements: ['right', 'top', 'bottom'],
+        fallbackPlacements: [
+          flipPlacementForDirection('right', direction),
+          'top',
+          'bottom',
+        ],
         boundary: boundaryElement ?? rootBoundary,
       }),
       shift({

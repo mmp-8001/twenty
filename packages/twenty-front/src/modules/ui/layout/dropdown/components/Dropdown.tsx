@@ -34,6 +34,8 @@ import { flushSync } from 'react-dom';
 import { type Keys } from 'react-hotkeys-hook';
 import { isDefined } from 'twenty-shared/utils';
 import { useIsMobile } from 'twenty-ui/utilities';
+import { useTextDirection } from '@/localization/hooks/useTextDirection';
+import { flipPlacementForDirection } from '@/localization/utils/flipPlacementForDirection';
 
 type Width = `${string}px` | `${number}%` | 'auto' | number;
 const StyledDropdownFallbackAnchor = styled.div`
@@ -100,6 +102,14 @@ export const Dropdown = ({
 
   const { toggleDropdown } = useToggleDropdown();
 
+  // floating-ui anchors left/right placements physically, so mirror them under
+  // RTL to keep popovers on the intended inline side.
+  const direction = useTextDirection();
+  const resolvedPlacement = flipPlacementForDirection(
+    dropdownPlacement,
+    direction,
+  );
+
   const isUsingOffset =
     isDefined(dropdownOffset?.x) || isDefined(dropdownOffset?.y);
 
@@ -146,7 +156,7 @@ export const Dropdown = ({
   };
 
   const { refs, floatingStyles, placement } = useFloating({
-    placement: dropdownPlacement,
+    placement: resolvedPlacement,
     middleware: [
       ...offsetMiddleware,
       flip({

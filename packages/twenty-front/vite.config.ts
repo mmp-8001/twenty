@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react-swc';
 import wyw from '@wyw-in-js/vite';
 import fs from 'fs';
 import path from 'path';
+import postcssRtlcss from 'postcss-rtlcss';
 import { visualizer } from 'rollup-plugin-visualizer';
 import {
   defineConfig,
@@ -269,6 +270,14 @@ export default defineConfig(({ mode }) => {
     css: {
       modules: {
         localsConvention: 'camelCaseOnly',
+      },
+      // Vite runs PostCSS over all emitted CSS, including what wyw-in-js
+      // extracts from Linaria at build time, so RTL auto-flipping happens here
+      // rather than through a runtime stylis plugin. `override` mode leaves the
+      // LTR output byte-identical and only adds [dir="rtl"]-scoped overrides.
+      // This is the whole RTL layout implementation — see ADR-0001.
+      postcss: {
+        plugins: [postcssRtlcss({ mode: 'override' })],
       },
     },
     resolve: {

@@ -57,6 +57,7 @@ describe('useNumberFormat', () => {
 
     expect(mockUtilFormatNumber).toHaveBeenCalledWith(value, {
       format: '1,000.00',
+      uiLocale: '',
       ...options,
     });
     expect(formattedValue).toBe('1,234.56');
@@ -75,6 +76,7 @@ describe('useNumberFormat', () => {
 
     expect(mockUtilFormatNumber).toHaveBeenCalledWith(value, {
       format: '1,000.00',
+      uiLocale: '',
     });
     expect(formattedValue).toBe('1,000');
   });

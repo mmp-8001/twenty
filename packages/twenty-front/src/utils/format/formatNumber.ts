@@ -16,6 +16,9 @@ export type FormatNumberOptions = {
   abbreviate?: boolean; // use k, M, B suffixes for large numbers
   locale?: string;
   format?: NumberFormat;
+  // Active UI locale. 'fa' switches Intl to fa-IR so Persian digits and
+  // separators come out natively instead of being substituted afterwards.
+  uiLocale?: string;
 };
 
 const defaultOptions: Required<FormatNumberOptions> = {
@@ -23,6 +26,7 @@ const defaultOptions: Required<FormatNumberOptions> = {
   abbreviate: false,
   locale: FORMAT_LOCALE_MAP[NumberFormat.COMMAS_AND_DOT],
   format: NumberFormat.COMMAS_AND_DOT,
+  uiLocale: '',
 };
 
 const getLocaleForFormat = (format?: NumberFormat): string => {
@@ -55,7 +59,8 @@ export const formatNumber = (
     ...(isDefined(opts) ? opts : {}),
   };
 
-  const locale = getLocaleForFormat(options.format);
+  const locale =
+    options.uiLocale === 'fa' ? 'fa-IR' : getLocaleForFormat(options.format);
 
   if (options.abbreviate) {
     const abs = Math.abs(value);

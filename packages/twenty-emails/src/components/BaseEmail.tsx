@@ -6,7 +6,10 @@ import { BaseHead } from 'src/components/BaseHead';
 import { Footer } from 'src/components/Footer';
 import { Logo } from 'src/components/Logo';
 import { createI18nInstance } from 'src/utils/i18n.utils';
-import { type APP_LOCALES } from 'twenty-shared/translations';
+import {
+  type APP_LOCALES,
+  getLocaleTextDirection,
+} from 'twenty-shared/translations';
 
 type BaseEmailProps = {
   children: JSX.Element | JSX.Element[] | string;
@@ -19,7 +22,7 @@ export const BaseEmail = ({ children, width, locale }: BaseEmailProps) => {
 
   return (
     <I18nProvider i18n={i18nInstance}>
-      <Html lang={locale}>
+      <Html lang={locale} dir={getLocaleTextDirection(locale)}>
         <BaseHead />
         <Container width={width || 290}>
           <Logo />
