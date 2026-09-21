@@ -4,7 +4,6 @@ import react from '@vitejs/plugin-react-swc';
 import wyw from '@wyw-in-js/vite';
 import fs from 'fs';
 import path from 'path';
-import postcssRtlcss from 'postcss-rtlcss';
 import { visualizer } from 'rollup-plugin-visualizer';
 import {
   defineConfig,
@@ -20,6 +19,7 @@ import {
   API_PROXY_PATHS,
   buildApiProxyMatcher,
 } from './src/config/apiProxyPrefixes';
+import { autoFlipRtlExceptCoordinateSpaces } from './src/config/autoFlipRtlExceptCoordinateSpaces';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '');
@@ -277,7 +277,7 @@ export default defineConfig(({ mode }) => {
       // LTR output byte-identical and only adds [dir="rtl"]-scoped overrides.
       // This is the whole RTL layout implementation — see ADR-0001.
       postcss: {
-        plugins: [postcssRtlcss({ mode: 'override' })],
+        plugins: [autoFlipRtlExceptCoordinateSpaces()],
       },
     },
     resolve: {

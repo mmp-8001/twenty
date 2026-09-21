@@ -11,5 +11,6 @@ A codemod rewriting all 551 declarations to logical properties was the obvious a
 - **Do not delete this as dead config.** It looks like an unused PostCSS plugin. It is the entire RTL implementation.
 - `mode: 'override'` leaves LTR output byte-identical, so English cannot regress from this.
 - Auto-flip cannot know when a physical direction is intentional. Files where a `transform` partners with `left`/`right` (~20 in `twenty-front`) need `/* rtl:ignore */`, as does any hand-authored RTL block.
+- Stylesheets that describe a coordinate space rather than a reading order must be excluded, not flipped. `@xyflow/react` pins `direction: ltr` on the canvas on purpose and positions nodes from a static position plus a JS-computed `translate()`; flipping it moved every node out from under its edges. `autoFlipRtlExceptCoordinateSpaces` skips those files.
 - It cannot touch non-CSS direction: SVG icon geometry, `@floating-ui` placement, and drag-and-drop axes are handled separately in `src/index.css` and `flipPlacementForDirection`.
 - New code should still prefer logical properties. The auto-flip carries the existing CSS; it is not a reason to keep writing physical ones.
