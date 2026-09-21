@@ -9,6 +9,7 @@
 const PO = require('pofile');
 const fs = require('fs');
 const path = require('path');
+const { compileMessage } = require('@lingui/message-utils/compileMessage');
 
 const ROOT = path.resolve(__dirname, '../..');
 const OUT = process.env.I18N_OUT ?? path.join(ROOT, '.i18n-run');
@@ -21,12 +22,31 @@ const PACKAGES = [
   { key: 'emails', po: `packages/twenty-emails/src/locales/${LOCALE}.po` },
 ];
 
-const simpleVars = (s) =>
-  (s.match(/\{\s*[a-zA-Z0-9_]+\s*\}/g) || []).map((x) => x.replace(/\s/g, '')).sort();
-const icuVars = (s) =>
-  (s.match(/\{\s*[a-zA-Z0-9_]+\s*,\s*(?:plural|select|selectordinal)/g) || [])
-    .map((x) => x.replace(/\s/g, ''))
-    .sort();
+// Placeholder integrity is checked against Lingui's own ICU compiler rather
+// than a regex: inside {count, plural, one {day} other {days}} the form bodies
+// look exactly like {placeholder} to a regex, so a correct Persian translation
+// (which does not inflect the noun after a number) gets rejected.
+const collectArguments = (tokens, found = []) => {
+  for (const token of tokens) {
+    if (!Array.isArray(token)) continue;
+    const [name, format, options] = token;
+    found.push(`${name}:${format ?? ''}`);
+    if (options && typeof options === 'object') {
+      for (const body of Object.values(options)) {
+        if (Array.isArray(body)) collectArguments(body, found);
+      }
+    }
+  }
+  return found;
+};
+
+// Throws if the message is not valid ICU, which is itself a rejection.
+const argumentsOf = (message) => {
+  const compiled = compileMessage(message);
+  const tokens = Array.isArray(compiled) ? compiled : [compiled];
+  return collectArguments(tokens).sort().join('|');
+};
+
 const countOf = (s, ch) => (s.match(new RegExp('\\' + ch, 'g')) || []).length;
 // Sources with nothing to translate: empty, or only punctuation/symbols/digits.
 const isPassThrough = (s) => /^[\s\p{P}\p{S}\d]*$/u.test(s);
@@ -91,12 +111,14 @@ for (const pkg of PACKAGES) {
     candidate =
       leading(source) + candidate.replace(/^\s+/, '').replace(/\s+$/, '') + trailing(source);
 
-    const placeholdersMatch =
-      simpleVars(source).join('|') === simpleVars(candidate).join('|') &&
-      icuVars(source).join('|') === icuVars(candidate).join('|') &&
-      countOf(source, '#') === countOf(candidate, '#') &&
-      countOf(source, '{') === countOf(candidate, '{') &&
-      countOf(source, '}') === countOf(candidate, '}');
+    let placeholdersMatch = false;
+    try {
+      placeholdersMatch =
+        argumentsOf(source) === argumentsOf(candidate) &&
+        countOf(source, '#') === countOf(candidate, '#');
+    } catch {
+      placeholdersMatch = false;
+    }
 
     if (!placeholdersMatch) {
       stats.integrity++;
