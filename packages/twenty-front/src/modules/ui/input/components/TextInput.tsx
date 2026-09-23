@@ -51,14 +51,18 @@ const StyledAdornmentContainer = styled.div<StyledAdornmentContainerProps>`
   align-items: center;
   background-color: ${themeCssVariables.background.transparent.light};
   border: 1px solid ${themeCssVariables.border.color.medium};
+  border-bottom-left-radius: ${({ position }) =>
+    position === 'left' ? themeCssVariables.border.radius.md : '0'};
+  border-bottom-right-radius: ${({ position }) =>
+    position === 'right' ? themeCssVariables.border.radius.md : '0'};
   border-left-style: ${({ position }) =>
     position === 'right' ? 'none' : 'solid'};
-  border-radius: ${({ position }) =>
-    position === 'left'
-      ? `${themeCssVariables.border.radius.md} 0 0 ${themeCssVariables.border.radius.md}`
-      : `0 ${themeCssVariables.border.radius.md} ${themeCssVariables.border.radius.md} 0`};
   border-right-style: ${({ position }) =>
     position === 'left' ? 'none' : 'solid'};
+  border-top-left-radius: ${({ position }) =>
+    position === 'left' ? themeCssVariables.border.radius.md : '0'};
+  border-top-right-radius: ${({ position }) =>
+    position === 'right' ? themeCssVariables.border.radius.md : '0'};
   box-sizing: border-box;
   color: ${themeCssVariables.font.color.tertiary};
   display: flex;
@@ -108,12 +112,18 @@ const StyledInput = styled.input<
         ? themeCssVariables.border.color.danger
         : themeCssVariables.border.color.medium};
 
-  border-radius: ${({ leftAdornment, rightAdornment }) =>
-    leftAdornment
-      ? `0 ${themeCssVariables.border.radius.md} ${themeCssVariables.border.radius.md} 0`
-      : rightAdornment
-        ? `${themeCssVariables.border.radius.md} 0 0 ${themeCssVariables.border.radius.md}`
-        : themeCssVariables.border.radius.md};
+  border-bottom-left-radius: ${({ leftAdornment }) =>
+    leftAdornment ? '0' : themeCssVariables.border.radius.md};
+  border-bottom-right-radius: ${({ leftAdornment, rightAdornment }) =>
+    !leftAdornment && rightAdornment
+      ? '0'
+      : themeCssVariables.border.radius.md};
+  border-top-left-radius: ${({ leftAdornment }) =>
+    leftAdornment ? '0' : themeCssVariables.border.radius.md};
+  border-top-right-radius: ${({ leftAdornment, rightAdornment }) =>
+    !leftAdornment && rightAdornment
+      ? '0'
+      : themeCssVariables.border.radius.md};
   box-sizing: border-box;
   color: ${themeCssVariables.font.color.primary};
   display: flex;
