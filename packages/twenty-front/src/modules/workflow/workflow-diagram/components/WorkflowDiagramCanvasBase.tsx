@@ -6,6 +6,7 @@ import { useAtomComponentStateCallbackState } from '@/ui/utilities/state/jotai/h
 import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomComponentStateValue';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentState';
+import { getUiZoom } from '@/ui/theme/utils/getUiZoom';
 import { flowComponentState } from '@/workflow/states/flowComponentState';
 import { WorkflowDiagramRightClickCommandMenu } from '@/workflow/workflow-diagram/components/WorkflowDiagramRightClickCommandMenu';
 import { WORKFLOW_DIAGRAM_EMPTY_NODE_DEFINITION } from '@/workflow/workflow-diagram/constants/WorkflowDiagramEmptyNodeDefinition';
@@ -46,7 +47,6 @@ import {
   useReactFlow,
   type Connection,
   type EdgeChange,
-  type FitViewOptions,
   type NodeChange,
   type NodeDimensionChange,
   type NodeOrigin,
@@ -92,6 +92,14 @@ const StyledResetReactflowStyles = styled.div`
   height: 100%;
   position: relative;
   width: 100%;
+
+  /* xyflow divides getBoundingClientRect() handle offsets by its own zoom
+     only, so under the root interface zoom every edge misses its handle.
+     The canvas cancels the root zoom and gets the interface scale back as
+     its viewport zoom instead. */
+  .react-flow {
+    zoom: calc(1 / var(--t-zoom, 1));
+  }
 `;
 
 const StyledStatusTagContainer = styled.div`
@@ -100,11 +108,6 @@ const StyledStatusTagContainer = styled.div`
   position: absolute;
   top: 0;
 `;
-
-const defaultFitViewOptions = {
-  minZoom: 1,
-  maxZoom: 1,
-} satisfies FitViewOptions;
 
 const CENTERED_NODE_ORIGIN = [0.5, 0.5] satisfies NodeOrigin;
 
@@ -301,6 +304,10 @@ export const WorkflowDiagramCanvasBase = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // ponytail: read once per mount, a scale change while the canvas is open
+  // applies on the next visit
+  const [uiZoom] = useState(getUiZoom);
+
   const setFlowViewport = useCallback(
     ({
       workflowDiagramFlowInitialized,
@@ -346,18 +353,19 @@ export const WorkflowDiagramCanvasBase = ({
 
       const flowBounds = reactflow.getNodesBounds(nodes);
       const centeredXPosition =
-        adjustedContainerWidth / 2 - flowBounds.width / 2 - flowBounds.x;
+        (adjustedContainerWidth / 2 - flowBounds.width / 2 - flowBounds.x) *
+        uiZoom;
 
       reactflow.setViewport(
         {
           ...currentViewport,
           x: centeredXPosition,
-          zoom: defaultFitViewOptions.maxZoom,
+          zoom: uiZoom,
         },
         { duration: hasViewportBeenMoved ? 300 : 0 },
       );
     },
-    [reactflow, setWorkflowDiagramWaitingNodesDimensions, store],
+    [reactflow, setWorkflowDiagramWaitingNodesDimensions, store, uiZoom],
   );
 
   const handleSetFlowViewportOnChange = useCallback(
@@ -618,9 +626,9 @@ export const WorkflowDiagramCanvasBase = ({
 
       <ReactFlow
         onInit={handleInit}
-        minZoom={defaultFitViewOptions.minZoom}
-        maxZoom={defaultFitViewOptions.maxZoom}
-        defaultViewport={{ x: 0, y: 150, zoom: defaultFitViewOptions.maxZoom }}
+        minZoom={uiZoom}
+        maxZoom={uiZoom}
+        defaultViewport={{ x: 0, y: 150 * uiZoom, zoom: uiZoom }}
         nodeOrigin={CENTERED_NODE_ORIGIN}
         nodeTypes={nodeTypes}
         // @ts-expect-error We override Reactflow types for sourceHandle and targetHandle to be required
