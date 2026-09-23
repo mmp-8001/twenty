@@ -6,6 +6,8 @@ import {
 } from 'react';
 import { isDefined } from 'twenty-shared/utils';
 
+import { getInlineDeltaForDirection } from '@/localization/utils/getInlineDeltaForDirection';
+import { useTextDirection } from '@/localization/hooks/useTextDirection';
 import { getUiZoom } from '@/ui/theme/utils/getUiZoom';
 
 import { RecordBoardContext } from '@/object-record/record-board/contexts/RecordBoardContext';
@@ -37,6 +39,8 @@ export const useResizeBoardColumn = () => {
   // captured once per drag: reading computed style on every move would
   // force a synchronous style recalc, and the zoom cannot change mid-drag
   const [dragUiZoom, setDragUiZoom] = useState(1);
+
+  const direction = useTextDirection();
 
   const handleResizeStart = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -71,11 +75,15 @@ export const useResizeBoardColumn = () => {
         recordBoardId,
         clampRecordBoardColumnWidth(
           recordIndexKanbanColumnWidth +
-            (x - initialPointerPositionX) / dragUiZoom,
+            getInlineDeltaForDirection(
+              (x - initialPointerPositionX) / dragUiZoom,
+              direction,
+            ),
         ),
       );
     },
     [
+      direction,
       initialPointerPositionX,
       recordIndexKanbanColumnWidth,
       recordBoardId,
@@ -96,7 +104,10 @@ export const useResizeBoardColumn = () => {
       const nextWidth = Math.round(
         clampRecordBoardColumnWidth(
           recordIndexKanbanColumnWidth +
-            (x - initialPointerPositionX) / dragUiZoom,
+            getInlineDeltaForDirection(
+              (x - initialPointerPositionX) / dragUiZoom,
+              direction,
+            ),
         ),
       );
 
@@ -106,6 +117,7 @@ export const useResizeBoardColumn = () => {
       }
     },
     [
+      direction,
       initialPointerPositionX,
       recordIndexKanbanColumnWidth,
       setRecordIndexKanbanColumnWidth,

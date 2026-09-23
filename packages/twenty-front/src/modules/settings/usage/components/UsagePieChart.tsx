@@ -55,7 +55,7 @@ export const UsagePieChart = ({ data }: UsagePieChartProps) => {
   const { formatUsageValue } = useUsageValueFormatter();
 
   return (
-    <StyledContainer>
+    <StyledContainer dir="ltr">
       <ResponsivePie
         data={data}
         margin={{ top: 20, right: 80, bottom: 20, left: 80 }}

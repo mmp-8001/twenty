@@ -21,7 +21,7 @@ const StyledCodeEditorContainer = styled.div`
 
 const StyledFullScreenButtonContainer = styled.div`
   position: absolute;
-  right: ${themeCssVariables.spacing[2]};
+  inset-inline-end: ${themeCssVariables.spacing[2]};
   top: ${themeCssVariables.spacing[2]};
   z-index: 1;
 `;
@@ -48,7 +48,9 @@ export const WorkflowCodeEditor = ({
   const { t } = useLingui();
 
   return (
-    <StyledCodeEditorContainer>
+    // The editor keeps a left-to-right coordinate space in RTL locales, so its
+    // overlay chrome has to stay on the same side as the code, not the gutter.
+    <StyledCodeEditorContainer dir="ltr">
       {!readonly && !fullScreenMode && onEnterFullScreen && (
         <StyledFullScreenButtonContainer>
           <LightIconButton

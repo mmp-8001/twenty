@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react';
 
+import { useTextDirection } from '@/localization/hooks/useTextDirection';
+import { getInlineDeltaForDirection } from '@/localization/utils/getInlineDeltaForDirection';
 import { getUiZoom } from '@/ui/theme/utils/getUiZoom';
 import { useTrackPointer } from '@/ui/utilities/pointer-event/hooks/useTrackPointer';
 import { type PointerEventListener } from '@/ui/utilities/pointer-event/types/PointerEventListener';
@@ -40,11 +42,18 @@ export const useResizablePanel = ({
   // force a synchronous style recalc, and the zoom cannot change mid-drag
   const [dragUiZoom, setDragUiZoom] = useState(1);
 
+  // `side` names the panel's inline edge, which the CSS auto-flip mirrors under
+  // RTL. The pointer stays physical, so its delta has to be mirrored to match.
+  const direction = useTextDirection();
+
   const handleResizeMove = useCallback<PointerEventListener>(
     ({ x }) => {
       if (startX === null) return;
 
-      const deltaX = (x - startX) / dragUiZoom;
+      const deltaX = getInlineDeltaForDirection(
+        (x - startX) / dragUiZoom,
+        direction,
+      );
 
       if (!hasDragged && Math.abs(deltaX) > RESIZE_DRAG_THRESHOLD_PX) {
         setHasDragged(true);
@@ -68,6 +77,7 @@ export const useResizablePanel = ({
       }
     },
     [
+      direction,
       dragUiZoom,
       startX,
       startWidth,
@@ -87,7 +97,10 @@ export const useResizablePanel = ({
         return;
       }
 
-      const deltaX = (x - startX) / dragUiZoom;
+      const deltaX = getInlineDeltaForDirection(
+        (x - startX) / dragUiZoom,
+        direction,
+      );
 
       if (!hasDragged) {
         onCollapse();
@@ -105,6 +118,7 @@ export const useResizablePanel = ({
       setIsResizing(false);
     },
     [
+      direction,
       dragUiZoom,
       startX,
       startWidth,

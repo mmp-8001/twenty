@@ -1,3 +1,4 @@
+import { useTextDirection } from '@/localization/hooks/useTextDirection';
 import { forwardRef } from 'react';
 
 export const ReactGridLayoutCardWrapper = forwardRef<
@@ -16,11 +17,14 @@ export const ReactGridLayoutCardWrapper = forwardRef<
     { children, key, className, style, onMouseDown, onMouseUp, onMouseMove },
     ref,
   ) => {
+    const textDirection = useTextDirection();
+
     return (
       <div
         ref={ref}
         key={key}
         data-select-disable="true"
+        dir={textDirection}
         className={className}
         style={style}
         onMouseDown={onMouseDown}

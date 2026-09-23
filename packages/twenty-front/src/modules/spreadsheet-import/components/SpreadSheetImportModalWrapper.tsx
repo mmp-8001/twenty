@@ -3,7 +3,7 @@ import { Dialog } from 'twenty-ui/primitives/surfaces';
 import { DialogInstance } from '@/ui/layout/dialog/components/DialogInstance';
 import { styled } from '@linaria/react';
 
-import { useSpreadsheetImportInternal } from '@/spreadsheet-import/hooks/useSpreadsheetImportInternal';
+import { useTextDirection } from '@/localization/hooks/useTextDirection';
 
 import { MOBILE_VIEWPORT } from 'twenty-ui/theme-constants';
 import { SpreadSheetImportModalCloseButton } from './SpreadSheetImportModalCloseButton';
@@ -23,7 +23,7 @@ const StyledInnerContainer = styled.div`
   }
 `;
 
-const StyledRtlLtr = styled.div`
+const StyledDirection = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -40,7 +40,7 @@ export const SpreadSheetImportModalWrapper = ({
   children,
   onClose,
 }: SpreadSheetImportModalWrapperProps) => {
-  const { rtl } = useSpreadsheetImportInternal();
+  const direction = useTextDirection();
 
   return (
     <DialogInstance
@@ -57,10 +57,10 @@ export const SpreadSheetImportModalWrapper = ({
           style={{ padding: 0, height: 'var(--t-modal-size-xl-height)' }}
         >
           <StyledInnerContainer>
-            <StyledRtlLtr dir={rtl ? 'rtl' : 'ltr'}>
+            <StyledDirection dir={direction}>
               <SpreadSheetImportModalCloseButton onClose={onClose} />
               {children}
-            </StyledRtlLtr>
+            </StyledDirection>
           </StyledInnerContainer>
         </Dialog.Popup>
       )}

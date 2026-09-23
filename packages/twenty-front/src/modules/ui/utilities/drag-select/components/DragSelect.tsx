@@ -25,15 +25,14 @@ type Position = {
 
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
-const StyledDragSelection = styled.div<SelectionBox>`
+// The box is placed from pointer coordinates, which stay physical in RTL.
+// Its offsets go through the style prop so the build-time RTL auto-flip, which
+// only rewrites stylesheets, cannot turn `left` into `right` and mirror it.
+const StyledDragSelection = styled.div`
   background: ${themeCssVariables.color.blue7};
   border: 1px solid ${themeCssVariables.color.blue3};
-  height: ${({ height }) => height}px;
-  left: ${({ left }) => left}px;
   opacity: 0.2;
   position: absolute;
-  top: ${({ top }) => top}px;
-  width: ${({ width }) => width}px;
   z-index: 99;
 `;
 
@@ -242,10 +241,12 @@ export const DragSelect = ({
     isSelecting &&
     isDefined(selectionBox) && (
       <StyledDragSelection
-        top={selectionBox.top}
-        left={selectionBox.left}
-        width={selectionBox.width}
-        height={selectionBox.height}
+        style={{
+          top: selectionBox.top,
+          left: selectionBox.left,
+          width: selectionBox.width,
+          height: selectionBox.height,
+        }}
       />
     )
   );

@@ -193,8 +193,10 @@ export const CodeEditor = ({
     <div
       className={styles.editorLoader}
       data-variant={variant}
+      dir="ltr"
       style={
         {
+          direction: 'ltr',
           '--code-editor-height':
             typeof currentHeight === 'number'
               ? `${currentHeight}px`
@@ -217,6 +219,13 @@ export const CodeEditor = ({
         className={styles.editorWrapper}
         data-variant={variant}
         data-transparent-background={transparentBackground || undefined}
+        dir="ltr"
+        // Monaco has no RTL mode: it absolutely positions every line from a
+        // left-to-right origin, so inheriting rtl parks the viewport off
+        // screen and the editor renders blank. Inline rather than in the
+        // stylesheet because postcss-rtlcss mirrors `direction` back, and its
+        // `rtl:ignore` comment does not survive twenty-ui's CSS minification.
+        style={{ direction: 'ltr' }}
       >
         <Editor
           height={currentHeight}

@@ -17,6 +17,8 @@ import { useRecordTableFirstColumnWidthOverride } from '@/object-record/record-t
 import { computeLastRecordTableColumnWidth } from '@/object-record/record-table/utils/computeLastRecordTableColumnWidth';
 import { getRecordTableColumnFieldWidthCSSVariableName } from '@/object-record/record-table/utils/getRecordTableColumnFieldWidthCSSVariableName';
 import { updateRecordTableCSSVariable } from '@/object-record/record-table/utils/updateRecordTableCSSVariable';
+import { getInlineDeltaForDirection } from '@/localization/utils/getInlineDeltaForDirection';
+import { useTextDirection } from '@/localization/hooks/useTextDirection';
 import { getUiZoom } from '@/ui/theme/utils/getUiZoom';
 import { useDragSelect } from '@/ui/utilities/drag-select/hooks/useDragSelect';
 import { useTrackPointer } from '@/ui/utilities/pointer-event/hooks/useTrackPointer';
@@ -85,6 +87,8 @@ export const useResizeTableHeader = () => {
   // force a synchronous style recalc, and the zoom cannot change mid-drag
   const [dragUiZoom, setDragUiZoom] = useState(1);
 
+  const direction = useTextDirection();
+
   const handleResizeHandlerStart = useCallback<PointerEventListener>(
     ({ x }) => {
       resetTableRowSelection();
@@ -100,7 +104,10 @@ export const useResizeTableHeader = () => {
 
       throwIfNotDefined(recordField, 'recordField');
 
-      const newResizeOffset = (x - initialPointerPositionX) / dragUiZoom;
+      const newResizeOffset = getInlineDeltaForDirection(
+        (x - initialPointerPositionX) / dragUiZoom,
+        direction,
+      );
 
       const newRecordFieldSizeWithOffset = recordField.size + newResizeOffset;
 
@@ -147,9 +154,10 @@ export const useResizeTableHeader = () => {
         `${newGroupSectionLastColumnWidth}px`,
       );
 
-      setResizeFieldOffset((x - initialPointerPositionX) / dragUiZoom);
+      setResizeFieldOffset(newResizeOffset);
     },
     [
+      direction,
       dragUiZoom,
       initialPointerPositionX,
       recordField,

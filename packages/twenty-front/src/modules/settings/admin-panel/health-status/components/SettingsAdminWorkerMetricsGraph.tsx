@@ -107,7 +107,7 @@ export const SettingsAdminWorkerMetricsGraph = ({
     <>
       <ToastOnQueryErrorEffect error={error} />
 
-      <StyledGraphContainer>
+      <StyledGraphContainer dir="ltr">
         {loading ? (
           <StyledNoDataMessage>{t`Loading metrics data...`}</StyledNoDataMessage>
         ) : hasData ? (

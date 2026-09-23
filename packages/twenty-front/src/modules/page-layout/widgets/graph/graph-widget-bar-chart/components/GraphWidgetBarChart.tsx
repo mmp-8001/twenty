@@ -251,7 +251,7 @@ export const GraphWidgetBarChart = ({
   };
 
   return (
-    <StyledContainer id={id}>
+    <StyledContainer id={id} dir="ltr">
       <GraphWidgetChartContainer
         ref={containerRef}
         $isClickable={hasClickableItems}

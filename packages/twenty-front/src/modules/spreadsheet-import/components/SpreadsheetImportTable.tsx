@@ -3,7 +3,7 @@ import { type Key, useContext } from 'react';
 import { type SpreadsheetImportTableProps } from '@/spreadsheet-import/types/SpreadsheetImportTableProps';
 import { DataGrid } from 'react-data-grid';
 import 'react-data-grid/lib/styles.css';
-import { useSpreadsheetImportInternal } from '@/spreadsheet-import/hooks/useSpreadsheetImportInternal';
+import { useTextDirection } from '@/localization/hooks/useTextDirection';
 import { ThemeContext, themeCssVariables } from 'twenty-ui/theme-constants';
 
 const StyledDataGridContainer = styled.div<{ headerRowHeight?: number }>`
@@ -120,7 +120,7 @@ export const SpreadsheetImportTable = <TData, TRowKey extends Key = Key>({
   onSelectedRowsChange,
 }: SpreadsheetImportTableProps<TData, TRowKey>) => {
   const { colorScheme } = useContext(ThemeContext);
-  const { rtl } = useSpreadsheetImportInternal();
+  const direction = useTextDirection();
   const themeClassName = colorScheme === 'dark' ? 'rdg-dark' : 'rdg-light';
 
   if (!rows.length || !columns.length) return null;
@@ -128,7 +128,7 @@ export const SpreadsheetImportTable = <TData, TRowKey extends Key = Key>({
   return (
     <StyledDataGridContainer headerRowHeight={headerRowHeight ?? undefined}>
       <DataGrid
-        direction={rtl ? 'rtl' : 'ltr'}
+        direction={direction}
         rowHeight={40}
         className={`${className || ''} ${themeClassName}`}
         headerRowHeight={headerRowHeight}

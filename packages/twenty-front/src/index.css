@@ -26,7 +26,7 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--t-font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--t-background-tertiary);
@@ -91,9 +91,13 @@ form {
 /* Inter has no Arabic-script glyphs, so Persian would fall through to whatever
    the OS picks. Scoped to :lang(fa) rather than [dir='rtl'] so Arabic and
    Hebrew keep their existing fallback. lang is set by the inline script in
-   index.html and reconciled by dynamicActivate. */
-:lang(fa) body {
-  font-family: 'Vazirmatn', 'Inter', sans-serif;
+   index.html and reconciled by dynamicActivate.
+
+   Redefining the token rather than `body` reaches the components that read
+   var(--t-font-family) directly. html:lang(fa) outweighs the generated
+   .light/.dark blocks that declare the token on the same element. */
+html:lang(fa) {
+  --t-font-family: 'Vazirmatn', 'Inter', sans-serif;
 }
 
 /*
