@@ -12,7 +12,7 @@ const renderResizablePanel = (onWidthChange: jest.Mock) =>
   renderHook(() =>
     useResizablePanel({
       side: 'left',
-      constraints: { min: 100, max: 1000 },
+      constraints: { min: 100, max: 1000, default: 400 },
       currentWidth: 400,
       onWidthChange,
       onCollapse: jest.fn(),
