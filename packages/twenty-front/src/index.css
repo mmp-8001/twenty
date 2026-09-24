@@ -125,3 +125,12 @@ html:lang(fa) {
   transform: scaleX(-1);
 }
 /* rtl:end:ignore */
+
+/* Rich text often mixes English and Persian paragraphs. Under the rtl base
+   direction an English sentence lays out right-to-left and its trailing
+   period jumps to the far side. plaintext picks each paragraph's direction
+   from its first strong character, and the default text-align: start follows
+   it. Scoped to rtl so LTR output stays unchanged (ADR-0001). */
+[dir='rtl'] .bn-inline-content {
+  unicode-bidi: plaintext;
+}
