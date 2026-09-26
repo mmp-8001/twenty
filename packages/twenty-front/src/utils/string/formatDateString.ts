@@ -4,6 +4,8 @@ import { type DateFormat } from '@/localization/constants/DateFormat';
 import { formatDateISOStringToCustomUnicodeFormat } from '@/localization/utils/formatDateISOStringToCustomUnicodeFormat';
 import { formatDateISOStringToDate } from '@/localization/utils/formatDateISOStringToDate';
 import { formatDateISOStringToRelativeDate } from '@/localization/utils/formatDateISOStringToRelativeDate';
+import { isJalaliLocale } from '@/localization/utils/isJalaliLocale';
+import { toPersianDigits } from '@/localization/utils/formatToPersianDigits';
 import {
   FieldDateDisplayFormat,
   type FieldDateMetadataSettings,
@@ -27,34 +29,47 @@ export const formatDateString = ({
     return '';
   }
 
+  let result: string;
+
   switch (dateFieldSettings?.displayFormat) {
     case FieldDateDisplayFormat.RELATIVE:
-      return formatDateISOStringToRelativeDate({
+      result = formatDateISOStringToRelativeDate({
         isoDate: value,
         isDayMaximumPrecision: true,
         localeCatalog,
         timeZone,
       });
+      break;
     case FieldDateDisplayFormat.USER_SETTINGS:
-      return formatDateISOStringToDate({
+      result = formatDateISOStringToDate({
         date: value,
         timeZone,
         dateFormat,
         localeCatalog,
       });
+      break;
     case FieldDateDisplayFormat.CUSTOM:
-      return formatDateISOStringToCustomUnicodeFormat({
+      result = formatDateISOStringToCustomUnicodeFormat({
         date: value,
         timeZone,
         dateFormat: dateFieldSettings.customUnicodeDateFormat,
         localeCatalog,
       });
+      break;
     default:
-      return formatDateISOStringToDate({
+      result = formatDateISOStringToDate({
         date: value,
         timeZone,
         dateFormat,
         localeCatalog,
       });
   }
+
+  // Persian-Indic digits are applied once here so every display path is
+  // covered; date-fns-jalali emits Latin digits.
+  if (isJalaliLocale(localeCatalog)) {
+    return toPersianDigits(result);
+  }
+
+  return result;
 };

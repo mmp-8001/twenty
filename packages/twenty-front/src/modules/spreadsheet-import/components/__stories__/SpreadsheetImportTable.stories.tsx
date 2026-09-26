@@ -1,4 +1,3 @@
-import { RsiContext } from '@/spreadsheet-import/components/ReactSpreadsheetImportContextProvider';
 import { SpreadsheetImportSingleSelectTable } from '@/spreadsheet-import/components/SpreadsheetImportSingleSelectTable';
 import { SpreadsheetImportTable } from '@/spreadsheet-import/components/SpreadsheetImportTable';
 import { styled } from '@linaria/react';
@@ -70,11 +69,9 @@ const meta: Meta<typeof SingleSelectionExample> = {
   component: SingleSelectionExample,
   decorators: [
     (Story) => (
-      <RsiContext.Provider value={{ rtl: false }}>
-        <StyledContainer>
-          <Story />
-        </StyledContainer>
-      </RsiContext.Provider>
+      <StyledContainer>
+        <Story />
+      </StyledContainer>
     ),
     ComponentDecorator,
   ],

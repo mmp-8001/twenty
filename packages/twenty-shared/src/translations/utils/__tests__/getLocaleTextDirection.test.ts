@@ -5,6 +5,7 @@ describe('getLocaleTextDirection', () => {
   it.each([
     ['ar-SA', 'rtl'],
     ['he-IL', 'rtl'],
+    ['fa', 'rtl'],
     ['en', 'ltr'],
     ['fr-FR', 'ltr'],
     ['zh-CN', 'ltr'],
@@ -27,10 +28,10 @@ describe('getLocaleTextDirection', () => {
   });
 
   it('places every locale the app ships', () => {
-    const directions = Object.values(APP_LOCALES).map(getLocaleTextDirection);
-
-    expect(directions.filter((direction) => direction === 'rtl')).toHaveLength(
-      2,
+    const rightToLeftLocales = Object.values(APP_LOCALES).filter(
+      (locale) => getLocaleTextDirection(locale) === 'rtl',
     );
+
+    expect(rightToLeftLocales).toEqual(['ar-SA', 'fa', 'he-IL']);
   });
 });

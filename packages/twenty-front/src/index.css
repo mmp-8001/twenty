@@ -1,8 +1,32 @@
 @import './viewport-zoom.css';
 
+@font-face {
+  font-family: 'Vazirmatn';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Vazirmatn-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Vazirmatn-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/Vazirmatn-SemiBold.woff2') format('woff2');
+}
+
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--t-font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--t-background-tertiary);
@@ -62,4 +86,52 @@ form {
 /* https://stackoverflow.com/questions/44543157/how-to-hide-the-google-invisible-recaptcha-badge */
 .grecaptcha-badge {
   visibility: hidden !important;
+}
+
+/* Inter has no Arabic-script glyphs, so Persian would fall through to whatever
+   the OS picks. Scoped to :lang(fa) rather than [dir='rtl'] so Arabic and
+   Hebrew keep their existing fallback. lang is set by the inline script in
+   index.html and reconciled by dynamicActivate.
+
+   Redefining the token rather than `body` reaches the components that read
+   var(--t-font-family) directly. html:lang(fa) outweighs the generated
+   .light/.dark blocks that declare the token on the same element. */
+html:lang(fa) {
+  --t-font-family: 'Vazirmatn', 'Inter', sans-serif;
+}
+
+/*
+  Mirror directional icons under RTL. The PostCSS auto-flip (ADR-0001) rewrites
+  CSS but cannot touch geometry inside an SVG, so a left chevron keeps pointing
+  left in RTL — the most visible RTL defect. Tabler gives every icon a stable
+  `tabler-icon-<name>` class, so flip a curated list of unambiguously horizontal
+  icons and nothing else. :dir(rtl) rather than [dir='rtl'] so icons inside a
+  surface pinned with dir="ltr" keep their direction.
+
+  rtl:ignore because this block is already authored for RTL: rtlcss would
+  otherwise rewrite the left/right tokens in these selectors
+  (chevron-left -> chevron-right) and re-process the transform. */
+/* rtl:begin:ignore */
+.tabler-icon-chevron-left:dir(rtl),
+.tabler-icon-chevron-right:dir(rtl),
+.tabler-icon-chevrons-left:dir(rtl),
+.tabler-icon-chevrons-right:dir(rtl),
+.tabler-icon-chevron-left-pipe:dir(rtl),
+.tabler-icon-chevron-right-pipe:dir(rtl),
+.tabler-icon-caret-left:dir(rtl),
+.tabler-icon-caret-right:dir(rtl),
+.tabler-icon-arrow-left:dir(rtl),
+.tabler-icon-arrow-right:dir(rtl),
+.tabler-icon-arrow-back-up:dir(rtl) {
+  transform: scaleX(-1);
+}
+/* rtl:end:ignore */
+
+/* Rich text often mixes English and Persian paragraphs. Under the rtl base
+   direction an English sentence lays out right-to-left and its trailing
+   period jumps to the far side. plaintext picks each paragraph's direction
+   from its first strong character, and the default text-align: start follows
+   it. Scoped to rtl so LTR output stays unchanged (ADR-0001). */
+.bn-inline-content:dir(rtl) {
+  unicode-bidi: plaintext;
 }

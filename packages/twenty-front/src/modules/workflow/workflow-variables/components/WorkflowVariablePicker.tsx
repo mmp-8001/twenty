@@ -21,10 +21,12 @@ const StyledSearchVariablesDropdownContainer = styled.div<{
   border: ${({ multiline }) =>
     multiline ? 'none' : `1px solid ${themeCssVariables.border.color.medium}`};
 
-  border-radius: ${({ multiline }) =>
-    multiline
-      ? themeCssVariables.border.radius.sm
-      : `0 ${themeCssVariables.border.radius.sm} ${themeCssVariables.border.radius.sm} 0`};
+  border-bottom-left-radius: ${({ multiline }) =>
+    multiline ? themeCssVariables.border.radius.sm : '0'};
+  border-bottom-right-radius: ${themeCssVariables.border.radius.sm};
+  border-top-left-radius: ${({ multiline }) =>
+    multiline ? themeCssVariables.border.radius.sm : '0'};
+  border-top-right-radius: ${themeCssVariables.border.radius.sm};
 
   display: flex;
   height: ${({ multiline }) =>

@@ -1,5 +1,7 @@
 import { t } from '@lingui/core/macro';
+import { isJalaliLocale } from '@/localization/utils/isJalaliLocale';
 import { formatDistance, type Locale } from 'date-fns';
+import { formatDistance as formatDistanceJalali } from 'date-fns-jalali';
 import { Temporal } from 'temporal-polyfill';
 import { isDateWithoutTime } from 'twenty-shared/utils';
 
@@ -14,8 +16,12 @@ export const formatDateISOStringToRelativeDate = ({
   isDayMaximumPrecision?: boolean;
   timeZone: string;
 }) => {
+  const formatDistanceForCalendar = isJalaliLocale(localeCatalog)
+    ? formatDistanceJalali
+    : formatDistance;
+
   const formatRelative = (targetMs: number, baseMs: number) =>
-    formatDistance(targetMs, baseMs, {
+    formatDistanceForCalendar(targetMs, baseMs, {
       addSuffix: true,
       locale: localeCatalog,
     });

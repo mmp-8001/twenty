@@ -1,4 +1,3 @@
-import { RsiContext } from '@/spreadsheet-import/components/ReactSpreadsheetImportContextProvider';
 import { SelectHeaderTable } from '@/spreadsheet-import/steps/components/SelectHeaderStep/components/SelectHeaderTable';
 import { styled } from '@linaria/react';
 import { type Meta, type StoryObj } from '@storybook/react-vite';
@@ -16,19 +15,17 @@ const SelectHeaderTableExample = () => {
   const [selectedRowIndex, setSelectedRowIndex] = useState(0);
 
   return (
-    <RsiContext.Provider value={{ rtl: false }}>
-      <StyledContainer>
-        <SelectHeaderTable
-          importedRows={[
-            ['Report', 'September'],
-            ['Name', 'Email'],
-            ['Ada', 'ada@example.com'],
-          ]}
-          selectedRowIndex={selectedRowIndex}
-          onSelectedRowChange={setSelectedRowIndex}
-        />
-      </StyledContainer>
-    </RsiContext.Provider>
+    <StyledContainer>
+      <SelectHeaderTable
+        importedRows={[
+          ['Report', 'September'],
+          ['Name', 'Email'],
+          ['Ada', 'ada@example.com'],
+        ]}
+        selectedRowIndex={selectedRowIndex}
+        onSelectedRowChange={setSelectedRowIndex}
+      />
+    </StyledContainer>
   );
 };
 

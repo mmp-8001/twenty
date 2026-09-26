@@ -183,6 +183,7 @@ export const CodeEditor = ({
     <div
       className={styles.editorLoader}
       data-variant={variant}
+      dir="ltr"
       style={
         {
           '--code-editor-height':
@@ -208,6 +209,10 @@ export const CodeEditor = ({
         className={styles.editorWrapper}
         data-variant={variant}
         data-transparent-background={transparentBackground || undefined}
+        // Monaco has no RTL mode: it absolutely positions every line from a
+        // left-to-right origin, so inheriting rtl parks the viewport off
+        // screen and the editor renders blank.
+        dir="ltr"
       >
         <Editor
           height={currentHeight}

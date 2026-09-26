@@ -59,7 +59,8 @@ export const GraphQLPlayground = ({
   });
 
   return (
-    <StyledGraphiQLContainer>
+    // GraphiQL bundles Monaco's stylesheet, and Monaco has no RTL mode.
+    <StyledGraphiQLContainer dir="ltr">
       <GraphiQL
         forcedTheme={colorScheme}
         plugins={[explorer]}

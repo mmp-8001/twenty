@@ -70,3 +70,6 @@ screenshots/
 /.diag*.mjs
 /.compare*.mjs
 /.narrow*.mjs
+
+# Scratch directory for tools/i18n-translate
+.i18n-run/

@@ -3,6 +3,7 @@ import { isNonEmptyString } from '@sniptt/guards';
 import react from '@vitejs/plugin-react-swc';
 import wyw from '@wyw-in-js/vite';
 import fs from 'fs';
+import { Features } from 'lightningcss';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import {
@@ -19,6 +20,7 @@ import {
   API_PROXY_PATHS,
   buildApiProxyMatcher,
 } from './src/config/apiProxyPrefixes';
+import { autoFlipRtlExceptCoordinateSpaces } from './src/config/autoFlipRtlExceptCoordinateSpaces';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '');
@@ -269,6 +271,19 @@ export default defineConfig(({ mode }) => {
     css: {
       modules: {
         localsConvention: 'camelCaseOnly',
+      },
+      // Vite runs PostCSS over all emitted CSS, including what wyw-in-js
+      // extracts from Linaria at build time, so RTL auto-flipping happens here
+      // rather than through a runtime stylis plugin. `override` mode leaves the
+      // LTR output byte-identical and only adds :dir(rtl)-scoped overrides.
+      // This is the whole RTL layout implementation — see ADR-0001.
+      postcss: {
+        plugins: [autoFlipRtlExceptCoordinateSpaces()],
+      },
+      // The minifier would lower :dir(rtl) to a :lang() list for pre-2024
+      // targets, and :lang() ignores the dir="ltr" pins the overrides rely on.
+      lightningcss: {
+        exclude: Features.DirSelector,
       },
     },
     resolve: {

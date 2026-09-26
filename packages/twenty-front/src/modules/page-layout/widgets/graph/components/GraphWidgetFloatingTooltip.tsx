@@ -3,6 +3,7 @@ import {
   type GraphWidgetTooltipItem,
 } from '@/page-layout/widgets/graph/components/GraphWidgetTooltip';
 import { useGraphWidgetTooltipFloating } from '@/page-layout/widgets/graph/hooks/useGraphWidgetTooltipFloating';
+import { useTextDirection } from '@/localization/hooks/useTextDirection';
 import { FloatingPortal, type VirtualElement } from '@floating-ui/react';
 import { animated, useSpring } from '@react-spring/web';
 import { isDefined } from 'twenty-shared/utils';
@@ -40,6 +41,8 @@ export const GraphWidgetFloatingTooltip = ({
     tooltipOffsetFromAnchorInPx,
   );
 
+  const textDirection = useTextDirection();
+
   const xPos = x ?? 0;
   const yPos = y ?? 0;
 
@@ -71,6 +74,7 @@ export const GraphWidgetFloatingTooltip = ({
     <FloatingPortal root={boundary}>
       <animated.div
         ref={refs.setFloating}
+        dir={textDirection}
         style={{
           ...springStyles,
           position: 'fixed',

@@ -48,7 +48,6 @@ export type SpreadsheetImportDialogOptions = {
   dateFormat?: string;
   // Sets SheetJS "raw" option. If true, parsing will only be applied to xlsx date fields.
   parseRaw?: boolean;
-  rtl?: boolean;
   selectHeader?: boolean;
   availableFieldMetadataItems: FieldMetadataItem[];
 };

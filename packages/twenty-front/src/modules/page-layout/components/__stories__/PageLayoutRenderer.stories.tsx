@@ -312,3 +312,37 @@ export const MobileView: Story = {
     await validatePageLayoutContent(canvasElement);
   },
 };
+
+export const RightToLeftView: Story = {
+  parameters: {
+    viewport: {
+      defaultViewport: 'desktop1',
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const documentDirection = document.documentElement.dir;
+
+    document.documentElement.dir = 'rtl';
+
+    try {
+      const pageWidth = document.documentElement.clientWidth;
+
+      for (const title of [
+        'Revenue',
+        'Revenue Sources',
+        'Quarterly Comparison',
+      ]) {
+        const widget = (await canvas.findByText(title)).closest(
+          '.react-grid-item',
+        );
+        const { left, right } = widget?.getBoundingClientRect() ?? {};
+
+        await expect(left).toBeGreaterThanOrEqual(0);
+        await expect(right).toBeLessThanOrEqual(pageWidth);
+      }
+    } finally {
+      document.documentElement.dir = documentDirection;
+    }
+  },
+};

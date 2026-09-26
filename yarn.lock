@@ -28629,6 +28629,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"date-fns-jalali@npm:^4.4.0-0":
+  version: 4.4.0-0
+  resolution: "date-fns-jalali@npm:4.4.0-0"
+  checksum: 10c0/ae8d74c7ca1679a15876e63af36a79264f222d7f575bf1382359b5a3ab98a7212f69abdc102129c77af25a1f736097832a1537635d275fc7aaaed6a8cae26ba1
+  languageName: node
+  linkType: hard
+
 "date-fns-tz@npm:^3.2.0":
   version: 3.2.0
   resolution: "date-fns-tz@npm:3.2.0"
@@ -43213,6 +43220,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"postcss-rtlcss@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "postcss-rtlcss@npm:6.0.0"
+  dependencies:
+    rtlcss: "npm:4.3.0"
+  peerDependencies:
+    postcss: ^8.4.21
+  checksum: 10c0/9533d37f017caa8f9135eb8edb567d73871c8619c9920d3ea50d9a02e2abd5d2dbcb8ac03520626df6ba3173217d379fe0a8b9b4f9002cb9c3d3effa08b13d70
+  languageName: node
+  linkType: hard
+
 "postcss-selector-parser@npm:^6.1.1, postcss-selector-parser@npm:^6.1.2":
   version: 6.1.4
   resolution: "postcss-selector-parser@npm:6.1.4"
@@ -43262,7 +43280,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.5.6":
+"postcss@npm:^8.4.21, postcss@npm:^8.5.6":
   version: 8.5.28
   resolution: "postcss@npm:8.5.28"
   dependencies:
@@ -46284,6 +46302,20 @@ __metadata:
   version: 0.8.0
   resolution: "rrweb-cssom@npm:0.8.0"
   checksum: 10c0/56f2bfd56733adb92c0b56e274c43f864b8dd48784d6fe946ef5ff8d438234015e59ad837fc2ad54714b6421384141c1add4eb569e72054e350d1f8a50b8ac7b
+  languageName: node
+  linkType: hard
+
+"rtlcss@npm:4.3.0":
+  version: 4.3.0
+  resolution: "rtlcss@npm:4.3.0"
+  dependencies:
+    escalade: "npm:^3.1.1"
+    picocolors: "npm:^1.0.0"
+    postcss: "npm:^8.4.21"
+    strip-json-comments: "npm:^3.1.1"
+  bin:
+    rtlcss: bin/rtlcss.js
+  checksum: 10c0/ec59db839e1446b4cd6dcef618c8986f00d67e0ac3c2d40bd9041f1909aaacd668072c90849906ca692dea25cd993f46e9188b4c36adfa5bd3eebeb945fb28f2
   languageName: node
   linkType: hard
 
@@ -50078,6 +50110,7 @@ __metadata:
     cron-parser: "npm:5.1.1"
     d3-shape: "npm:^3.2.0"
     date-fns: "npm:^4.4.0"
+    date-fns-jalali: "npm:^4.4.0-0"
     date-fns-tz: "npm:^3.2.0"
     deep-equal: "npm:^2.2.2"
     dotenv-cli: "npm:^7.4.4"
@@ -50101,6 +50134,7 @@ __metadata:
     json-logic-js: "npm:^2.0.5"
     jwt-decode: "npm:^4.0.0"
     libphonenumber-js: "npm:^1.10.26"
+    lightningcss: "npm:^1.32.0"
     linkify-react: "npm:^4.1.3"
     linkifyjs: "npm:^4.1.3"
     lodash.camelcase: "npm:^4.3.0"
@@ -50121,6 +50155,7 @@ __metadata:
     papaparse: "npm:^5.4.1"
     playwright: "npm:^1.60.0"
     pluralize: "npm:^8.0.0"
+    postcss-rtlcss: "npm:^6.0.0"
     prettier: "npm:^3.1.1"
     qs: "npm:^6.15.2"
     react: "npm:^19.2.0"

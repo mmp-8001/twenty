@@ -41,7 +41,6 @@ export const mockedSpreadsheetOptions: SpreadsheetImportDialogOptions = {
   },
   dateFormat: 'MM/DD/YY',
   parseRaw: true,
-  rtl: false,
   selectHeader: true,
   availableFieldMetadataItems: [],
 };

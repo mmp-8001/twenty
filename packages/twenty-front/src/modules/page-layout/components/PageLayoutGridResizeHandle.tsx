@@ -185,8 +185,11 @@ export const PageLayoutGridResizeHandle = forwardRef<
     const theme = useTheme();
 
     return (
+      // The handle sits on the physical edge it drags, but it renders inside a
+      // grid card that restores the UI direction, so pin it back to ltr.
       <StyledResizeHandleWrapper
         ref={ref}
+        dir="ltr"
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onTouchEnd={onTouchEnd}

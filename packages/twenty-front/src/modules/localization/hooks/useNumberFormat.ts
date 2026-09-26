@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 
+import { dateLocaleState } from '~/localization/states/dateLocaleState';
 import { workspaceMemberFormatPreferencesState } from '@/localization/states/workspaceMemberFormatPreferencesState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import {
@@ -12,6 +13,10 @@ export const useNumberFormat = () => {
     workspaceMemberFormatPreferencesState,
   );
 
+  // Same source the date formatters read, so digits stay consistent across
+  // dates and numbers.
+  const { locale: uiLocale } = useAtomStateValue(dateLocaleState);
+
   const formatNumber = useMemo(
     () =>
       (
@@ -20,10 +25,11 @@ export const useNumberFormat = () => {
       ): string => {
         return utilFormatNumber(value, {
           format: workspaceMemberFormatPreferences.numberFormat,
+          uiLocale: uiLocale ?? '',
           ...options,
         });
       },
-    [workspaceMemberFormatPreferences.numberFormat],
+    [workspaceMemberFormatPreferences.numberFormat, uiLocale],
   );
 
   return {

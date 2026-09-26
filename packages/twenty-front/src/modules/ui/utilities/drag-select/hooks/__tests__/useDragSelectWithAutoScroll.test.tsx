@@ -161,9 +161,8 @@ describe('useDragSelectWithAutoScroll', () => {
       });
     });
 
-    it('should prevent negative scroll values', () => {
+    it('should prevent negative vertical scroll values', () => {
       mockElement.scrollTop = 5;
-      mockElement.scrollLeft = 3;
 
       const { result } = renderHook(() => useDragSelectWithAutoScroll({}));
 
@@ -172,9 +171,17 @@ describe('useDragSelectWithAutoScroll', () => {
       expect(mockElement.scrollTo).toHaveBeenCalledWith({
         top: 0,
       });
+    });
+
+    it('should let horizontal scroll go negative for RTL', () => {
+      mockElement.scrollLeft = 3;
+
+      const { result } = renderHook(() => useDragSelectWithAutoScroll({}));
+
+      result.current.handleAutoScroll(105, 250);
 
       expect(mockElement.scrollTo).toHaveBeenCalledWith({
-        left: 0,
+        left: -12,
         behavior: 'auto',
       });
     });

@@ -9,7 +9,11 @@ button {
   padding: 0;
   font: inherit;
   color: inherit;
-  background: none;
+  // Not the `background` shorthand: minifiers emit it as `background: 0 0`,
+  // which postcss-rtlcss reads as a position and mirrors into
+  // `button:dir(rtl) { background: 100% 0 }` - an element selector that
+  // outranks every class-based button background in RTL.
+  background-color: transparent;
   border: none;
   cursor: pointer;
 }

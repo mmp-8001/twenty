@@ -24,6 +24,10 @@ export const getDateFnsLocaleImport = (locale: AppLocale) => {
       return import('date-fns/locale/en-US');
     case 'es-ES':
       return import('date-fns/locale/es');
+    // date-fns-jalali carries Jalali month/day names and the fa-IR locale
+    // code the date formatters branch on to convert the calendar.
+    case 'fa':
+      return import('date-fns-jalali/locale/fa-IR');
     case 'fi-FI':
       return import('date-fns/locale/fi');
     case 'fr-FR':

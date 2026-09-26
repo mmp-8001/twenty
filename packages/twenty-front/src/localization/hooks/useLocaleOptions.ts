@@ -60,6 +60,7 @@ export const useLocaleOptions = (): LocaleOption[] => {
     'ja-JP': t`Japanese`,
     'ko-KR': t`Korean`,
     'no-NO': t`Norwegian`,
+    fa: t`Persian`,
     'pl-PL': t`Polish`,
     'pt-PT': t`Portuguese — Portugal`,
     'pt-BR': t`Portuguese — Brazil`,

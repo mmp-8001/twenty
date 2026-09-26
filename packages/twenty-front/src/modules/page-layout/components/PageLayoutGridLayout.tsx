@@ -218,6 +218,7 @@ export const PageLayoutGridLayout = ({ tabId }: PageLayoutGridLayoutProps) => {
 
   return (
     <StyledGridContainer
+      dir="ltr"
       ref={gridContainerRef}
       className={
         shouldDisableTransitions ? disabledTransitionsClass : undefined
