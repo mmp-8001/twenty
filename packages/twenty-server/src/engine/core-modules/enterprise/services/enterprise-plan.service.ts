@@ -186,6 +186,12 @@ export class EnterprisePlanService implements OnModuleInit {
   }
 
   private isCachedValidityPayloadValid(): boolean {
+    // The commercial license allows enterprise code without a subscription
+    // only for development and testing, never in production.
+    if (this.isDevelopmentOrTestEnvironment()) {
+      return true;
+    }
+
     if (!isDefined(this.cachedValidityPayload)) {
       return false;
     }
@@ -723,16 +729,20 @@ export class EnterprisePlanService implements OnModuleInit {
   // In development and Jest integration tests, tries both keys so production keys
   // work locally
   private getPublicKeysToTry(): string[] {
-    const nodeEnv = this.twentyConfigService.get('NODE_ENV');
-
-    if (
-      nodeEnv === NodeEnvironment.DEVELOPMENT ||
-      nodeEnv === NodeEnvironment.TEST
-    ) {
+    if (this.isDevelopmentOrTestEnvironment()) {
       return [ENTERPRISE_JWT_PUBLIC_KEY, ENTERPRISE_JWT_DEV_PUBLIC_KEY];
     }
 
     return [ENTERPRISE_JWT_PUBLIC_KEY];
+  }
+
+  private isDevelopmentOrTestEnvironment(): boolean {
+    const nodeEnv = this.twentyConfigService.get('NODE_ENV');
+
+    return (
+      nodeEnv === NodeEnvironment.DEVELOPMENT ||
+      nodeEnv === NodeEnvironment.TEST
+    );
   }
 
   private verifyJwt<T extends Record<string, unknown>>(
