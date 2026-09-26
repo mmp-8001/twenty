@@ -1,22 +1,40 @@
 import type { Plugin as PostcssPlugin } from 'postcss';
 import postcssRtlcss from 'postcss-rtlcss';
 
-// These libraries draw JS-driven coordinate spaces: they position everything
-// themselves and read their own physical offsets back in layout code.
-// @xyflow/react pins `direction: ltr` on the canvas on purpose, and flipping
-// its stylesheet moves the nodes out from under their edges. Monaco absolutely
-// positions each line's spans from their static position, so a flipped
-// stylesheet parks the whole viewport off-screen and the editor renders blank.
-// react-grid-layout places widgets with a JS-computed translate() and
-// react-resizable puts each resize handle on the physical edge it drags, as
-// does our own handle component. The flipped rules are scoped to <html dir>,
-// so a dir="ltr" pin on the surface cannot stop them; only exclusion can.
-// All keep their physical CSS; only the content rendered inside them flips.
+// A pseudo-element has to stay last in a compound selector, so :dir(rtl) goes
+// in front of it. Minifiers may shorten ::before to the legacy :before form.
+const PSEUDO_ELEMENT =
+  /::|(?<!:):(?:before|after|first-line|first-letter)(?![\w-])/;
+
+// The default `[dir="rtl"] .x` prefix matches through <html dir="rtl"> whatever
+// dir sits in between, so a surface pinned with dir="ltr" (the dashboard grid,
+// charts, the flow canvas, the code editor) would still get flipped rules.
+// `.x:dir(rtl)` follows the nearest dir attribute instead, so the pin holds.
+const scopeToRightToLeft = (prefix: string, selector: string) => {
+  if (prefix !== '[dir="rtl"]') {
+    return undefined;
+  }
+
+  const pseudoElementIndex = selector.search(PSEUDO_ELEMENT);
+
+  return pseudoElementIndex === -1
+    ? `${selector}:dir(rtl)`
+    : `${selector.slice(0, pseudoElementIndex)}:dir(rtl)${selector.slice(pseudoElementIndex)}`;
+};
+
+// These libraries draw JS-driven coordinate spaces from physical offsets and
+// have no RTL mode, so their stylesheets are never flipped. @xyflow/react and
+// Monaco render in places not all pinned with dir="ltr". react-grid-layout and
+// react-resizable style the grid items and their resize handles, which sit
+// inside cards that restore the UI direction.
 const COORDINATE_SPACE_STYLESHEETS =
-  /node_modules[\\/](@xyflow|monaco-editor|react-grid-layout|react-resizable)[\\/]|PageLayoutGridResizeHandle\.wyw-in-js\.css/;
+  /node_modules[\\/](@xyflow|monaco-editor|react-grid-layout|react-resizable)[\\/]/;
 
 export const autoFlipRtlExceptCoordinateSpaces = (): PostcssPlugin => {
-  const { Once: flip } = postcssRtlcss({ mode: 'override' });
+  const { Once: flip } = postcssRtlcss({
+    mode: 'override',
+    prefixSelectorTransformer: scopeToRightToLeft,
+  });
 
   return {
     postcssPlugin: 'twenty-postcss-rtlcss',

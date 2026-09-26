@@ -3,6 +3,7 @@ import { isNonEmptyString } from '@sniptt/guards';
 import react from '@vitejs/plugin-react-swc';
 import wyw from '@wyw-in-js/vite';
 import fs from 'fs';
+import { Features } from 'lightningcss';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import {
@@ -274,10 +275,15 @@ export default defineConfig(({ mode }) => {
       // Vite runs PostCSS over all emitted CSS, including what wyw-in-js
       // extracts from Linaria at build time, so RTL auto-flipping happens here
       // rather than through a runtime stylis plugin. `override` mode leaves the
-      // LTR output byte-identical and only adds [dir="rtl"]-scoped overrides.
+      // LTR output byte-identical and only adds :dir(rtl)-scoped overrides.
       // This is the whole RTL layout implementation — see ADR-0001.
       postcss: {
         plugins: [autoFlipRtlExceptCoordinateSpaces()],
+      },
+      // The minifier would lower :dir(rtl) to a :lang() list for pre-2024
+      // targets, and :lang() ignores the dir="ltr" pins the overrides rely on.
+      lightningcss: {
+        exclude: Features.DirSelector,
       },
     },
     resolve: {

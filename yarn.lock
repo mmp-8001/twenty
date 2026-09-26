@@ -50200,6 +50200,7 @@ __metadata:
     json-logic-js: "npm:^2.0.5"
     jwt-decode: "npm:^4.0.0"
     libphonenumber-js: "npm:^1.10.26"
+    lightningcss: "npm:^1.32.0"
     linkify-react: "npm:^4.1.3"
     linkifyjs: "npm:^4.1.3"
     lodash.camelcase: "npm:^4.3.0"

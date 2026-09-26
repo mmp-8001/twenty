@@ -11,7 +11,7 @@ button {
   color: inherit;
   // Not the `background` shorthand: minifiers emit it as `background: 0 0`,
   // which postcss-rtlcss reads as a position and mirrors into
-  // `[dir='rtl'] button { background: 100% 0 }` - an element selector that
+  // `button:dir(rtl) { background: 100% 0 }` - an element selector that
   // outranks every class-based button background in RTL.
   background-color: transparent;
   border: none;

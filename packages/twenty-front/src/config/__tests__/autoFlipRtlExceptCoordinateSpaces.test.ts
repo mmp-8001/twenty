@@ -26,17 +26,11 @@ describe('autoFlipRtlExceptCoordinateSpaces', () => {
     ).toBe(EDITOR_CSS);
   });
 
-  it('leaves the grid resize handle stylesheets untouched', () => {
+  it('leaves the grid resize handle stylesheet untouched', () => {
     expect(
       process(
         GRID_HANDLE_CSS,
         '/repo/node_modules/react-resizable/css/styles.css',
-      ),
-    ).toBe(GRID_HANDLE_CSS);
-    expect(
-      process(
-        GRID_HANDLE_CSS,
-        '/repo/packages/twenty-front/src/modules/page-layout/components/PageLayoutGridResizeHandle.wyw-in-js.css',
       ),
     ).toBe(GRID_HANDLE_CSS);
   });
@@ -44,6 +38,20 @@ describe('autoFlipRtlExceptCoordinateSpaces', () => {
   it('flips application stylesheets', () => {
     expect(
       process(APP_CSS, '/repo/packages/twenty-front/src/index.css'),
-    ).toContain('[dir="rtl"]');
+    ).toContain('.card:dir(rtl) {');
+  });
+
+  // [dir="rtl"] .card would match through <html dir="rtl"> even inside a
+  // dir="ltr" pin; :dir(rtl) follows the nearest dir attribute.
+  it('scopes flipped rules to the element direction, before pseudo-elements', () => {
+    const css = process(
+      '.a .b::before, .c:before, .d:hover { left: 0; }',
+      '/repo/packages/twenty-front/src/index.css',
+    );
+
+    expect(css).toContain(
+      '.a .b:dir(rtl)::before, .c:dir(rtl):before, .d:hover:dir(rtl) {',
+    );
+    expect(css).not.toContain('[dir="rtl"]');
   });
 });

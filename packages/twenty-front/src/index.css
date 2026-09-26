@@ -105,23 +105,24 @@ html:lang(fa) {
   CSS but cannot touch geometry inside an SVG, so a left chevron keeps pointing
   left in RTL — the most visible RTL defect. Tabler gives every icon a stable
   `tabler-icon-<name>` class, so flip a curated list of unambiguously horizontal
-  icons and nothing else.
+  icons and nothing else. :dir(rtl) rather than [dir='rtl'] so icons inside a
+  surface pinned with dir="ltr" keep their direction.
 
   rtl:ignore because this block is already authored for RTL: rtlcss would
   otherwise rewrite the left/right tokens in these selectors
   (chevron-left -> chevron-right) and re-process the transform. */
 /* rtl:begin:ignore */
-[dir='rtl'] .tabler-icon-chevron-left,
-[dir='rtl'] .tabler-icon-chevron-right,
-[dir='rtl'] .tabler-icon-chevrons-left,
-[dir='rtl'] .tabler-icon-chevrons-right,
-[dir='rtl'] .tabler-icon-chevron-left-pipe,
-[dir='rtl'] .tabler-icon-chevron-right-pipe,
-[dir='rtl'] .tabler-icon-caret-left,
-[dir='rtl'] .tabler-icon-caret-right,
-[dir='rtl'] .tabler-icon-arrow-left,
-[dir='rtl'] .tabler-icon-arrow-right,
-[dir='rtl'] .tabler-icon-arrow-back-up {
+.tabler-icon-chevron-left:dir(rtl),
+.tabler-icon-chevron-right:dir(rtl),
+.tabler-icon-chevrons-left:dir(rtl),
+.tabler-icon-chevrons-right:dir(rtl),
+.tabler-icon-chevron-left-pipe:dir(rtl),
+.tabler-icon-chevron-right-pipe:dir(rtl),
+.tabler-icon-caret-left:dir(rtl),
+.tabler-icon-caret-right:dir(rtl),
+.tabler-icon-arrow-left:dir(rtl),
+.tabler-icon-arrow-right:dir(rtl),
+.tabler-icon-arrow-back-up:dir(rtl) {
   transform: scaleX(-1);
 }
 /* rtl:end:ignore */
@@ -131,6 +132,6 @@ html:lang(fa) {
    period jumps to the far side. plaintext picks each paragraph's direction
    from its first strong character, and the default text-align: start follows
    it. Scoped to rtl so LTR output stays unchanged (ADR-0001). */
-[dir='rtl'] .bn-inline-content {
+.bn-inline-content:dir(rtl) {
   unicode-bidi: plaintext;
 }
