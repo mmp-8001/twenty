@@ -35,3 +35,30 @@ _Avoid_: Shamsi, Persian calendar
 **Persian digits**:
 The Persian-Indic numerals (`۰`–`۹`) substituted for ASCII digits at the display layer, after formatting.
 _Avoid_: Arabic numerals, Eastern digits
+
+### CRM demo
+
+**Brand**:
+One of the businesses the CRM serves: Gerami, Kifpool, Proopco. Each brand is its own tenant; its customers, leads and staff never see another brand's.
+_Avoid_: tenant, company, app
+
+**Customer**:
+A person registered in a brand's app. Exists in the CRM from registration onward, identified by the app's own user id.
+_Avoid_: user, client, account
+
+**Lifecycle stage**:
+Where a customer stands with a brand: registered, verified, first purchase, active, inactive, churned. Moved only by events the brand's app reports.
+
+**Lead**:
+A person who showed interest through a channel (Telegram, Instagram, call, form) but has not registered in the brand's app.
+_Avoid_: prospect, opportunity
+
+**Conversion**:
+The app reporting that a lead's phone number registered, verified and made a first purchase. Decided by the app's events, never set by hand.
+
+**Successful lead**:
+A lead that converts within the attribution window after being assigned to a sales employee. The only thing commission is paid on.
+
+**Commission**:
+What a sales employee has earned for a successful lead. Calculated in the CRM; paid outside it.
+_Avoid_: bonus, profit, payout
