@@ -47,7 +47,15 @@ A person registered in a brand's app. Exists in the CRM from registration onward
 _Avoid_: user, client, account
 
 **Lifecycle stage**:
-Where a customer stands with a brand: registered, verified, first purchase, active, inactive, churned. Moved only by events the brand's app reports.
+Where a customer stands with a brand: registered, verified, first purchase, active, inactive, churned. Moved only by what the brand's app reports. The first three only move forward; an inactive or churned customer becomes active again on their next transaction. Every brand uses the same six stages, unlike segments.
+
+**Inactive**:
+A customer who has stopped transacting for longer than their brand allows, or, for Proopco, has no running challenge account. Still holding value with the brand.
+_Avoid_: dormant, lapsed (those are segments)
+
+**Churned**:
+An inactive customer who has been gone a long time and holds nothing with the brand anymore.
+_Avoid_: lost, closed
 
 **Lead**:
 A person who showed interest through a channel (Telegram, Instagram, call, form) but has not registered in the brand's app.
@@ -72,7 +80,7 @@ The sales employee a lead was given to. Fixed once the lead converts, since comm
 _Avoid_: owner, account manager
 
 **Account manager**:
-The employee who looks after a customer now. Starts as the converting lead's assignee and can be changed by a manager without affecting commission.
+The employee who looks after a customer now. Starts as the converting lead's assignee, or is given in turn to a sales employee when the customer came without a lead. A manager can change it without affecting commission.
 _Avoid_: owner, assignee
 
 **Segment**:
