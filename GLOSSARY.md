@@ -78,6 +78,10 @@ _Avoid_: lost lead
 What a sales employee has earned for a successful lead: a fixed amount set per brand, halved when the lead came through a partnership. Calculated in the CRM and paid outside it; a manager can void it, with a reason, until it is marked paid.
 _Avoid_: bonus, profit, payout
 
+**Commission month**:
+The Jalali month a commission was earned in, counted from conversion, not from when it was paid. Commission is reported by this month.
+_Avoid_: pay month, payroll month
+
 **Milestone**:
 A notable thing a customer did in a brand's app (verified, first purchase, first withdrawal, funded), as reported by the app. The CRM keeps milestones, never individual trades.
 _Avoid_: event, transaction, trade
