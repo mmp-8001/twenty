@@ -62,3 +62,27 @@ A lead that converts within the attribution window after being assigned to a sal
 **Commission**:
 What a sales employee has earned for a successful lead. Calculated in the CRM; paid outside it.
 _Avoid_: bonus, profit, payout
+
+**Milestone**:
+A notable thing a customer did in a brand's app (verified, first purchase, first withdrawal, funded), as reported by the app. The CRM keeps milestones, never individual trades.
+_Avoid_: event, transaction, trade
+
+**Lead assignee**:
+The sales employee a lead was given to. Fixed once the lead converts, since commission follows it.
+_Avoid_: owner, account manager
+
+**Account manager**:
+The employee who looks after a customer now. Starts as the converting lead's assignee and can be changed by a manager without affecting commission.
+_Avoid_: owner, assignee
+
+**RFM segment**:
+How a customer's recent activity ranks them (champions, loyal, at risk, hibernating, new), judged from how recently, how often and how much they transacted.
+_Avoid_: tier, value tier, level
+
+**Influencer**:
+A social media personality a brand pays to bring in users. Not a customer.
+_Avoid_: partner, affiliate
+
+**Partnership**:
+A deal between a brand and an influencer to promote it, from first contact through a live campaign. Users it brings in are tracked against it; it pays no commission.
+_Avoid_: opportunity, deal, campaign
