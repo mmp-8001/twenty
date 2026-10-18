@@ -58,7 +58,7 @@ An inactive customer who has been gone a long time and holds nothing with the br
 _Avoid_: lost, closed
 
 **Lead**:
-A person who showed interest through a channel (Telegram, Instagram, call, form) but has not registered in the brand's app.
+A person who showed interest through a channel (Telegram, Instagram, call, form) but has not registered in the brand's app. One per phone number per brand; repeat contacts are the same lead. A lead without a phone number cannot convert until one is recorded.
 _Avoid_: prospect, opportunity
 
 **Conversion**:
@@ -66,6 +66,13 @@ The app reporting that a lead's phone number registered, verified and made a fir
 
 **Successful lead**:
 A lead that converts within the attribution window after being assigned to a sales employee. The only thing commission is paid on.
+
+**Attribution window**:
+The time a lead has, from when it was first assigned, to convert and count as a successful lead. Set per brand; reassigning a lead does not restart it.
+
+**Expired lead**:
+A lead whose attribution window ran out before it converted. It can still convert later, but earns no commission.
+_Avoid_: lost lead
 
 **Commission**:
 What a sales employee has earned for a successful lead. Calculated in the CRM; paid outside it.
