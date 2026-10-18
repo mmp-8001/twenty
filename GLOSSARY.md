@@ -75,9 +75,9 @@ _Avoid_: owner, account manager
 The employee who looks after a customer now. Starts as the converting lead's assignee and can be changed by a manager without affecting commission.
 _Avoid_: owner, assignee
 
-**RFM segment**:
-How a customer's recent activity ranks them (champions, loyal, at risk, hibernating, new), judged from how recently, how often and how much they transacted.
-_Avoid_: tier, value tier, level
+**Segment**:
+The group a customer's recent behaviour puts them in, by rules each brand sets: Gerami ranks by recency, frequency and holdings (champions, loyal, at risk, hibernating, new); Kifpool by where money is heading (new, withdrawing, active trader, regular, holder, dormant).
+_Avoid_: RFM segment, tier, value tier, level
 
 **Influencer**:
 A social media personality a brand pays to bring in users. Not a customer.
@@ -88,9 +88,25 @@ A deal between a brand and an influencer to promote it, from first contact throu
 _Avoid_: opportunity, deal, campaign
 
 **Holdings**:
-What a Gerami customer keeps with Gerami right now: grams of gold and silver plus the toman wallet balance, as last reported by the app.
+What a customer keeps with a brand right now, as last reported by the app: for Gerami, grams of gold and silver plus the toman wallet; for Kifpool, the toman balance plus crypto valued in toman.
 _Avoid_: portfolio, assets, balance
 
 **Delivery request**:
 A Gerami customer's request to receive physical gold or silver (coins or bars), tracked from request through delivery or cancellation. Its status is moved by the app; staff follow it up.
 _Avoid_: order, shipment
+
+**Corporate account**:
+A Kifpool customer that is a registered company rather than an individual, represented by the person who holds the login. Follows the same lifecycle as any other customer.
+_Avoid_: company, business customer
+
+**KYC level**:
+How far a Kifpool customer has been identity-checked (0, 1 or 2), each level unlocking more of the app. Reaching level 1 is what makes a Kifpool customer verified.
+_Avoid_: tier, verification status
+
+**KYC rejection**:
+The app turning down a Kifpool customer's attempt to reach the next KYC level, with a reason. A customer can be rejected many times; it is a moment for staff to help, not a milestone.
+_Avoid_: KYC failure
+
+**Referrer**:
+A Kifpool customer who brought in other customers with their own invite code. Their rewards are settled in the app, not the CRM.
+_Avoid_: affiliate, influencer, partner
