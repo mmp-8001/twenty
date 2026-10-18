@@ -86,3 +86,11 @@ _Avoid_: partner, affiliate
 **Partnership**:
 A deal between a brand and an influencer to promote it, from first contact through a live campaign. Users it brings in are tracked against it; it pays no commission.
 _Avoid_: opportunity, deal, campaign
+
+**Holdings**:
+What a Gerami customer keeps with Gerami right now: grams of gold and silver plus the toman wallet balance, as last reported by the app.
+_Avoid_: portfolio, assets, balance
+
+**Delivery request**:
+A Gerami customer's request to receive physical gold or silver (coins or bars), tracked from request through delivery or cancellation. Its status is moved by the app; staff follow it up.
+_Avoid_: order, shipment
