@@ -65,7 +65,7 @@ _Avoid_: prospect, opportunity
 The app reporting that a lead's phone number registered, verified and made a first purchase. Decided by the app's events, never set by hand.
 
 **Successful lead**:
-A lead that converts within the attribution window after being assigned to a sales employee. The only thing commission is paid on.
+A lead that converts within the attribution window after being assigned to a sales employee, with a first purchase at or above the brand's minimum. The only thing commission is paid on.
 
 **Attribution window**:
 The time a lead has, from when it was first assigned, to convert and count as a successful lead. Set per brand; reassigning a lead does not restart it.
@@ -75,7 +75,7 @@ A lead whose attribution window ran out before it converted. It can still conver
 _Avoid_: lost lead
 
 **Commission**:
-What a sales employee has earned for a successful lead. Calculated in the CRM; paid outside it.
+What a sales employee has earned for a successful lead: a fixed amount set per brand, halved when the lead came through a partnership. Calculated in the CRM and paid outside it; a manager can void it, with a reason, until it is marked paid.
 _Avoid_: bonus, profit, payout
 
 **Milestone**:
