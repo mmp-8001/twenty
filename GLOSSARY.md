@@ -76,7 +76,7 @@ The employee who looks after a customer now. Starts as the converting lead's ass
 _Avoid_: owner, assignee
 
 **Segment**:
-The group a customer's recent behaviour puts them in, by rules each brand sets: Gerami ranks by recency, frequency and holdings (champions, loyal, at risk, hibernating, new); Kifpool by where money is heading (new, withdrawing, active trader, regular, holder, dormant).
+The group a customer's recent behaviour puts them in, by rules each brand sets: Gerami ranks by recency, frequency and holdings (champions, loyal, at risk, hibernating, new); Kifpool by where money is heading (new, withdrawing, active trader, regular, holder, dormant); Proopco by where the trader stands in the program (earning, funded, in challenge, retry candidate, new, lapsed).
 _Avoid_: RFM segment, tier, value tier, level
 
 **Influencer**:
@@ -110,3 +110,15 @@ _Avoid_: KYC failure
 **Referrer**:
 A Kifpool customer who brought in other customers with their own invite code. Their rewards are settled in the app, not the CRM.
 _Avoid_: affiliate, influencer, partner
+
+**Challenge account**:
+One evaluation a Proopco customer bought: a trading account of a set size that moves through phase 1 and phase 2 to funded, or ends when a rule is broken. A customer can hold several at once. Its progress is reported by the app; staff follow it up.
+_Avoid_: account, challenge, evaluation, plan
+
+**Breach**:
+A challenge account ending because the customer broke a trading rule (daily loss, maximum drawdown, a rule violation, inactivity). A moment for staff to offer a retry, not a milestone.
+_Avoid_: failure, fail, loss
+
+**Payout**:
+Proopco's share of profit paid to a customer from a funded challenge account. Approved and paid by the app; the CRM only learns that it happened.
+_Avoid_: withdrawal, commission, profit split
