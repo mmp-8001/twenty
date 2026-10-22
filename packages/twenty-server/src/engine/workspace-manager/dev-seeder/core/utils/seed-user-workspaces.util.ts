@@ -1,6 +1,8 @@
 import { type QueryRunner } from 'typeorm';
 
 import { type UserWorkspaceEntity } from 'src/engine/core-modules/user-workspace/user-workspace.entity';
+import { BRAND_SEED_CONFIGS } from 'src/engine/workspace-manager/dev-seeder/brands/constants/brand-seed-configs.constant';
+import { isBrandWorkspaceId } from 'src/engine/workspace-manager/dev-seeder/brands/constants/brand-workspace-ids.constant';
 import {
   SEED_APPLE_WORKSPACE_ID,
   SEED_YCOMBINATOR_WORKSPACE_ID,
@@ -40,6 +42,30 @@ export const seedUserWorkspaces = async ({
   schemaName,
   workspaceId,
 }: SeedUserWorkspacesArgs) => {
+  if (isBrandWorkspaceId(workspaceId)) {
+    await queryRunner.manager
+      .createQueryBuilder()
+      .insert()
+      .into(`${schemaName}.${tableName}`, [
+        'id',
+        'userId',
+        'workspaceId',
+        'locale',
+      ])
+      .orIgnore()
+      .values(
+        BRAND_SEED_CONFIGS[workspaceId].members.map((member) => ({
+          id: member.userWorkspaceId,
+          userId: member.userId,
+          workspaceId,
+          locale: 'fa',
+        })),
+      )
+      .execute();
+
+    return;
+  }
+
   let userWorkspaces: Pick<
     UserWorkspaceEntity,
     'id' | 'userId' | 'workspaceId'

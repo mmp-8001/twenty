@@ -1,0 +1,371 @@
+import {
+  type BrandFieldSeeds,
+  type BrandRelationSeed,
+} from 'src/engine/workspace-manager/dev-seeder/brands/types/brand-seed-config.type';
+import {
+  booleanField,
+  dateTimeField,
+  numberField,
+  phonesField,
+  selectField,
+  textField,
+} from 'src/engine/workspace-manager/dev-seeder/brands/utils/brand-field-seed-builders.util';
+import { type ObjectMetadataSeed } from 'src/engine/workspace-manager/dev-seeder/metadata/types/object-metadata-seed.type';
+
+export const CORE_OBJECT_SEEDS: ObjectMetadataSeed[] = [
+  {
+    nameSingular: 'lead',
+    namePlural: 'leads',
+    labelSingular: 'سرنخ',
+    labelPlural: 'سرنخ‌ها',
+    icon: 'IconTargetArrow',
+    color: 'orange',
+    isRemote: false,
+  },
+  {
+    nameSingular: 'milestone',
+    namePlural: 'milestones',
+    labelSingular: 'رویداد',
+    labelPlural: 'رویدادها',
+    icon: 'IconFlag',
+    color: 'blue',
+    isRemote: false,
+  },
+  {
+    nameSingular: 'commission',
+    namePlural: 'commissions',
+    labelSingular: 'کمیسیون',
+    labelPlural: 'کمیسیون‌ها',
+    icon: 'IconCoins',
+    color: 'green',
+    isRemote: false,
+  },
+  {
+    nameSingular: 'influencer',
+    namePlural: 'influencers',
+    labelSingular: 'اینفلوئنسر',
+    labelPlural: 'اینفلوئنسرها',
+    icon: 'IconSpeakerphone',
+    color: 'pink',
+    isRemote: false,
+  },
+  {
+    nameSingular: 'partnership',
+    namePlural: 'partnerships',
+    labelSingular: 'همکاری',
+    labelPlural: 'همکاری‌ها',
+    icon: 'IconHeartHandshake',
+    color: 'purple',
+    isRemote: false,
+  },
+];
+
+export const CORE_FIELD_SEEDS: BrandFieldSeeds[] = [
+  {
+    objectName: 'person',
+    seeds: [
+      textField({
+        name: 'appUserId',
+        label: 'شناسه کاربر در اپ',
+        icon: 'IconId',
+        isUnique: true,
+      }),
+      selectField({
+        name: 'lifecycleStage',
+        label: 'مرحله چرخه عمر',
+        icon: 'IconStairsUp',
+        options: [
+          ['REGISTERED', 'ثبت‌نام'],
+          ['VERIFIED', 'احراز هویت'],
+          ['FIRST_PURCHASE', 'اولین خرید'],
+          ['ACTIVE', 'فعال'],
+          ['INACTIVE', 'غیرفعال'],
+          ['CHURNED', 'ریزش'],
+        ],
+        defaultValue: 'REGISTERED',
+      }),
+      dateTimeField({
+        name: 'lifecycleStageChangedAt',
+        label: 'تاریخ تغییر مرحله',
+        icon: 'IconCalendarEvent',
+      }),
+      dateTimeField({
+        name: 'verifiedAt',
+        label: 'تاریخ احراز هویت',
+        icon: 'IconShieldCheck',
+      }),
+      dateTimeField({
+        name: 'lastTransactionAt',
+        label: 'آخرین تراکنش',
+        icon: 'IconClockDollar',
+      }),
+      numberField({
+        name: 'transactionCount90d',
+        label: 'تعداد تراکنش ۹۰ روز',
+        icon: 'IconHash',
+      }),
+      numberField({
+        name: 'volume90d',
+        label: 'حجم ۹۰ روز (تومان)',
+        icon: 'IconCash',
+      }),
+    ],
+  },
+  {
+    objectName: 'note',
+    seeds: [
+      textField({
+        name: 'externalId',
+        label: 'شناسه خارجی',
+        icon: 'IconExternalLink',
+        isUnique: true,
+      }),
+    ],
+  },
+  {
+    objectName: 'lead',
+    seeds: [
+      phonesField({
+        name: 'phones',
+        label: 'تلفن',
+        icon: 'IconPhone',
+        isUnique: true,
+      }),
+      textField({
+        name: 'handle',
+        label: 'شناسه شبکه اجتماعی',
+        icon: 'IconAt',
+      }),
+      selectField({
+        name: 'channel',
+        label: 'کانال',
+        icon: 'IconBroadcast',
+        options: [
+          ['TELEGRAM', 'تلگرام'],
+          ['INSTAGRAM', 'اینستاگرام'],
+          ['CALL', 'تماس تلفنی'],
+          ['FORM', 'فرم سایت'],
+        ],
+      }),
+      selectField({
+        name: 'status',
+        label: 'وضعیت',
+        icon: 'IconProgressCheck',
+        options: [
+          ['NEW', 'جدید'],
+          ['CONTACTED', 'تماس گرفته شد'],
+          ['REGISTERED', 'ثبت‌نام کرد'],
+          ['CONVERTED', 'تبدیل شد'],
+          ['LOST', 'از دست رفت'],
+          ['EXPIRED', 'منقضی'],
+        ],
+        defaultValue: 'NEW',
+      }),
+      dateTimeField({
+        name: 'assignedAt',
+        label: 'تاریخ واگذاری',
+        icon: 'IconUserCheck',
+      }),
+      dateTimeField({
+        name: 'lastContactAt',
+        label: 'آخرین تماس',
+        icon: 'IconMessageCircle',
+      }),
+    ],
+  },
+  {
+    objectName: 'milestone',
+    seeds: [
+      dateTimeField({
+        name: 'occurredAt',
+        label: 'زمان رخداد',
+        icon: 'IconCalendarEvent',
+      }),
+      numberField({
+        name: 'amount',
+        label: 'مبلغ (تومان)',
+        icon: 'IconCash',
+      }),
+      textField({
+        name: 'appEventId',
+        label: 'شناسه رویداد در اپ',
+        icon: 'IconId',
+        isUnique: true,
+      }),
+    ],
+  },
+  {
+    objectName: 'commission',
+    seeds: [
+      numberField({ name: 'amount', label: 'مبلغ (تومان)', icon: 'IconCash' }),
+      booleanField({
+        name: 'isPartnershipRate',
+        label: 'نرخ همکاری',
+        icon: 'IconHeartHandshake',
+      }),
+      numberField({
+        name: 'firstPurchaseAmount',
+        label: 'مبلغ اولین خرید (تومان)',
+        icon: 'IconShoppingCart',
+      }),
+      dateTimeField({
+        name: 'earnedAt',
+        label: 'تاریخ کسب',
+        icon: 'IconCalendarEvent',
+      }),
+      textField({
+        name: 'earnedJalaliMonth',
+        label: 'ماه کمیسیون',
+        icon: 'IconCalendarMonth',
+      }),
+      selectField({
+        name: 'status',
+        label: 'وضعیت',
+        icon: 'IconProgressCheck',
+        options: [
+          ['PENDING', 'در انتظار'],
+          ['APPROVED', 'تأیید شده'],
+          ['PAID', 'پرداخت شده'],
+          ['VOID', 'باطل'],
+        ],
+        defaultValue: 'PENDING',
+      }),
+      textField({
+        name: 'voidReason',
+        label: 'دلیل ابطال',
+        icon: 'IconBan',
+      }),
+    ],
+  },
+  {
+    objectName: 'influencer',
+    seeds: [
+      textField({ name: 'handle', label: 'شناسه', icon: 'IconAt' }),
+      numberField({
+        name: 'followerCount',
+        label: 'تعداد دنبال‌کننده',
+        icon: 'IconUsers',
+      }),
+      phonesField({ name: 'phones', label: 'تلفن', icon: 'IconPhone' }),
+    ],
+  },
+  {
+    objectName: 'partnership',
+    seeds: [
+      selectField({
+        name: 'stage',
+        label: 'مرحله',
+        icon: 'IconProgress',
+        options: [
+          ['IDENTIFIED', 'شناسایی شده'],
+          ['CONTACTED', 'تماس گرفته شد'],
+          ['NEGOTIATING', 'در حال مذاکره'],
+          ['AGREED', 'توافق شد'],
+          ['LIVE', 'در جریان'],
+          ['COMPLETED', 'تمام شده'],
+          ['REJECTED', 'رد شده'],
+        ],
+        defaultValue: 'IDENTIFIED',
+      }),
+      textField({
+        name: 'referralCode',
+        label: 'کد معرفی',
+        icon: 'IconTicket',
+        isUnique: true,
+      }),
+    ],
+  },
+];
+
+export const CORE_RELATION_SEEDS: BrandRelationSeed[] = [
+  {
+    objectName: 'person',
+    name: 'accountManager',
+    label: 'مدیر حساب',
+    icon: 'IconUserStar',
+    targetObjectName: 'workspaceMember',
+    inverseName: 'managedCustomers',
+    inverseLabel: 'مشتریان تحت مدیریت',
+    inverseIcon: 'IconUsers',
+  },
+  {
+    objectName: 'person',
+    name: 'partnership',
+    label: 'همکاری',
+    icon: 'IconHeartHandshake',
+    targetObjectName: 'partnership',
+    inverseName: 'customers',
+    inverseLabel: 'مشتریان',
+    inverseIcon: 'IconUsers',
+  },
+  {
+    objectName: 'lead',
+    name: 'assignee',
+    label: 'کارشناس فروش',
+    icon: 'IconUserCheck',
+    targetObjectName: 'workspaceMember',
+    inverseName: 'assignedLeads',
+    inverseLabel: 'سرنخ‌های واگذار شده',
+    inverseIcon: 'IconTargetArrow',
+  },
+  {
+    objectName: 'lead',
+    name: 'convertedCustomer',
+    label: 'مشتری تبدیل شده',
+    icon: 'IconUser',
+    targetObjectName: 'person',
+    inverseName: 'originatingLeads',
+    inverseLabel: 'سرنخ مبدأ',
+    inverseIcon: 'IconTargetArrow',
+  },
+  {
+    objectName: 'lead',
+    name: 'partnership',
+    label: 'همکاری',
+    icon: 'IconHeartHandshake',
+    targetObjectName: 'partnership',
+    inverseName: 'leads',
+    inverseLabel: 'سرنخ‌ها',
+    inverseIcon: 'IconTargetArrow',
+  },
+  {
+    objectName: 'milestone',
+    name: 'customer',
+    label: 'مشتری',
+    icon: 'IconUser',
+    targetObjectName: 'person',
+    inverseName: 'milestones',
+    inverseLabel: 'رویدادها',
+    inverseIcon: 'IconFlag',
+  },
+  {
+    objectName: 'commission',
+    name: 'lead',
+    label: 'سرنخ',
+    icon: 'IconTargetArrow',
+    targetObjectName: 'lead',
+    inverseName: 'commissions',
+    inverseLabel: 'کمیسیون‌ها',
+    inverseIcon: 'IconCoins',
+  },
+  {
+    objectName: 'commission',
+    name: 'employee',
+    label: 'کارمند',
+    icon: 'IconUserDollar',
+    targetObjectName: 'workspaceMember',
+    inverseName: 'commissions',
+    inverseLabel: 'کمیسیون‌ها',
+    inverseIcon: 'IconCoins',
+  },
+  {
+    objectName: 'partnership',
+    name: 'influencer',
+    label: 'اینفلوئنسر',
+    icon: 'IconSpeakerphone',
+    targetObjectName: 'influencer',
+    inverseName: 'partnerships',
+    inverseLabel: 'همکاری‌ها',
+    inverseIcon: 'IconHeartHandshake',
+  },
+];

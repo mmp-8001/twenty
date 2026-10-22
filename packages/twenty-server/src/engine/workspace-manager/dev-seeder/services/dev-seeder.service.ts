@@ -27,6 +27,8 @@ import { ViewEntity } from 'src/engine/metadata-modules/view/entities/view.entit
 import { WorkspaceCacheStorageService } from 'src/engine/workspace-cache-storage/workspace-cache-storage.service';
 import { WorkspaceCacheService } from 'src/engine/workspace-cache/services/workspace-cache.service';
 import { WorkspaceSchemaService } from 'src/engine/workspace-datasource/workspace-schema.service';
+import { isBrandWorkspaceId } from 'src/engine/workspace-manager/dev-seeder/brands/constants/brand-workspace-ids.constant';
+import { DevSeederBrandService } from 'src/engine/workspace-manager/dev-seeder/brands/services/dev-seeder-brand.service';
 import { seedBillingCustomers } from 'src/engine/workspace-manager/dev-seeder/core/billing/utils/seed-billing-customers.util';
 import { seedBillingSubscriptions } from 'src/engine/workspace-manager/dev-seeder/core/billing/utils/seed-billing-subscriptions.util';
 import {
@@ -71,6 +73,7 @@ export class DevSeederService {
     private readonly devSeederMetadataService: DevSeederMetadataService,
     private readonly devSeederPermissionsService: DevSeederPermissionsService,
     private readonly devSeederDataService: DevSeederDataService,
+    private readonly devSeederBrandService: DevSeederBrandService,
     private readonly applicationService: ApplicationService,
     private readonly applicationRegistrationService: ApplicationRegistrationService,
     private readonly workspaceCacheService: WorkspaceCacheService,
@@ -145,6 +148,30 @@ export class DevSeederService {
         twentyStandardFlatApplication.universalIdentifier,
       trigger: 'dev-seeder',
     });
+
+    if (isBrandWorkspaceId(workspaceId)) {
+      await this.devSeederBrandService.seed({
+        workspaceId,
+        schemaName,
+        workspaceCustomFlatApplication,
+      });
+
+      await this.sdkClientGenerationService.generateSdkClientForApplication({
+        workspaceId,
+        applicationId: workspaceCustomFlatApplication.id,
+        applicationUniversalIdentifier:
+          workspaceCustomFlatApplication.universalIdentifier,
+        trigger: 'dev-seeder',
+      });
+
+      await this.devSeederBrandService.deactivateUnusedStandardObjects(
+        workspaceId,
+      );
+
+      await this.workspaceCacheStorageService.flush(workspaceId);
+
+      return;
+    }
 
     await this.devSeederMetadataService.seed({
       workspaceId,

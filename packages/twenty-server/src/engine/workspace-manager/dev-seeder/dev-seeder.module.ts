@@ -17,6 +17,7 @@ import { ObjectMetadataEntity } from 'src/engine/metadata-modules/object-metadat
 import { ObjectMetadataModule } from 'src/engine/metadata-modules/object-metadata/object-metadata.module';
 import { ObjectPermissionModule } from 'src/engine/metadata-modules/object-permission/object-permission.module';
 import { RolePermissionFlagModule } from 'src/engine/metadata-modules/role-permission-flag/role-permission-flag.module';
+import { RowLevelPermissionModule } from 'src/engine/metadata-modules/row-level-permission-predicate/row-level-permission.module';
 import { RoleTargetModule } from 'src/engine/metadata-modules/role-target/role-target.module';
 import { RoleEntity } from 'src/engine/metadata-modules/role/role.entity';
 import { RoleModule } from 'src/engine/metadata-modules/role/role.module';
@@ -26,6 +27,7 @@ import { provideWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspac
 import { WorkspaceCacheStorageModule } from 'src/engine/workspace-cache-storage/workspace-cache-storage.module';
 import { WorkspaceCacheModule } from 'src/engine/workspace-cache/workspace-cache.module';
 import { WorkspaceDataSourceModule } from 'src/engine/workspace-datasource/workspace-datasource.module';
+import { DevSeederBrandService } from 'src/engine/workspace-manager/dev-seeder/brands/services/dev-seeder-brand.service';
 import { DevSeederPermissionsService } from 'src/engine/workspace-manager/dev-seeder/core/services/dev-seeder-permissions.service';
 import { DevSeederDataService } from 'src/engine/workspace-manager/dev-seeder/data/services/dev-seeder-data.service';
 import { TimelineActivitySeederService } from 'src/engine/workspace-manager/dev-seeder/data/services/timeline-activity-seeder.service';
@@ -48,6 +50,7 @@ import { WorkspaceMigrationModule } from 'src/engine/workspace-manager/workspace
     RoleModule,
     RolePermissionFlagModule,
     RoleTargetModule,
+    RowLevelPermissionModule,
     UserRoleModule,
     ApiKeyModule,
     ApplicationModule,
@@ -71,6 +74,7 @@ import { WorkspaceMigrationModule } from 'src/engine/workspace-manager/workspace
     DevSeederMetadataService,
     DevSeederPermissionsService,
     DevSeederDataService,
+    DevSeederBrandService,
     TimelineActivitySeederService,
     provideWorkspaceScopedRepository(RoleEntity),
     provideWorkspaceScopedRepository(ObjectMetadataEntity),

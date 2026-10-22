@@ -1,5 +1,7 @@
 import { type QueryRunner } from 'typeorm';
 
+import { BRAND_SEED_CONFIGS } from 'src/engine/workspace-manager/dev-seeder/brands/constants/brand-seed-configs.constant';
+
 import { generateRandomUsers } from './generate-random-users.util';
 
 const tableName = 'user';
@@ -80,7 +82,20 @@ export const seedUsers = async ({ queryRunner, schemaName }: SeedUsersArgs) => {
     },
   ];
 
-  const allUsers = [...originalUsers, ...randomUsers];
+  const brandUsers = Object.values(BRAND_SEED_CONFIGS).flatMap(({ members }) =>
+    members.map((member) => ({
+      id: member.userId,
+      firstName: member.firstName,
+      lastName: member.lastName,
+      email: member.email,
+      passwordHash: originalUsers[0].passwordHash,
+      canImpersonate: false,
+      canAccessFullAdminPanel: false,
+      isEmailVerified: true,
+    })),
+  );
+
+  const allUsers = [...originalUsers, ...randomUsers, ...brandUsers];
 
   await queryRunner.manager
     .createQueryBuilder()

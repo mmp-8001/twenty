@@ -3,6 +3,10 @@ import { Logger } from '@nestjs/common';
 import { Command, CommandRunner, Option } from 'nest-commander';
 
 import {
+  BRAND_WORKSPACE_IDS,
+  isBrandWorkspaceId,
+} from 'src/engine/workspace-manager/dev-seeder/brands/constants/brand-workspace-ids.constant';
+import {
   SEED_APPLE_WORKSPACE_ID,
   SEED_YCOMBINATOR_WORKSPACE_ID,
   SeededWorkspacesIds,
@@ -40,17 +44,29 @@ export class DataSeedWorkspaceCommand extends CommandRunner {
   ): Promise<void> {
     const workspaceIds: SeededWorkspacesIds[] = options.light
       ? [SEED_APPLE_WORKSPACE_ID]
-      : [SEED_APPLE_WORKSPACE_ID, SEED_YCOMBINATOR_WORKSPACE_ID];
+      : [
+          SEED_APPLE_WORKSPACE_ID,
+          SEED_YCOMBINATOR_WORKSPACE_ID,
+          ...BRAND_WORKSPACE_IDS,
+        ];
 
-    try {
-      for (const workspaceId of workspaceIds) {
+    for (const workspaceId of workspaceIds) {
+      try {
         await this.devSeederService.seedDev(workspaceId, {
           light: options.light,
         });
+      } catch (error) {
+        // A broken brand seed must fail the reset instead of looking like a
+        // successful one.
+        if (isBrandWorkspaceId(workspaceId)) {
+          throw error;
+        }
+
+        this.logger.error(error);
+        this.logger.error(error.stack);
+
+        return;
       }
-    } catch (error) {
-      this.logger.error(error);
-      this.logger.error(error.stack);
     }
   }
 }

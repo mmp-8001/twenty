@@ -1,6 +1,13 @@
 import { WorkspaceActivationStatus } from 'twenty-shared/workspace';
 
 import { type WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
+import {
+  type BrandWorkspaceId,
+  SEED_GERAMI_WORKSPACE_ID,
+  SEED_KIFPOOL_WORKSPACE_ID,
+  SEED_PROOPCO_WORKSPACE_ID,
+} from 'src/engine/workspace-manager/dev-seeder/brands/constants/brand-workspace-ids.constant';
+import { BRAND_SEED_CONFIGS } from 'src/engine/workspace-manager/dev-seeder/brands/constants/brand-seed-configs.constant';
 
 export const WORKSPACE_FIELDS_TO_SEED = [
   'id',
@@ -29,7 +36,8 @@ export const SEED_EMPTY_WORKSPACE_4_ID = 'aa8fdcb1-8ee1-4012-98af-44a97caa7411';
 
 export type SeededWorkspacesIds =
   | typeof SEED_APPLE_WORKSPACE_ID
-  | typeof SEED_YCOMBINATOR_WORKSPACE_ID;
+  | typeof SEED_YCOMBINATOR_WORKSPACE_ID
+  | BrandWorkspaceId;
 
 export const SEEDER_CREATE_WORKSPACE_INPUT = {
   [SEED_APPLE_WORKSPACE_ID]: {
@@ -50,6 +58,12 @@ export const SEEDER_CREATE_WORKSPACE_INPUT = {
     activationStatus: WorkspaceActivationStatus.PENDING_CREATION, // will be set to active after default role creation
     isTwoFactorAuthenticationEnforced: false,
   },
+  [SEED_GERAMI_WORKSPACE_ID]:
+    BRAND_SEED_CONFIGS[SEED_GERAMI_WORKSPACE_ID].workspace,
+  [SEED_KIFPOOL_WORKSPACE_ID]:
+    BRAND_SEED_CONFIGS[SEED_KIFPOOL_WORKSPACE_ID].workspace,
+  [SEED_PROOPCO_WORKSPACE_ID]:
+    BRAND_SEED_CONFIGS[SEED_PROOPCO_WORKSPACE_ID].workspace,
 } as const satisfies Record<
   SeededWorkspacesIds,
   Omit<CreateWorkspaceInput, 'workspaceCustomApplicationId'>
