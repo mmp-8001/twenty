@@ -2347,7 +2347,7 @@ export class ConfigVariables {
     type: ConfigVariableType.STRING,
   })
   @IsOptional()
-  ENTERPRISE_API_URL: string = 'https://twenty.com/api/enterprise';
+  ENTERPRISE_API_URL: string = '';
 
   @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.ADVANCED_SETTINGS,
