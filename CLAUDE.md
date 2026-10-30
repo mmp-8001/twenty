@@ -63,7 +63,7 @@ npx nx run twenty-front:graphql:generate      # after GraphQL schema changes (--
 
 ### Issue tracker
 
-GitHub Issues on the fork `mmp-8001/twenty` (always pass `--repo`). See `docs/agents/issue-tracker.md`.
+GitHub Issues on `mmp-8001/inex-crm` (always pass `--repo`). See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
