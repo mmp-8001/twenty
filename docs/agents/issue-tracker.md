@@ -12,7 +12,7 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 - **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
 - **Close**: `gh issue close <number> --comment "..."`
 
-Target the fork `mmp-8001/twenty`. This clone also has an `upstream` remote (`twentyhq/twenty`), so pass `--repo mmp-8001/twenty` to every `gh issue`/`gh pr`/`gh label` command, and use `mmp-8001/twenty` for `<owner>/<repo>` in `gh api` paths.
+Target `mmp-8001/inex-crm`. This clone also has an `upstream` remote (`twentyhq/twenty`), so pass `--repo mmp-8001/inex-crm` to every `gh issue`/`gh pr`/`gh label` command, and use `mmp-8001/inex-crm` for `<owner>/<repo>` in `gh api` paths.
 
 ## Pull requests as a triage surface
 
