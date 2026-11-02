@@ -120,6 +120,7 @@ export const SettingsSecurityIframeOrigins = () => {
           </StyledRow>
         ))}
         <SettingsTextInput
+          dir="ltr"
           instanceId="allowed-iframe-origin"
           label={t`Allowed origin`}
           placeholder="https://portal.example.com"

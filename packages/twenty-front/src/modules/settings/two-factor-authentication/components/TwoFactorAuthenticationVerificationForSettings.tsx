@@ -11,6 +11,7 @@ type OTPFormValues = {
 };
 
 const StyledOTPContainer = styled.div`
+  direction: ltr;
   display: flex;
   gap: ${themeCssVariables.spacing[1]};
   margin-bottom: ${themeCssVariables.spacing[8]};

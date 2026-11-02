@@ -126,7 +126,9 @@ export const Toast = ({
             {isRenderableSlot(toastIcon) && (
               <div className={styles.icon}>{toastIcon}</div>
             )}
-            <div className={styles.message}>{children}</div>
+            <div className={styles.message} dir="auto">
+              {children}
+            </div>
             <div className={styles.actions}>
               {isDefined(onCancel) && isRenderableSlot(cancelLabel) && (
                 <Button

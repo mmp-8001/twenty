@@ -201,6 +201,7 @@ export const SettingsDataModelOverview = () => {
       />
       <SettingsDataModelOverviewRelationMarkers />
       <ReactFlow
+        dir="ltr"
         fitView
         nodes={nodes}
         edges={edges}

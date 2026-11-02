@@ -264,6 +264,7 @@ export const RecordFormEmailsFieldInput = ({
       }
     >
       <MultiItemFieldTextInput
+        dir="ltr"
         ref={inputRef}
         autoFocus={shouldFocusInput}
         spacing={inputSpacing}

@@ -42,6 +42,7 @@ export const LinksFieldEditInputs = ({
   return (
     <StyledLinksFieldEditInputsContainer ref={scrollIntoViewOnMount}>
       <TextInput
+        dir="ltr"
         label={t`URL`}
         value={url}
         onChange={onUrlChange}

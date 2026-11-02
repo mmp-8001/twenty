@@ -49,14 +49,18 @@ const StyledAdornmentContainer = styled.div<StyledAdornmentContainerProps>`
   align-items: center;
   background-color: ${themeCssVariables.background.transparent.light};
   border: 1px solid ${themeCssVariables.border.color.medium};
-  border-left-style: ${({ position }) =>
-    position === 'right' ? 'none' : 'solid'};
-  border-radius: ${({ position }) =>
-    position === 'left'
-      ? `${themeCssVariables.border.radius.md} 0 0 ${themeCssVariables.border.radius.md}`
-      : `0 ${themeCssVariables.border.radius.md} ${themeCssVariables.border.radius.md} 0`};
-  border-right-style: ${({ position }) =>
+  border-end-end-radius: ${({ position }) =>
+    position === 'left' ? 0 : themeCssVariables.border.radius.md};
+  border-end-start-radius: ${({ position }) =>
+    position === 'left' ? themeCssVariables.border.radius.md : 0};
+  border-inline-end-style: ${({ position }) =>
     position === 'left' ? 'none' : 'solid'};
+  border-inline-start-style: ${({ position }) =>
+    position === 'right' ? 'none' : 'solid'};
+  border-start-end-radius: ${({ position }) =>
+    position === 'left' ? 0 : themeCssVariables.border.radius.md};
+  border-start-start-radius: ${({ position }) =>
+    position === 'left' ? themeCssVariables.border.radius.md : 0};
   box-sizing: border-box;
   color: ${themeCssVariables.font.color.tertiary};
   display: flex;
@@ -99,6 +103,23 @@ const StyledInput = styled.input<
     | 'leftAdornment'
   >
 >`
+  --text-input-end-padding: ${({ RightIcon, autoGrow }) =>
+    autoGrow
+      ? themeCssVariables.spacing[1]
+      : RightIcon
+        ? `calc(${themeCssVariables.spacing[3]} + 16px)`
+        : themeCssVariables.spacing[2]};
+  --text-input-end-radius: ${({ leftAdornment, rightAdornment }) =>
+    !leftAdornment && rightAdornment ? 0 : themeCssVariables.border.radius.md};
+  --text-input-start-padding: ${({ LeftIcon, autoGrow }) =>
+    autoGrow
+      ? themeCssVariables.spacing[1]
+      : LeftIcon
+        ? `calc(${themeCssVariables.spacing[3]} + 16px)`
+        : themeCssVariables.spacing[2]};
+  --text-input-start-radius: ${({ leftAdornment }) =>
+    leftAdornment ? 0 : themeCssVariables.border.radius.md};
+
   background-color: ${themeCssVariables.background.transparent.lighter};
   border: 1px solid
     ${({ error }) =>
@@ -270,6 +291,7 @@ const TextInputComponent = forwardRef<
       leftAdornment,
       textClickOutsideId,
       ignorePasswordManagers = false,
+      dir,
       inputProps,
     },
     ref,
@@ -329,7 +351,7 @@ const TextInputComponent = forwardRef<
             {label + (required ? '*' : '')}
           </Field.Label>
         )}
-        <StyledInputContainer>
+        <StyledInputContainer dir={dir}>
           {leftAdornment && (
             <StyledAdornmentContainer sizeVariant={sizeVariant} position="left">
               {leftAdornment}
@@ -358,6 +380,7 @@ const TextInputComponent = forwardRef<
             disabled={disabled}
             readOnly={readOnly}
             placeholder={placeholder}
+            dir={dir}
             required={required}
             value={value}
             LeftIcon={LeftIcon}

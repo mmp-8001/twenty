@@ -37,6 +37,7 @@ const StyledCodeEditorContainer = styled.div`
 `;
 
 const StyledJsonTreeContainer = styled.div`
+  direction: ltr;
   padding: ${themeCssVariables.spacing[2]};
   width: min-content;
 `;

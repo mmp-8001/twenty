@@ -299,6 +299,7 @@ export const GraphWidgetLineChart = ({
   return (
     <StyledContainer id={id}>
       <GraphWidgetChartContainer
+        dir="ltr"
         $isClickable={hasClickableItems}
         onMouseLeave={() => debouncedHideTooltip()}
         ref={containerRef}
