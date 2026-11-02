@@ -132,6 +132,7 @@ export const SettingsListItemCardContent = ({
         {rightComponent}
         {isDefined(to) && (
           <IconChevronRight
+            className="rtl-mirror"
             size={theme.icon.size.md}
             color={theme.font.color.tertiary}
           />

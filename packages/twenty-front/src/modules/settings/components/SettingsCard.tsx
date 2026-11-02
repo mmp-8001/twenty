@@ -153,7 +153,7 @@ export const SettingsCard = ({
       </StyledTitle>
       {isDefined(Status) && Status}
       <StyledIconChevronRightContainer>
-        <IconChevronRight size={theme.icon.size.sm} />
+        <IconChevronRight className="rtl-mirror" size={theme.icon.size.sm} />
       </StyledIconChevronRightContainer>
     </>
   );

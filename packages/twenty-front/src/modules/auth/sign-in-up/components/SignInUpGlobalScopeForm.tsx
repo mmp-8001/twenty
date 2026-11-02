@@ -202,7 +202,10 @@ export const SignInUpGlobalScopeForm = () => {
                         </StyledWorkspaceUrl>
                       </StyledWorkspaceTextContainer>
                       <StyledChevronIcon>
-                        <IconChevronRight size={theme.icon.size.md} />
+                        <IconChevronRight
+                          className="rtl-mirror"
+                          size={theme.icon.size.md}
+                        />
                       </StyledChevronIcon>
                     </StyledWorkspaceContent>
                   </StyledWorkspaceItem>
@@ -226,7 +229,10 @@ export const SignInUpGlobalScopeForm = () => {
                       <StyledWorkspaceName>{t`Create a workspace`}</StyledWorkspaceName>
                     </StyledWorkspaceTextContainer>
                     <StyledChevronIcon>
-                      <IconChevronRight size={theme.icon.size.md} />
+                      <IconChevronRight
+                        className="rtl-mirror"
+                        size={theme.icon.size.md}
+                      />
                     </StyledChevronIcon>
                   </StyledWorkspaceContent>
                 </StyledWorkspaceItem>

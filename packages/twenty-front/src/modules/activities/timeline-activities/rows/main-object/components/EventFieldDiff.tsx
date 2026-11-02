@@ -58,7 +58,7 @@ export const EventFieldDiff = ({
     return (
       <StyledEventFieldDiffContainer>
         <EventFieldDiffLabel fieldMetadataItem={fieldMetadataItem} />
-        <StyledArrowContainer>→</StyledArrowContainer>
+        <StyledArrowContainer className="rtl-mirror">→</StyledArrowContainer>
         <EventRelationFieldDiffValues
           fieldDiff={fieldDiff}
           fieldMetadataItem={fieldMetadataItem}
@@ -84,7 +84,7 @@ export const EventFieldDiff = ({
   return (
     <StyledEventFieldDiffContainer>
       <EventFieldDiffLabel fieldMetadataItem={fieldMetadataItem} />
-      <StyledArrowContainer>→</StyledArrowContainer>
+      <StyledArrowContainer className="rtl-mirror">→</StyledArrowContainer>
       {isUpdatedToEmpty ? (
         <StyledEmptyValue>
           <Trans>Empty</Trans>

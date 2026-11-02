@@ -223,7 +223,7 @@ export const SettingsApplicationInstallPermissionValidationModal = ({
         >
           <StyledFullscreenContainer>
             <StyledLightButton
-              startIcon={<IconChevronLeft />}
+              startIcon={<IconChevronLeft className="rtl-mirror" />}
               onClick={handleClose}
             >{t`Back to settings`}</StyledLightButton>
 

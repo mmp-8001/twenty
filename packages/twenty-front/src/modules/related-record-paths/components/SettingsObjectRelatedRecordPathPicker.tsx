@@ -80,7 +80,7 @@ export const SettingsObjectRelatedRecordPathPicker = ({
             aria-label={t`Back`}
             onClick={() => navigateTo(fieldMetadataIds.slice(0, -1))}
           >
-            <IconChevronLeft />
+            <IconChevronLeft className="rtl-mirror" />
           </LightIconButton>
         )}
         <Dropdown.Title>

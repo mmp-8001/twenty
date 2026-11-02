@@ -60,7 +60,7 @@ export const BookCall = () => {
             <NavigationButton
               buttonComponent={LightButton}
               to={AppPath.PlanRequired}
-              startIcon={<IconChevronLeft />}
+              startIcon={<IconChevronLeft className="rtl-mirror" />}
             >{t`Back`}</NavigationButton>
           )}
         </StyledFooter>

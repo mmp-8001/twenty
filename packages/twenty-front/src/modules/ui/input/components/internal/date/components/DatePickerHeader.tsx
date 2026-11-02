@@ -89,7 +89,7 @@ export const DatePickerHeader = ({
           disabled={prevMonthButtonDisabled}
           aria-label={t`Previous`}
         >
-          <IconChevronLeft />
+          <IconChevronLeft className="rtl-mirror" />
         </LightIconButton>
         <LightIconButton
           onClick={onAddMonth}
@@ -97,7 +97,7 @@ export const DatePickerHeader = ({
           disabled={nextMonthButtonDisabled}
           aria-label={t`Next`}
         >
-          <IconChevronRight />
+          <IconChevronRight className="rtl-mirror" />
         </LightIconButton>
       </StyledCustomDatePickerHeader>
     </>

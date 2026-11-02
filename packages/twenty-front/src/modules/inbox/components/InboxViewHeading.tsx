@@ -60,11 +60,15 @@ export const InboxViewHeading = ({
         color={theme.font.color.tertiary}
       />
       <StyledChannelName>{headingLabel}</StyledChannelName>
-      <span aria-hidden>→</span>
+      <span aria-hidden className="rtl-mirror">
+        →
+      </span>
       <StyledChannelView>{channelViewLabel}</StyledChannelView>
       {selectedThreadCount > 0 && (
         <>
-          <span aria-hidden>→</span>
+          <span aria-hidden className="rtl-mirror">
+            →
+          </span>
           <StyledChannelView>
             {t`${formatNumber(selectedThreadCount)} selected`}
           </StyledChannelView>

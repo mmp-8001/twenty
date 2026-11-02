@@ -30,7 +30,7 @@ export const RecordIndexCommandMenuDropdown = () => {
       ))}
       {shouldShowMoreActions && (
         <Dropdown.ActionItem
-          startIcon={<IconLayoutSidebarRightExpand />}
+          startIcon={<IconLayoutSidebarRightExpand className="rtl-mirror" />}
           onClick={() => openSidePanelMenu()}
         >
           {t`More actions`}

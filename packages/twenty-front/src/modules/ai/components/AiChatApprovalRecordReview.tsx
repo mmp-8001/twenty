@@ -263,6 +263,7 @@ export const AiChatApprovalRecordReview = ({
                             </StyledPreviousValue>
                             <StyledChangeIcon aria-hidden="true">
                               <IconArrowRight
+                                className="rtl-mirror"
                                 size={APPROVAL_REVIEW_CHANGE_ICON_SIZE}
                               />
                             </StyledChangeIcon>

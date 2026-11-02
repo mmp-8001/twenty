@@ -65,7 +65,7 @@ export const SidePanelBackButton = () => {
         onContextMenu={handleBackButtonContextMenu}
         aria-label={t`Back`}
       >
-        <IconChevronLeft />
+        <IconChevronLeft className="rtl-mirror" />
       </IconButton>
       <DropdownContent
         anchor={backButtonRef}

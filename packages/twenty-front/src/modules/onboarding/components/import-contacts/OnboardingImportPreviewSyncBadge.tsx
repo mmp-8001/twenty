@@ -65,6 +65,7 @@ export const OnboardingImportPreviewSyncBadge = () => {
       <StyledDivider />
       <StyledArrow>
         <IconArrowRight
+          className="rtl-mirror"
           size={theme.icon.size.md}
           color={themeCssVariables.font.color.tertiary}
         />

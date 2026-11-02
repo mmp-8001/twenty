@@ -246,6 +246,7 @@ export const SettingsObjectTable = ({
                         isActive ? (
                           <StyledIconChevronRightContainer>
                             <IconChevronRight
+                              className="rtl-mirror"
                               size={theme.icon.size.md}
                               stroke={theme.icon.stroke.sm}
                             />

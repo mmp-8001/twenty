@@ -47,7 +47,7 @@ export const RecordSharingInvitationAccessPicker = ({
             }
             description={getRecordShareAccessLevelLabel(value)}
             descriptionPlacement="end"
-            endIcon={<IconChevronRight />}
+            endIcon={<IconChevronRight className="rtl-mirror" />}
           >
             {t`Invite as`}
           </ListItemButton>

@@ -133,7 +133,7 @@ export const SettingsTableListSection = <
                       align="right"
                       color={themeCssVariables.font.color.light}
                     >
-                      <IconChevronRight size={16} />
+                      <IconChevronRight className="rtl-mirror" size={16} />
                     </TableCell>
                   )}
                 </TableRow>

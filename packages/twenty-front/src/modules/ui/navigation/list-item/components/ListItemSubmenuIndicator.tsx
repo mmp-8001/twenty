@@ -29,6 +29,7 @@ export const ListItemSubmenuIndicator = ({
   return (
     <StyledContainer aria-hidden data-opened={isOpen} data-disabled={disabled}>
       <IconChevronRight
+        className={isOpen ? undefined : 'rtl-mirror'}
         size={theme.icon.size.sm}
         stroke={theme.icon.stroke.sm}
       />

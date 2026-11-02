@@ -38,7 +38,7 @@ export const SidePanelSubPageNavigationHeader = ({
         size="sm"
         aria-label={t`Go back`}
       >
-        <IconChevronLeft />
+        <IconChevronLeft className="rtl-mirror" />
       </IconButton>
       <StyledText>{title}</StyledText>
     </StyledContainer>
