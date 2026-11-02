@@ -2,7 +2,7 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--t-font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--t-background-tertiary);
@@ -66,4 +66,39 @@ html.light {
 /* https://stackoverflow.com/questions/44543157/how-to-hide-the-google-invisible-recaptcha-badge */
 .grecaptcha-badge {
   visibility: hidden !important;
+}
+
+:root:lang(fa) {
+  --t-font-family: Inter, Vazirmatn, sans-serif;
+}
+
+[dir='rtl']
+  input:is(
+    [type='email'],
+    [type='url'],
+    [type='tel'],
+    [type='password'],
+    [type='number'],
+    [dir='ltr']
+  ) {
+  direction: ltr;
+  text-align: left;
+}
+
+[dir='rtl']
+  input:is(
+    [type='email'],
+    [type='url'],
+    [type='tel'],
+    [type='password'],
+    [type='number'],
+    [dir='ltr']
+  ):placeholder-shown {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl-mirror:dir(rtl) {
+  display: inline-block;
+  transform: scaleX(-1);
 }
