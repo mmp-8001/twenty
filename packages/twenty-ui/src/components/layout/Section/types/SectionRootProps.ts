@@ -4,6 +4,6 @@ import { type HeadingProps } from '@ui/primitives/typography/Heading/types/Headi
 
 export type SectionRootProps = Omit<useRender.ComponentProps<'div'>, 'color'> &
   Pick<HeadingProps, 'color'> & {
-    align?: 'left' | 'center';
+    align?: 'start' | 'center';
     fullWidth?: boolean;
   };

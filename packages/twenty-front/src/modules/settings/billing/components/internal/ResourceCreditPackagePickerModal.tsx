@@ -62,7 +62,7 @@ const StyledPackagePrice = styled.span`
   flex: 1 1 auto;
   font-size: ${themeCssVariables.font.size.md};
   font-weight: ${themeCssVariables.font.weight.regular};
-  text-align: right;
+  text-align: end;
   white-space: nowrap;
 `;
 
@@ -132,7 +132,7 @@ const StyledPackageSummaryValue = styled.div`
 
 const StyledMutedText = styled.span`
   color: ${themeCssVariables.font.color.tertiary};
-  margin-left: ${themeCssVariables.spacing[1]};
+  margin-inline-start: ${themeCssVariables.spacing[1]};
 `;
 
 const StyledAmountWithUnit = styled.span`

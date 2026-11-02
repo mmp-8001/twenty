@@ -81,6 +81,10 @@ const StyledChevronContainer = styled.div`
   transition: transform calc(${themeCssVariables.animation.duration.fast} * 1s)
     ease-in-out;
 
+  &:dir(rtl) {
+    transform: scaleX(-1);
+  }
+
   [data-panel-open] & {
     transform: rotate(90deg);
   }

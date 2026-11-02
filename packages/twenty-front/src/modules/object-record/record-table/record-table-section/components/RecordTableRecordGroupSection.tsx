@@ -47,7 +47,7 @@ const StyledTrContainer = styled.div`
 
 const StyledRecordGroupHeaderContainer = styled.div<{ width: number }>`
   align-items: center;
-  border-right: none;
+  border-inline-end: none;
   display: flex;
   flex-direction: row;
   gap: ${themeCssVariables.spacing[1]};

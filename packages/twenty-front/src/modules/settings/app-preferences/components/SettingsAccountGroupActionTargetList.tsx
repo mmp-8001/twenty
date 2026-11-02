@@ -4,7 +4,7 @@ import { themeCssVariables } from 'twenty-ui/theme';
 
 const StyledList = styled.ul`
   margin: ${themeCssVariables.spacing[2]} 0 0;
-  padding-left: ${themeCssVariables.spacing[4]};
+  padding-inline-start: ${themeCssVariables.spacing[4]};
 `;
 
 type SettingsAccountGroupActionTargetListProps = {

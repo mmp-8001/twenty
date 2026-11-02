@@ -1,8 +1,8 @@
 .root {
   inline-size: auto;
 
-  &:where([data-align='left']) {
-    text-align: left;
+  &:where([data-align='start']) {
+    text-align: start;
   }
 
   &:where([data-align='center']) {

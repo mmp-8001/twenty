@@ -9,8 +9,8 @@ type NestedSettingsRowProps = {
 };
 
 const StyledNestedRow = styled.div`
-  margin-left: ${themeCssVariables.spacing[8]};
-  padding-left: ${themeCssVariables.spacing[4]};
+  margin-inline-start: ${themeCssVariables.spacing[8]};
+  padding-inline-start: ${themeCssVariables.spacing[4]};
   position: relative;
 `;
 
@@ -19,7 +19,7 @@ const StyledGuide = styled.div<{
   guideOffset: string;
 }>`
   bottom: 0;
-  left: 0;
+  inset-inline-start: 0;
   pointer-events: none;
   position: absolute;
   top: 0;
@@ -30,7 +30,7 @@ const StyledGuide = styled.div<{
     bottom: 0;
     content: '';
     display: ${({ isLast }) => (isLast ? 'none' : 'block')};
-    left: 0;
+    inset-inline-start: 0;
     position: absolute;
     top: 0;
     width: 1px;
@@ -38,12 +38,12 @@ const StyledGuide = styled.div<{
 
   &::after {
     border-bottom: 1px solid ${themeCssVariables.border.color.strong};
-    border-bottom-left-radius: ${themeCssVariables.border.radius.sm};
-    border-left: 1px solid ${themeCssVariables.border.color.strong};
+    border-end-start-radius: ${themeCssVariables.border.radius.sm};
+    border-inline-start: 1px solid ${themeCssVariables.border.color.strong};
     box-sizing: border-box;
     content: '';
     height: ${({ guideOffset }) => guideOffset};
-    left: 0;
+    inset-inline-start: 0;
     position: absolute;
     top: 0;
     width: 100%;

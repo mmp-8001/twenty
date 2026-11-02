@@ -25,7 +25,7 @@ const StyledHeaderCell = styled.div<{
 
   position: relative;
 
-  text-align: left;
+  text-align: start;
 
   @media (hover: hover) {
     &:hover {

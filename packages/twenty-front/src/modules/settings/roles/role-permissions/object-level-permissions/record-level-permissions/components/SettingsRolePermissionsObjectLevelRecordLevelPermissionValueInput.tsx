@@ -46,9 +46,9 @@ const StyledIconContainer = styled.div`
   align-items: center;
   background-color: ${themeCssVariables.background.transparent.lighter};
   border: 1px solid ${themeCssVariables.border.color.medium};
-  border-bottom-right-radius: ${themeCssVariables.border.radius.sm};
-  border-left: none;
-  border-top-right-radius: ${themeCssVariables.border.radius.sm};
+  border-end-end-radius: ${themeCssVariables.border.radius.sm};
+  border-inline-start: none;
+  border-start-end-radius: ${themeCssVariables.border.radius.sm};
   color: ${themeCssVariables.font.color.tertiary};
   cursor: pointer;
   display: flex;
@@ -64,8 +64,8 @@ const StyledReadOnlyInput = styled.div`
   align-items: center;
   background-color: ${themeCssVariables.background.secondary};
   border: 1px solid ${themeCssVariables.border.color.medium};
-  border-bottom-left-radius: ${themeCssVariables.border.radius.sm};
-  border-top-left-radius: ${themeCssVariables.border.radius.sm};
+  border-end-start-radius: ${themeCssVariables.border.radius.sm};
+  border-start-start-radius: ${themeCssVariables.border.radius.sm};
   box-sizing: border-box;
   color: ${themeCssVariables.font.color.primary};
   display: flex;
