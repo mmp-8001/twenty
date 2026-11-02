@@ -32,6 +32,7 @@ import { useAtomComponentStateValue } from '@/ui/utilities/state/jotai/hooks/use
 import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSetAtomComponentState';
 import { css } from '@linaria/core';
 import { styled } from '@linaria/react';
+import { useLingui } from '@lingui/react/macro';
 import { useMemo } from 'react';
 import {
   type Layout,
@@ -40,6 +41,7 @@ import {
   useContainerWidth,
   verticalCompactor,
 } from 'react-grid-layout';
+import { getLocaleTextDirection } from 'twenty-shared/translations';
 import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables } from 'twenty-ui/theme';
 
@@ -119,6 +121,9 @@ type PageLayoutGridLayoutProps = {
 };
 
 export const PageLayoutGridLayout = ({ tabId }: PageLayoutGridLayoutProps) => {
+  const { i18n } = useLingui();
+  const direction = getLocaleTextDirection(i18n.locale);
+
   const pageLayoutId = useAvailableComponentInstanceIdOrThrow(
     PageLayoutComponentInstanceContext,
   );
@@ -216,6 +221,7 @@ export const PageLayoutGridLayout = ({ tabId }: PageLayoutGridLayoutProps) => {
   return (
     <StyledGridContainer
       ref={gridContainerRef}
+      dir="ltr"
       className={
         shouldDisableTransitions ? disabledTransitionsClass : undefined
       }
@@ -282,7 +288,7 @@ export const PageLayoutGridLayout = ({ tabId }: PageLayoutGridLayoutProps) => {
           }
         >
           {gridLayoutItems.map((item) => (
-            <ReactGridLayoutCardWrapper key={item.id}>
+            <ReactGridLayoutCardWrapper key={item.id} dir={direction}>
               {item.type === 'placeholder' ? (
                 <WidgetPlaceholder />
               ) : (

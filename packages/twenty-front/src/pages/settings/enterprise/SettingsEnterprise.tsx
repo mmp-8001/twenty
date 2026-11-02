@@ -1,4 +1,5 @@
 import { Trans, useLingui } from '@lingui/react/macro';
+import { getLatinDigitsLocale } from '@/localization/utils/getLatinDigitsLocale';
 import { useCallback, useEffect, useState } from 'react';
 
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
@@ -245,12 +246,12 @@ export const SettingsEnterprise = ({
     : null;
 
   const licenseExpiresAtDate = isDefined(licenseExpiresAt)
-    ? licenseExpiresAt.toLocaleDateString()
+    ? licenseExpiresAt.toLocaleDateString(getLatinDigitsLocale())
     : '';
 
   const cancelAtDate =
     isCancelScheduled && isDefined(cancelAt)
-      ? cancelAt.toLocaleDateString()
+      ? cancelAt.toLocaleDateString(getLatinDigitsLocale())
       : '';
 
   const cancellationMessage =
@@ -713,7 +714,7 @@ export const SettingsEnterprise = ({
                 <SubscriptionInfoRowContainer
                   label={cancellationOrPeriodEndDateLabel}
                   Icon={IconCalendarRepeat}
-                  currentValue={cancellationOrPeriodEndDate.toLocaleDateString()}
+                  currentValue={cancellationOrPeriodEndDate.toLocaleDateString(getLatinDigitsLocale())}
                 />
               )}
             </SubscriptionInfoContainer>
@@ -776,7 +777,7 @@ export const SettingsEnterprise = ({
                 <SubscriptionInfoRowContainer
                   label={cancellationOrPeriodEndDateLabel}
                   Icon={IconCalendarRepeat}
-                  currentValue={cancellationOrPeriodEndDate.toLocaleDateString()}
+                  currentValue={cancellationOrPeriodEndDate.toLocaleDateString(getLatinDigitsLocale())}
                 />
               )}
             </SubscriptionInfoContainer>

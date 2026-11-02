@@ -63,6 +63,7 @@ const StyledConfirmationContent = styled.div`
 `;
 
 const StyledOTPContainer = styled.div`
+  direction: ltr;
   display: flex;
   gap: ${themeCssVariables.spacing[1]};
 `;
@@ -166,7 +167,7 @@ export const SettingsAdminServerAdminAccess = ({
               </LightIconButton>
             }
           />
-          <DropdownContent side="right" align="start">
+          <DropdownContent side="inline-end" align="start">
             <Dropdown.Section>
               <Dropdown.ActionItem
                 disabled={isLastFullAdmin}

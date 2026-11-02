@@ -30,7 +30,7 @@ export const SettingsAdminQueueJobRowDropdownMenu = ({
           </LightIconButton>
         }
       />
-      <DropdownContent side="right" align="start">
+      <DropdownContent side="inline-end" align="start">
         <Dropdown.Section>
           {jobState === JobState.FAILED && isDefined(onRetry) && (
             <Dropdown.ActionItem

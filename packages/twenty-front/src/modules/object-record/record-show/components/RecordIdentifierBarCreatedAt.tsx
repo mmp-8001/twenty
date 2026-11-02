@@ -46,7 +46,7 @@ export const RecordIdentifierBarCreatedAt = ({
     <Tooltip
       delay={TooltipDelay.mediumDelay}
       content={beautifyExactDateTime(recordCreatedAt)}
-      side="left"
+      side="inline-start"
     >
       <StyledCreatedAt id={createdAtElementId}>
         <Trans>Created {beautifiedCreatedAt}</Trans>

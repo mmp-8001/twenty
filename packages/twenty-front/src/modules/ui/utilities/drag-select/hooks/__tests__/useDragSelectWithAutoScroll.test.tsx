@@ -30,6 +30,7 @@ describe('useDragSelectWithAutoScroll', () => {
         .fn()
         .mockReturnValue({ ...defaultBounds, ...bounds }),
       scrollTo: jest.fn(),
+      scrollBy: jest.fn(),
       scrollTop: 50,
       scrollLeft: 25,
     };
@@ -64,7 +65,7 @@ describe('useDragSelectWithAutoScroll', () => {
       expect(document.getElementById).toHaveBeenCalledWith(
         'scroll-wrapper-context-instance',
       );
-      expect(mockElement.scrollTo).toHaveBeenCalled();
+      expect(mockElement.scrollBy).toHaveBeenCalled();
     });
 
     it('should not attempt scrolling when no instance ID available', () => {
@@ -120,8 +121,8 @@ describe('useDragSelectWithAutoScroll', () => {
 
       result.current.handleAutoScroll(105, 250);
 
-      expect(mockElement.scrollTo).toHaveBeenCalledWith({
-        left: 10,
+      expect(mockElement.scrollBy).toHaveBeenCalledWith({
+        left: -15,
         behavior: 'auto',
       });
 
@@ -129,13 +130,13 @@ describe('useDragSelectWithAutoScroll', () => {
 
       result.current.handleAutoScroll(595, 250);
 
-      expect(mockElement.scrollTo).toHaveBeenCalledWith({
-        left: 40,
+      expect(mockElement.scrollBy).toHaveBeenCalledWith({
+        left: 15,
         behavior: 'auto',
       });
     });
 
-    it('should prevent negative scroll values', () => {
+    it('should scroll by a signed delta without clamping', () => {
       mockElement.scrollTop = 5;
       mockElement.scrollLeft = 3;
 
@@ -147,8 +148,8 @@ describe('useDragSelectWithAutoScroll', () => {
         top: 0,
       });
 
-      expect(mockElement.scrollTo).toHaveBeenCalledWith({
-        left: 0,
+      expect(mockElement.scrollBy).toHaveBeenCalledWith({
+        left: -15,
         behavior: 'auto',
       });
     });
@@ -173,8 +174,8 @@ describe('useDragSelectWithAutoScroll', () => {
 
       result.current.handleAutoScroll(119, 250);
 
-      expect(mockElement.scrollTo).toHaveBeenCalledWith({
-        left: 10,
+      expect(mockElement.scrollBy).toHaveBeenCalledWith({
+        left: -15,
         behavior: 'auto',
       });
 
@@ -182,7 +183,7 @@ describe('useDragSelectWithAutoScroll', () => {
 
       result.current.handleAutoScroll(120, 250);
 
-      expect(mockElement.scrollTo).not.toHaveBeenCalled();
+      expect(mockElement.scrollBy).not.toHaveBeenCalled();
     });
   });
 

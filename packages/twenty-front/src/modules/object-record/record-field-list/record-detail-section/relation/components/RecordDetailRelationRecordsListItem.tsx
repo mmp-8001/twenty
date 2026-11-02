@@ -232,7 +232,7 @@ export const RecordDetailRelationRecordsListItem = ({
               />
             </StyledHoverRevealedAction>
             <DropdownContent
-              side="right"
+              side="inline-end"
               align="start"
               width={GenericDropdownContentWidth.Medium}
             >

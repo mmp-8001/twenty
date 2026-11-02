@@ -230,7 +230,7 @@ export const RecordDetailRelationSectionDropdownToMany = ({
     >
       <Dropdown.Trigger render={dropdownTriggerClickableComponent} />
       <DropdownContent
-        side="left"
+        side="inline-start"
         align="start"
         aria-label={fieldDefinition.label}
       >

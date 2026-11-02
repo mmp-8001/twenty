@@ -306,7 +306,7 @@ export const NavigationDrawerItem = ({
     <StyledNavigationDrawerItemContainer>
       <Tooltip
         content={label}
-        side="right"
+        side="inline-end"
         delay={TooltipDelay.noDelay}
         positionMethod="fixed"
         disabled={isExpanded || isMobile}

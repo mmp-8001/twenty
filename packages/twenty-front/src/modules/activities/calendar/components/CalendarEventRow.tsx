@@ -114,7 +114,10 @@ export const CalendarEventRow = ({
           {startTimeLabel}
           {endTimeLabel && (
             <>
-              <IconArrowRight size={theme.icon.size.sm} />
+              <IconArrowRight
+                className="rtl-mirror"
+                size={theme.icon.size.sm}
+              />
               {endTimeLabel}
             </>
           )}

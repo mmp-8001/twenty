@@ -2,6 +2,7 @@ import { useLingui } from '@lingui/react/macro';
 import { styled } from '@linaria/react';
 import { motion, useIsPresent, useReducedMotion } from 'framer-motion';
 import { type ReactNode } from 'react';
+import { getLocaleTextDirection } from 'twenty-shared/translations';
 import { ANIMATION } from 'twenty-ui/theme';
 
 import { AiChatInboxConversationCloseEffect } from '@/ai/components/AiChatInboxConversationCloseEffect';
@@ -32,10 +33,12 @@ export const AiChatInboxConversationPane = ({
   children,
   isSplitView,
 }: AiChatInboxConversationPaneProps) => {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const isPresent = useIsPresent();
   const shouldReduceMotion = useReducedMotion();
   const shouldAnimate = isSplitView && !shouldReduceMotion;
+  const offscreenX =
+    getLocaleTextDirection(i18n.locale) === 'rtl' ? '-100%' : '100%';
 
   return (
     <StyledPane
@@ -44,9 +47,9 @@ export const AiChatInboxConversationPane = ({
       aria-label={t`Conversation`}
       aria-hidden={!isPresent}
       inert={!isPresent || undefined}
-      initial={{ x: shouldAnimate ? '100%' : 0 }}
+      initial={{ x: shouldAnimate ? offscreenX : 0 }}
       animate={{ x: 0 }}
-      exit={{ x: shouldAnimate ? '100%' : 0 }}
+      exit={{ x: shouldAnimate ? offscreenX : 0 }}
       transition={{
         duration: shouldAnimate ? ANIMATION.duration.normal : 0,
         ease: 'easeInOut',
