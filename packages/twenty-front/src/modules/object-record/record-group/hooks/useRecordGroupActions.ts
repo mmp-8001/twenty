@@ -19,6 +19,7 @@ import { useLocation } from 'react-router-dom';
 import { SettingsPath } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { doNotTranslate } from 'twenty-shared/i18n';
+import { getLocaleTextDirection } from 'twenty-shared/translations';
 import {
   IconArrowLeft,
   IconArrowRight,
@@ -36,12 +37,14 @@ type UseRecordGroupActionsParams = {
 export const useRecordGroupActions = ({
   viewType,
 }: UseRecordGroupActionsParams) => {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const { recordIndexId } = useRecordIndexIdFromCurrentContextStore();
   const navigate = useNavigateSettings();
   const location = useLocation();
 
   const { objectNameSingular } = useRecordIndexContextOrThrow();
+
+  const isRtl = getLocaleTextDirection(i18n.locale) === 'rtl';
 
   const { columnDefinition: recordGroupDefinition } = useContext(
     RecordBoardColumnContext,
@@ -113,8 +116,8 @@ export const useRecordGroupActions = ({
     },
     {
       id: 'moveRight',
-      label: t`Move right`,
-      icon: IconArrowRight,
+      label: t`Move after`,
+      icon: isRtl ? IconArrowLeft : IconArrowRight,
       condition:
         !isCurrentRecordGroupNotFound &&
         currentIndex < visibleRecordGroupIds.length - 1,
@@ -128,8 +131,8 @@ export const useRecordGroupActions = ({
     },
     {
       id: 'moveLeft',
-      label: t`Move left`,
-      icon: IconArrowLeft,
+      label: t`Move before`,
+      icon: isRtl ? IconArrowRight : IconArrowLeft,
       condition: !isCurrentRecordGroupNotFound && currentIndex > 0,
       position: 2,
       closeOnClick: false,

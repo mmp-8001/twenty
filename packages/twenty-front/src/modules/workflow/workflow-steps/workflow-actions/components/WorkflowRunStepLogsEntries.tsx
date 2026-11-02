@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { getLatinDigitsLocale } from '@/localization/utils/getLatinDigitsLocale';
 import { useLingui } from '@lingui/react/macro';
 import { type WorkflowRunStepLog } from 'twenty-shared/workflow';
 import { themeCssVariables } from 'twenty-ui/theme';
@@ -12,6 +13,7 @@ import {
 const StyledEntriesList = styled.div`
   background: ${themeCssVariables.background.tertiary};
   border-radius: ${themeCssVariables.border.radius.sm};
+  direction: ltr;
   display: flex;
   flex-direction: column;
   font-family: ${MONOSPACE_FONT_FAMILY};
@@ -80,7 +82,7 @@ const formatTimestamp = (timestamp: string): string => {
     return timestamp;
   }
 
-  return date.toLocaleTimeString();
+  return date.toLocaleTimeString(getLatinDigitsLocale());
 };
 
 export const WorkflowRunStepLogsEntries = ({

@@ -8,6 +8,9 @@ import { selectableItemIdsComponentState } from '@/ui/layout/selectable-list/sta
 import { selectedItemIdComponentState } from '@/ui/layout/selectable-list/states/selectedItemIdComponentState';
 import { useHotkeysOnFocusedElement } from '@/ui/utilities/hotkey/hooks/useHotkeysOnFocusedElement';
 
+// Read at keypress so the hook needs no i18n provider
+const isRtl = () => document.documentElement.dir === 'rtl';
+
 type Direction = 'up' | 'down' | 'left' | 'right';
 
 export const useSelectableListHotKeys = ({
@@ -166,7 +169,7 @@ export const useSelectableListHotKeys = ({
 
   useHotkeysOnFocusedElement({
     keys: Key.ArrowLeft,
-    callback: () => handleSelect('left'),
+    callback: () => handleSelect(isRtl() ? 'right' : 'left'),
     focusId,
     dependencies: [handleSelect],
     options: { enableOnFormTags: false },
@@ -174,7 +177,7 @@ export const useSelectableListHotKeys = ({
 
   useHotkeysOnFocusedElement({
     keys: Key.ArrowRight,
-    callback: () => handleSelect('right'),
+    callback: () => handleSelect(isRtl() ? 'left' : 'right'),
     focusId,
     dependencies: [handleSelect],
     options: { enableOnFormTags: false },

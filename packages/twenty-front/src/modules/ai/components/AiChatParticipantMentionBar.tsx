@@ -38,7 +38,7 @@ type AiChatParticipantMentionBarProps = {
 export const AiChatParticipantMentionBar = ({
   editor,
 }: AiChatParticipantMentionBarProps) => {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const theme = useTheme();
   const pendingParticipantMentions = useAiChatPendingParticipantMentions();
 
@@ -46,9 +46,9 @@ export const AiChatParticipantMentionBar = ({
     return null;
   }
 
-  const participantLabels = pendingParticipantMentions
-    .map(({ label }) => label)
-    .join(', ');
+  const participantLabels = new Intl.ListFormat(i18n.locale, {
+    type: 'conjunction',
+  }).format(pendingParticipantMentions.map(({ label }) => label));
   const message =
     pendingParticipantMentions.length === 1
       ? t`${participantLabels} will be added as a participant and get access to this chat`

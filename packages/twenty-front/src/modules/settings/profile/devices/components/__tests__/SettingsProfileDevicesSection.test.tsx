@@ -78,7 +78,7 @@ describe('SettingsProfileDevicesSection', () => {
     );
 
     expect(
-      await screen.findAllByText(/Paris, France · 127\.0\.0\.1/),
+      await screen.findAllByText(/Paris, France · \u2066127\.0\.0\.1\u2069/),
     ).toHaveLength(2);
   });
 

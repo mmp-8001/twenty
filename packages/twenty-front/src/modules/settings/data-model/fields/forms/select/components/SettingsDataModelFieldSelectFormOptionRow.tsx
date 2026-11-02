@@ -187,7 +187,7 @@ export const SettingsDataModelFieldSelectFormOptionRow = ({
             }
           />
         </StyledLightIconButtonContainer>
-        <DropdownContent side="right" align="start">
+        <DropdownContent side="inline-end" align="start">
           <Dropdown.Section>
             {isDefault ? (
               <Dropdown.ActionItem

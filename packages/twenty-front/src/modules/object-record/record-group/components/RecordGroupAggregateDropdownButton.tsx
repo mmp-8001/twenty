@@ -24,7 +24,7 @@ export const RecordGroupAggregateDropdownButton = ({
   return (
     <Tooltip
       content={tooltip ?? ''}
-      side="right"
+      side="inline-end"
       positionMethod="fixed"
       delay={TooltipDelay.mediumDelay}
       disabled={isDropdownOpen}

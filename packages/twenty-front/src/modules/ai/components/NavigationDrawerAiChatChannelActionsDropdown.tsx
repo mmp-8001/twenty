@@ -58,7 +58,7 @@ export const NavigationDrawerAiChatChannelActionsDropdown = ({
           </LightIconButton>
         }
       />
-      <DropdownContent side="right" align="start">
+      <DropdownContent side="inline-end" align="start">
         <Dropdown.Section>
           {channel.isAccessible &&
             (isAgentChatChannelFavorite ? (

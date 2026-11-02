@@ -13,6 +13,7 @@ import { useSetAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useSe
 import { styled } from '@linaria/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRef, useState } from 'react';
+import { getLocaleTextDirection } from 'twenty-shared/translations';
 import { LightIconButton } from 'twenty-ui/components/input';
 import { OverflowingTextWithTooltip } from 'twenty-ui/primitives/typography';
 import { IconChevronLeft, IconChevronRight } from 'twenty-ui/icon';
@@ -136,7 +137,7 @@ export const GraphWidgetLegend = ({
   items,
   show = true,
 }: GraphWidgetLegendProps) => {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const theme = useTheme();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -214,7 +215,10 @@ export const GraphWidgetLegend = ({
     setCurrentPage((prevPage) => Math.min(totalPages - 1, prevPage + 1));
   };
 
-  const slideOffset = availableWidth;
+  const slideOffset =
+    getLocaleTextDirection(i18n.locale) === 'rtl'
+      ? -availableWidth
+      : availableWidth;
 
   const variants = {
     enter: (direction: AnimationDirection) => ({
@@ -271,7 +275,7 @@ export const GraphWidgetLegend = ({
                   emphasis="subtle"
                   aria-label={t`Previous`}
                 >
-                  <IconChevronLeft />
+                  <IconChevronLeft className="rtl-mirror" />
                 </LightIconButton>
                 <StyledPaginationIndicator>
                   {safeCurrentPage + 1}/{totalPages}
@@ -281,7 +285,7 @@ export const GraphWidgetLegend = ({
                   disabled={safeCurrentPage === totalPages - 1}
                   aria-label={t`Next`}
                 >
-                  <IconChevronRight />
+                  <IconChevronRight className="rtl-mirror" />
                 </LightIconButton>
               </StyledPaginationContainer>
             )}

@@ -18,7 +18,11 @@ export const getMultipleRecordPickerLayoutDirection = ({
     return layoutDirection;
   }
 
-  const isHorizontalPopup = side === 'left' || side === 'right';
+  const isHorizontalPopup =
+    side === 'left' ||
+    side === 'right' ||
+    side === 'inline-start' ||
+    side === 'inline-end';
   const shouldPlaceSearchAtBottom =
     side === 'top' || (isHorizontalPopup && align === 'end');
 

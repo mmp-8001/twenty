@@ -146,7 +146,7 @@ export const RecordDetailMorphRelationSectionDropdownOneToMany = ({
     >
       <Dropdown.Trigger render={dropdownTriggerClickableComponent} />
       <DropdownContent
-        side="left"
+        side="inline-start"
         align="start"
         aria-label={fieldDefinition.label}
         width={GenericDropdownContentWidth.ExtraLarge}

@@ -9,6 +9,7 @@ import { useRecordTableContextOrThrow } from '@/object-record/record-table/conte
 import { useMoveTableColumn } from '@/object-record/record-table/hooks/useMoveTableColumn';
 import { useOpenRecordFilterChipFromTableHeader } from '@/object-record/record-table/record-table-header/hooks/useOpenRecordFilterChipFromTableHeader';
 import { useLingui } from '@lingui/react/macro';
+import { getLocaleTextDirection } from 'twenty-shared/translations';
 import { useAtomFamilySelectorValue } from '@/ui/utilities/state/jotai/hooks/useAtomFamilySelectorValue';
 import {
   IconArrowLeft,
@@ -27,7 +28,8 @@ export const RecordTableColumnHeadDropdownMenu = ({
   recordField,
   objectMetadataId,
 }: RecordTableColumnHeadDropdownMenuProps) => {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
+  const isRtl = getLocaleTextDirection(i18n.locale) === 'rtl';
 
   const { visibleRecordFields } = useRecordTableContextOrThrow();
 
@@ -122,17 +124,17 @@ export const RecordTableColumnHeadDropdownMenu = ({
       {showSeparator && <Dropdown.Separator />}
       {canMoveLeft && (
         <Dropdown.ActionItem
-          startIcon={<IconArrowLeft />}
+          startIcon={isRtl ? <IconArrowRight /> : <IconArrowLeft />}
           onClick={handleColumnMoveLeft}
           closeOnClick={false}
-        >{t`Move left`}</Dropdown.ActionItem>
+        >{t`Move before`}</Dropdown.ActionItem>
       )}
       {canMoveRight && (
         <Dropdown.ActionItem
-          startIcon={<IconArrowRight />}
+          startIcon={isRtl ? <IconArrowLeft /> : <IconArrowRight />}
           onClick={handleColumnMoveRight}
           closeOnClick={false}
-        >{t`Move right`}</Dropdown.ActionItem>
+        >{t`Move after`}</Dropdown.ActionItem>
       )}
       {canHide && (
         <Dropdown.ActionItem

@@ -28,7 +28,7 @@ export const SuggestionItemPreviewTooltip = ({
     <Tooltip.Portal>
       <Tooltip.Positioner
         anchor={anchor}
-        side="right"
+        side="inline-end"
         align="start"
         sideOffset={16}
       >

@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
 import { useGetInitialFilterValue } from '@/object-record/object-filter-dropdown/hooks/useGetInitialFilterValue';
 import { fieldMetadataItemIdUsedInDropdownComponentState } from '@/object-record/object-filter-dropdown/states/fieldMetadataItemIdUsedInDropdownComponentState';
@@ -103,7 +104,7 @@ export const useApplyAdvancedFilterRelationTargetField = () => {
       positionInRecordFilterGroup:
         existingRecordFilter?.positionInRecordFilterGroup,
       type: filterType,
-      label: `${sourceFieldMetadataItem.label} → ${relationTargetFieldMetadataItem.label}`,
+      label: t`${sourceFieldMetadataItem.label} → ${relationTargetFieldMetadataItem.label}`,
       subFieldName: null,
       relationTargetFieldMetadataId: relationTargetFieldMetadataItem.id,
     } satisfies RecordFilter;
