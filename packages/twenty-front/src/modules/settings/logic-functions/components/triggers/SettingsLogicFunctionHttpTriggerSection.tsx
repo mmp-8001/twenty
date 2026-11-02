@@ -109,6 +109,7 @@ export const SettingsLogicFunctionHttpTriggerSection = ({
             dropdownWidth={GenericDropdownContentWidth.ExtraLarge}
           />
           <SettingsTextInput
+            dir="ltr"
             instanceId="logic-function-http-trigger-path"
             label={t`Path`}
             placeholder="/my-route"
@@ -118,6 +119,7 @@ export const SettingsLogicFunctionHttpTriggerSection = ({
             fullWidth
           />
           <SettingsTextInput
+            dir="ltr"
             instanceId="logic-function-http-trigger-url"
             label={t`Live URL`}
             value={fullUrl}

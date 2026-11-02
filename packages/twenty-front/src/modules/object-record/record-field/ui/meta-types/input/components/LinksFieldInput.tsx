@@ -269,6 +269,7 @@ export const LinksFieldInput = () => {
     >
       {isDomainField && <LinksFieldDomainFavicon domain={inputValue} />}
       <MultiItemFieldTextInput
+        dir="ltr"
         autoFocus
         spacing={inputSpacing}
         placeholder={placeholder}

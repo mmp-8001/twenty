@@ -1,8 +1,10 @@
 .root {
   color: var(--t-font-color-secondary);
+  direction: ltr;
   display: inline-flex;
   flex: none;
   font-size: inherit;
+  unicode-bidi: isolate;
   vertical-align: middle;
   white-space: nowrap;
 

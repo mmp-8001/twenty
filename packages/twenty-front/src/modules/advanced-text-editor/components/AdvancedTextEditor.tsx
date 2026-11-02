@@ -262,7 +262,9 @@ const StyledEditorContainer = styled.div<{
         );
         bottom: 0;
         content: '';
-        left: calc(-1 * var(--editor-indent) * var(--editor-list-indent));
+        inset-inline-start: calc(
+          -1 * var(--editor-indent) * var(--editor-list-indent)
+        );
         position: absolute;
         top: 0;
         width: calc(var(--editor-indent) * var(--editor-list-indent));
@@ -295,6 +297,7 @@ const StyledEditorContainer = styled.div<{
       background-color: var(--editor-code-block-background);
       border-radius: ${themeCssVariables.border.radius.md};
       color: var(--editor-code-block-color);
+      direction: ltr;
       margin: 0 0 var(--editor-block-spacing);
       overflow-x: auto;
       padding: var(--editor-code-block-padding);

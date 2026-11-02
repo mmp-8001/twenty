@@ -41,6 +41,7 @@ export const SettingsSecurityAddWebsiteForm = ({
     <StyledForm>
       <StyledInputContainer>
         <SettingsTextInput
+          dir="ltr"
           instanceId={instanceId}
           aria-label={t`Website origin`}
           placeholder={placeholder}

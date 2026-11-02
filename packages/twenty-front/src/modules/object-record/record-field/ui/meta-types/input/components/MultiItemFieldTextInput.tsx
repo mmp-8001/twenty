@@ -34,6 +34,7 @@ type MultiItemFieldTextInputProps = {
   shouldPreventTabNavigation?: boolean;
   onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
   onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
+  dir?: 'ltr' | 'rtl';
   ref?: Ref<HTMLInputElement>;
 };
 
@@ -51,12 +52,14 @@ export const MultiItemFieldTextInput = ({
   shouldPreventTabNavigation,
   onFocus,
   onBlur,
+  dir,
   ref,
 }: MultiItemFieldTextInputProps) => (
   <StyledInputContent spacing={spacing}>
     <Input
       variant="plain"
       hasFocusRing={false}
+      dir={dir}
       aria-invalid={hasError || undefined}
       autoFocus={autoFocus}
       value={value}

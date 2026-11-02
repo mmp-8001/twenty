@@ -248,6 +248,7 @@ export const EmailsFieldInput = () => {
       }
     >
       <MultiItemFieldTextInput
+        dir="ltr"
         autoFocus
         spacing={inputSpacing}
         placeholder={t`Email`}

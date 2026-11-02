@@ -116,10 +116,12 @@ export const StyledMarkdownContainer = styled.div<{
     background-color: ${themeCssVariables.background.tertiary};
     border-radius: ${themeCssVariables.border.radius.sm};
     color: ${themeCssVariables.color.red10};
+    direction: ltr;
     font-family: ${themeCssVariables.code.font.family}, monospace;
     font-size: 1em;
     padding: ${themeCssVariables.spacing[0]} ${themeCssVariables.spacing[1]};
     transition: all calc(${themeCssVariables.animation.duration.fast} * 1s) ease;
+    unicode-bidi: isolate;
   }
 
   :not(pre) > code[style*='cursor: pointer'] {
@@ -130,6 +132,11 @@ export const StyledMarkdownContainer = styled.div<{
 
   :not(pre) > code[style*='cursor: pointer']:hover {
     background-color: ${themeCssVariables.background.transparent.blue};
+  }
+
+  pre {
+    direction: ltr;
+    text-align: left;
   }
 
   .markdown-code-outer-container {

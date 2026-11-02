@@ -189,6 +189,7 @@ export const GraphWidgetPieChart = ({
   return (
     <StyledContainer id={id}>
       <GraphWidgetChartContainer
+        dir="ltr"
         ref={containerRef}
         $isClickable={!hasNoData && isDefined(onSliceClick)}
         $cursorSelector={doNotTranslate('svg g path')}

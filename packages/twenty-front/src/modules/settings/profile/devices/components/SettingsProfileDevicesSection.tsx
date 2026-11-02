@@ -95,7 +95,11 @@ export const SettingsProfileDevicesSection = () => {
       country: session.country,
       locale: i18n.locale,
     });
-    const details = [location, session.ipAddress].filter(isNonEmptyString);
+    // Isolated so an IPv6 address keeps its order inside an RTL sentence.
+    const ipAddress = isNonEmptyString(session.ipAddress)
+      ? `\u2066${session.ipAddress}\u2069`
+      : undefined;
+    const details = [location, ipAddress].filter(isNonEmptyString);
 
     // An expression, not a variable, keeps the "{0}" placeholder and so the existing translations.
     return isNonEmptyArray(details)

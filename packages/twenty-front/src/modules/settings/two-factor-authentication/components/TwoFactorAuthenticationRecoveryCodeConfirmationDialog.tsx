@@ -17,6 +17,7 @@ const StyledConfirmationContent = styled.div`
 `;
 
 const StyledOTPContainer = styled.div`
+  direction: ltr;
   display: flex;
   gap: ${themeCssVariables.spacing[1]};
 `;

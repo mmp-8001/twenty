@@ -160,6 +160,7 @@ export const SettingsSsoSamlForm = () => {
           <StyledContainer>
             <StyledLinkContainer>
               <SettingsTextInput
+                dir="ltr"
                 instanceId="sso-saml-acs-url"
                 disabled={true}
                 label={t`ACS URL`}
@@ -180,6 +181,7 @@ export const SettingsSsoSamlForm = () => {
           <StyledContainer>
             <StyledLinkContainer>
               <SettingsTextInput
+                dir="ltr"
                 instanceId="sso-saml-entity-id"
                 disabled={true}
                 label={t`Entity ID`}
