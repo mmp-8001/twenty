@@ -19,8 +19,8 @@ const StyledDialogOverlayBase = styled.div`
   background: ${themeCssVariables.background.overlayPrimary};
   display: flex;
   height: calc(100dvh / var(--t-zoom, 1));
+  inset-inline-start: 0;
   justify-content: center;
-  left: 0;
   position: fixed;
   top: 0;
   width: calc(100vw / var(--t-zoom, 1));

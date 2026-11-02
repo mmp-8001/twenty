@@ -56,7 +56,7 @@ const StyledSearchRow = styled.div`
   box-sizing: border-box;
   display: flex;
   gap: ${themeCssVariables.spacing[1]};
-  padding-right: ${themeCssVariables.spacing[2]};
+  padding-inline-end: ${themeCssVariables.spacing[2]};
   width: 100%;
 `;
 

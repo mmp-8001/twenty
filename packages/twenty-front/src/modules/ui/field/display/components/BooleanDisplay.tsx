@@ -5,7 +5,7 @@ import { useLingui } from '@lingui/react/macro';
 const iconSizeSm = 14;
 
 const StyledBooleanFieldValue = styled.div`
-  margin-left: 4px;
+  margin-inline-start: 4px;
 `;
 
 type BooleanDisplayProps = {

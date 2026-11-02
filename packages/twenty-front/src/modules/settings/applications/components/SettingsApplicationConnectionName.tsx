@@ -4,7 +4,7 @@ import { themeCssVariables } from 'twenty-ui/theme';
 
 const StyledHandle = styled.span`
   color: ${themeCssVariables.font.color.tertiary};
-  margin-left: ${themeCssVariables.spacing[1]};
+  margin-inline-start: ${themeCssVariables.spacing[1]};
 `;
 
 type SettingsApplicationConnectionNameProps = {

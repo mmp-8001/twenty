@@ -121,9 +121,9 @@ const StyledModeLabelBase = styled.span`
 const StyledModeLabel = motion.create(StyledModeLabelBase);
 
 const StyledUnreadBadge = styled.span`
+  inset-inline-end: calc(-1 * ${themeCssVariables.spacing['1.5']});
   pointer-events: none;
   position: absolute;
-  right: calc(-1 * ${themeCssVariables.spacing['1.5']});
   top: calc(-1 * ${themeCssVariables.spacing['1.5']});
 `;
 

@@ -37,7 +37,7 @@ import { useIsMobile } from 'twenty-ui/utilities';
 
 type Width = `${string}px` | `${number}%` | 'auto' | number;
 const StyledDropdownFallbackAnchor = styled.div`
-  left: 0;
+  inset-inline-start: 0;
   position: fixed;
   top: 0;
 `;

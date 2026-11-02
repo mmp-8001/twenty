@@ -65,9 +65,9 @@ const StyledOperationOverlay = styled.div`
   bottom: -5px;
   display: flex;
   height: 14px;
+  inset-inline-end: -6px;
   justify-content: center;
   position: absolute;
-  right: -6px;
   width: 12px;
 `;
 

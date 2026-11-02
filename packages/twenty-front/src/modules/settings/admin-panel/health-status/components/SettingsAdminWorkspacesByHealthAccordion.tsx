@@ -18,7 +18,7 @@ const StyledAccordionHeader = styled(Card.Content)`
   font-weight: ${themeCssVariables.font.weight.medium};
   justify-content: space-between;
   padding: ${themeCssVariables.spacing[3]} ${themeCssVariables.spacing[4]};
-  text-align: left;
+  text-align: start;
 `;
 
 const StyledAccordionContent = styled.div`

@@ -19,6 +19,7 @@ const StyledEntriesList = styled.div`
   max-height: 300px;
   overflow-y: auto;
   padding: ${themeCssVariables.spacing[2]};
+  text-align: left;
 `;
 
 const StyledEntryRow = styled.div`

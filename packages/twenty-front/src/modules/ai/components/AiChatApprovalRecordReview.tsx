@@ -43,7 +43,7 @@ const StyledHeaderCell = styled.th`
   color: ${themeCssVariables.font.color.tertiary};
   font-weight: ${themeCssVariables.font.weight.regular};
   padding: 0;
-  text-align: left;
+  text-align: start;
 
   &:not(:last-child) {
     border-right: 1px solid ${themeCssVariables.border.color.light};

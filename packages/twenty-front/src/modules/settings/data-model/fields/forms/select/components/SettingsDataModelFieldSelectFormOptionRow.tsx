@@ -65,13 +65,13 @@ const StyledOptionInputContainer = styled.div`
 const StyledIconGripVerticalContainer = styled.span`
   align-items: center;
   display: flex;
-  margin-right: 3px;
+  margin-inline-end: 3px;
 `;
 
 const StyledLightIconButtonContainer = styled.span`
   align-items: center;
   display: flex;
-  margin-left: ${themeCssVariables.spacing[2]};
+  margin-inline-start: ${themeCssVariables.spacing[2]};
 `;
 
 export const SettingsDataModelFieldSelectFormOptionRow = ({

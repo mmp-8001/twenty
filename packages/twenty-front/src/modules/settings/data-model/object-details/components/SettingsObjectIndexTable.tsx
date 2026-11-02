@@ -18,7 +18,7 @@ const OBJECT_INDEX_TABLE_GRID_TEMPLATE_COLUMNS = '1fr 70px 80px 32px';
 
 const StyledActionCell = styled(TableCell)`
   justify-content: flex-end;
-  padding-right: 0;
+  padding-inline-end: 0;
 `;
 
 const StyledEmpty = styled.div`
