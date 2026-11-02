@@ -31,7 +31,7 @@ const StyledHeader = styled.label<{ hasBody: boolean; hasNote: boolean }>`
     hasNote
       ? `${themeCssVariables.spacing[4]} ${themeCssVariables.spacing[3]}`
       : themeCssVariables.spacing[3]};
-  text-align: left;
+  text-align: start;
   width: 100%;
 `;
 

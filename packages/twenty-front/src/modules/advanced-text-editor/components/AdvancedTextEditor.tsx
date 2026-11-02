@@ -62,7 +62,7 @@ const StyledEditorContainer = styled.div<{
     p.is-editor-empty:first-of-type:not([data-placeholder=''])::before {
       ${FORM_FIELD_PLACEHOLDER_STYLES}
       content: attr(data-placeholder);
-      float: left;
+      float: inline-start;
       height: 0;
       pointer-events: none;
     }
@@ -73,12 +73,12 @@ const StyledEditorContainer = styled.div<{
       &::before {
         color: ${themeCssVariables.font.color.light};
         content: attr(data-hint);
-        left: 0;
+        inset-inline-end: 0;
+        inset-inline-start: 0;
         overflow: hidden;
         padding: inherit;
         pointer-events: none;
         position: absolute;
-        right: 0;
         text-overflow: ellipsis;
         top: 0;
         white-space: nowrap;
@@ -153,7 +153,7 @@ const StyledEditorContainer = styled.div<{
       &::before {
         border-bottom: calc(var(--editor-toggle-icon-size) / 2) solid
           transparent;
-        border-left: calc(var(--editor-toggle-icon-size) * 0.75) solid
+        border-inline-start: calc(var(--editor-toggle-icon-size) * 0.75) solid
           currentColor;
         border-top: calc(var(--editor-toggle-icon-size) / 2) solid transparent;
         content: '';
@@ -194,7 +194,7 @@ const StyledEditorContainer = styled.div<{
       font: inherit;
       grid-column: 2;
       padding: 0;
-      text-align: left;
+      text-align: start;
 
       &:hover {
         color: ${themeCssVariables.font.color.tertiary};
@@ -204,7 +204,7 @@ const StyledEditorContainer = styled.div<{
     ul,
     ol {
       margin: 0 0 var(--editor-block-spacing);
-      padding-left: var(--editor-list-indent);
+      padding-inline-start: var(--editor-list-indent);
     }
 
     li {
@@ -222,8 +222,8 @@ const StyledEditorContainer = styled.div<{
       }
 
       & > p:first-child {
-        margin-left: calc(-1 * var(--editor-list-item-offset));
-        padding-left: var(--editor-list-item-offset);
+        margin-inline-start: calc(-1 * var(--editor-list-item-offset));
+        padding-inline-start: var(--editor-list-item-offset);
         position: relative;
       }
 
@@ -236,10 +236,10 @@ const StyledEditorContainer = styled.div<{
         position: relative;
 
         &::after {
-          border-left: 1px solid var(--editor-guide-color);
+          border-inline-start: 1px solid var(--editor-guide-color);
           bottom: 0;
           content: '';
-          left: calc(
+          inset-inline-start: calc(
             ${themeCssVariables.spacing[1]} - var(--editor-list-indent)
           );
           position: absolute;
@@ -270,12 +270,12 @@ const StyledEditorContainer = styled.div<{
     }
 
     blockquote {
-      border-left: var(--editor-quote-border-width) solid
+      border-inline-start: var(--editor-quote-border-width) solid
         var(--editor-accent-color);
       color: var(--editor-quote-color);
       font-style: var(--editor-quote-font-style);
       margin: 0 0 var(--editor-block-spacing);
-      padding-left: var(--editor-quote-indent);
+      padding-inline-start: var(--editor-quote-indent);
     }
 
     .node-image,
@@ -298,6 +298,7 @@ const StyledEditorContainer = styled.div<{
       margin: 0 0 var(--editor-block-spacing);
       overflow-x: auto;
       padding: var(--editor-code-block-padding);
+      text-align: left;
 
       code {
         background-color: transparent;
@@ -308,7 +309,7 @@ const StyledEditorContainer = styled.div<{
 
     ul[data-type='taskList'] {
       list-style: none;
-      padding-left: 0;
+      padding-inline-start: 0;
 
       li {
         align-items: flex-start;
@@ -376,7 +377,7 @@ const StyledEditorContainer = styled.div<{
       th {
         background-color: ${themeCssVariables.background.tertiary};
         font-weight: ${themeCssVariables.font.weight.medium};
-        text-align: left;
+        text-align: start;
       }
 
       .selectedCell::after {
@@ -391,9 +392,9 @@ const StyledEditorContainer = styled.div<{
       .column-resize-handle {
         background-color: ${themeCssVariables.color.blue};
         bottom: 0;
+        inset-inline-end: calc(-1 * ${themeCssVariables.spacing['0.5']});
         pointer-events: none;
         position: absolute;
-        right: calc(-1 * ${themeCssVariables.spacing['0.5']});
         top: 0;
         width: ${themeCssVariables.spacing[1]};
       }
@@ -464,8 +465,7 @@ const StyledEditorContainer = styled.div<{
 
     .block-divider {
       border-bottom: none;
-      border-left: none;
-      border-right: none;
+      border-inline: none;
       border-top: 1px solid var(--editor-divider-color);
       margin: var(--editor-divider-spacing) 0;
 

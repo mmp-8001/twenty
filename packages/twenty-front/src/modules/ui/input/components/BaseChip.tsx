@@ -44,9 +44,9 @@ const StyledChip = styled.div<{
   flex-shrink: 0;
   height: 20px;
   max-width: 100%;
-  padding-left: ${themeCssVariables.spacing[1]};
-  padding-right: ${({ deletable }) =>
+  padding-inline-end: ${({ deletable }) =>
     deletable ? '0' : themeCssVariables.spacing[1]};
+  padding-inline-start: ${themeCssVariables.spacing[1]};
 
   user-select: none;
   white-space: nowrap;
@@ -78,8 +78,8 @@ const StyledDelete = styled.button`
   align-items: center;
   background: none;
   border: none;
-  border-bottom-right-radius: ${themeCssVariables.border.radius.smRound};
-  border-top-right-radius: ${themeCssVariables.border.radius.smRound};
+  border-end-end-radius: ${themeCssVariables.border.radius.smRound};
+  border-start-end-radius: ${themeCssVariables.border.radius.smRound};
   box-sizing: border-box;
   color: inherit;
   corner-shape: round;

@@ -25,7 +25,7 @@ const StyledCaret = styled.span`
   border-radius: ${themeCssVariables.border.radius.xs};
   display: inline-block;
   height: ${themeCssVariables.spacing[3]};
-  margin-left: ${themeCssVariables.spacing[0.5]};
+  margin-inline-start: ${themeCssVariables.spacing[0.5]};
   vertical-align: middle;
   width: ${themeCssVariables.spacing[0.5]};
 

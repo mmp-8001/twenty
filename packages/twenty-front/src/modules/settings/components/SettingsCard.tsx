@@ -72,7 +72,7 @@ const StyledDescription = styled.span<{ disabled?: boolean }>`
   display: block;
   line-height: ${themeCssVariables.text.lineHeight.lg};
   padding-bottom: ${themeCssVariables.spacing[2]};
-  padding-left: ${themeCssVariables.spacing[7]};
+  padding-inline-start: ${themeCssVariables.spacing[7]};
 `;
 
 const StyledIllustratedLayout = styled.span`

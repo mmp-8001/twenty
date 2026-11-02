@@ -30,13 +30,13 @@ const StyledHeader = styled.div<{ $hasBottomBorder: boolean }>`
   gap: ${themeCssVariables.spacing[2]};
   height: 48px;
   justify-content: space-between;
-  padding-right: ${themeCssVariables.spacing[3]};
+  padding-inline-end: ${themeCssVariables.spacing[3]};
 `;
 
 const StyledTabsContainer = styled.div`
   flex: 1 1 auto;
   min-width: 0;
-  padding-left: ${themeCssVariables.spacing[3]};
+  padding-inline-start: ${themeCssVariables.spacing[3]};
 `;
 
 const StyledTitle = styled.div`
@@ -47,7 +47,7 @@ const StyledTitle = styled.div`
   font-weight: ${themeCssVariables.font.weight.medium};
   gap: ${themeCssVariables.spacing[1]};
   min-width: 0;
-  padding-left: ${themeCssVariables.spacing[5]};
+  padding-inline-start: ${themeCssVariables.spacing[5]};
 `;
 
 const StyledTitleText = styled.span`

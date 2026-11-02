@@ -32,7 +32,7 @@ type SettingsCounterProps = {
 const StyledCounterContainer = styled.div<{ showButtons: boolean }>`
   align-items: center;
   display: flex;
-  margin-left: auto;
+  margin-inline-start: auto;
   width: ${({ showButtons }) =>
     showButtons
       ? themeCssVariables.spacing[30]

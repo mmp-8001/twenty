@@ -41,7 +41,7 @@ const StyledMainCardWrapper = styled.div`
 
 const StyledCard = styled.div`
   background: ${themeCssVariables.background.primary};
-  border-left: 1px solid ${themeCssVariables.border.color.medium};
+  border-inline-start: 1px solid ${themeCssVariables.border.color.medium};
   border-radius: 0;
   box-shadow: ${themeCssVariables.boxShadow.sidebar};
   box-sizing: border-box;
@@ -53,12 +53,12 @@ const StyledCard = styled.div`
   width: 100%;
 
   @media (max-width: ${MOBILE_VIEWPORT}px) {
-    border-left: none;
+    border-inline-start: none;
     box-shadow: none;
   }
 
   @media print {
-    border-left: none;
+    border-inline-start: none;
     box-shadow: none;
     display: block;
     min-height: auto;

@@ -35,7 +35,7 @@ const StyledToggle = styled.button`
   justify-content: space-between;
   min-width: 0;
   padding-left: ${themeCssVariables.spacing[2]};
-  text-align: left;
+  text-align: start;
 
   &:hover {
     background: ${themeCssVariables.background.transparent.light};

@@ -13,7 +13,7 @@
 }
 
 .stackedIcon {
-  left: var(--t-spacing-2);
+  inset-inline-start: var(--t-spacing-2);
   position: absolute;
   top: 7px;
 }

@@ -4,7 +4,7 @@ import { themeCssVariables } from 'twenty-ui/theme';
 export const StyledFieldInputSuffix = styled.span`
   align-items: center;
   align-self: stretch;
-  border-left: 1px solid ${themeCssVariables.border.color.medium};
+  border-inline-start: 1px solid ${themeCssVariables.border.color.medium};
   box-sizing: border-box;
   color: ${themeCssVariables.font.color.tertiary};
   display: flex;

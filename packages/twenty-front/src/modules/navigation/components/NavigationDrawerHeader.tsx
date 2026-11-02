@@ -44,7 +44,7 @@ const StyledRightActions = styled.div`
   display: flex;
   flex-shrink: 0;
   gap: ${themeCssVariables.spacing['0.5']};
-  margin-left: auto;
+  margin-inline-start: auto;
 `;
 
 const StyledWorkspaceDropdownContainer = styled.div`

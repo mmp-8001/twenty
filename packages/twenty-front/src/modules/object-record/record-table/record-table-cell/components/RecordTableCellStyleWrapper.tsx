@@ -6,17 +6,17 @@ import { themeCssVariables } from 'twenty-ui/theme';
 const StyledCell = styled.div`
   background: ${themeCssVariables.background.primary};
   border-bottom: 1px solid ${themeCssVariables.border.color.light};
-  border-right: 1px solid ${themeCssVariables.border.color.light};
+  border-inline-end: 1px solid ${themeCssVariables.border.color.light};
   color: ${themeCssVariables.font.color.primary};
   padding: 0;
-  text-align: left;
+  text-align: start;
 
   &[data-selected] {
     background: ${themeCssVariables.accent.quaternary};
   }
 
   &[data-without-right-border] {
-    border-right: none;
+    border-inline-end: none;
   }
 
   &[data-without-bottom-border] {

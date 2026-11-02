@@ -28,7 +28,7 @@ const StyledColumnFooterCell = styled.div<{
   isReadOnly: boolean;
 }>`
   background-color: ${themeCssVariables.background.primary};
-  border-right: solid 1px ${themeCssVariables.background.primary};
+  border-inline-end: solid 1px ${themeCssVariables.background.primary};
 
   bottom: 0;
 
@@ -56,7 +56,7 @@ const StyledColumnFooterCell = styled.div<{
   padding: 0;
 
   position: sticky;
-  text-align: left;
+  text-align: start;
 
   width: ${({ columnWidth }) => columnWidth}px;
 

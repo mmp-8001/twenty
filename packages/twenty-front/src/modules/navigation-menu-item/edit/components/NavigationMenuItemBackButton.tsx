@@ -19,7 +19,7 @@ const StyledBackButton = styled.button`
   padding-left: ${themeCssVariables.spacing[1]};
   padding-right: ${themeCssVariables.spacing[0.5]};
   padding-top: ${themeCssVariables.spacing[1]};
-  text-align: left;
+  text-align: start;
   width: 100%;
 
   &:hover {

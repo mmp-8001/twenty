@@ -46,7 +46,7 @@ const StyledContainer = styled.div`
 const StyledIcon = styled.div`
   align-items: center;
   display: flex;
-  padding-left: ${themeCssVariables.spacing[1]};
+  padding-inline-start: ${themeCssVariables.spacing[1]};
 `;
 
 export type CurrencyInputProps = {

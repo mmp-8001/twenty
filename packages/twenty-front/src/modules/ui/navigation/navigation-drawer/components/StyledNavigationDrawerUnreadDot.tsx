@@ -7,8 +7,8 @@ export const StyledNavigationDrawerUnreadDot = styled.span`
   background: ${themeCssVariables.color.blue};
   border-radius: 50%;
   height: 6px;
+  inset-inline-end: -2px;
   position: absolute;
-  right: -2px;
   top: -2px;
   width: 6px;
 `;

@@ -46,6 +46,7 @@ const StyledStackTrace = styled.pre`
   max-height: 240px;
   overflow: auto;
   padding: ${themeCssVariables.spacing[2]};
+  text-align: left;
   white-space: pre-wrap;
   word-break: break-word;
 `;

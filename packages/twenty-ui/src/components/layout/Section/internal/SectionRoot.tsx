@@ -6,7 +6,7 @@ import { type SectionRootProps } from '../types/SectionRootProps';
 import styles from '../SectionRoot.module.scss';
 
 export const SectionRoot = ({
-  align = 'left',
+  align = 'start',
   color = 'primary',
   fullWidth = true,
   className,

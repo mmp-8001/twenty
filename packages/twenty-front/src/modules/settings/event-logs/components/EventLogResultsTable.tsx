@@ -52,8 +52,8 @@ const StyledResizeHandle = styled.div<{ isResizing: boolean }>`
     isResizing ? themeCssVariables.color.blue : 'transparent'};
   bottom: 0;
   cursor: col-resize;
+  inset-inline-end: 0;
   position: absolute;
-  right: 0;
   top: 0;
   width: 4px;
 

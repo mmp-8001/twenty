@@ -18,7 +18,7 @@ const styles = {
   `,
   childWrapper: css`
     & {
-      left: 0;
+      inset-inline-start: 0;
       position: absolute;
       top: 0;
       width: 100%;

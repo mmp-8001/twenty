@@ -46,21 +46,21 @@ const StyledCounter = styled.div`
 `;
 
 const StyledCloseButton = styled.div`
+  inset-inline-end: ${themeCssVariables.spacing[4]};
   position: absolute;
-  right: ${themeCssVariables.spacing[4]};
   top: ${themeCssVariables.spacing[4]};
 `;
 
 const StyledPreviousButton = styled.div`
-  left: ${themeCssVariables.spacing[4]};
+  inset-inline-start: ${themeCssVariables.spacing[4]};
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
 `;
 
 const StyledNextButton = styled.div`
+  inset-inline-end: ${themeCssVariables.spacing[4]};
   position: absolute;
-  right: ${themeCssVariables.spacing[4]};
   top: 50%;
   transform: translateY(-50%);
 `;

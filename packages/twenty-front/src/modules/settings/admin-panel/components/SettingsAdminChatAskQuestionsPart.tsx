@@ -43,7 +43,7 @@ const StyledCardHeader = styled.div`
 `;
 
 const StyledStatusTag = styled.div`
-  margin-left: auto;
+  margin-inline-start: auto;
 `;
 
 const getStatusLabel = (status: string) => {

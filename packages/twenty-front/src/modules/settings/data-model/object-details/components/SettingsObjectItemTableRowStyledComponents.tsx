@@ -12,7 +12,7 @@ export const SETTINGS_OBJECT_TABLE_ROW_MOBILE_MIN_WIDTH = '520px';
 export const StyledStickyFirstCell = styled.div`
   @media (max-width: ${MOBILE_VIEWPORT}px) {
     background: ${themeCssVariables.background.primary};
-    left: 0;
+    inset-inline-start: 0;
     position: sticky;
     z-index: 1;
   }

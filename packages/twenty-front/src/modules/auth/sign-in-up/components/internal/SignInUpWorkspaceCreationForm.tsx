@@ -114,7 +114,7 @@ const StyledAlternativeRow = styled.button`
   font-weight: ${themeCssVariables.font.weight.semiBold};
   gap: ${themeCssVariables.spacing[1]};
   padding: 2px 0;
-  text-align: left;
+  text-align: start;
 `;
 
 const StyledAvailabilityDotBox = styled.div`
