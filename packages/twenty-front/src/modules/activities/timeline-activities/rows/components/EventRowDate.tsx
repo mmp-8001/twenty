@@ -51,7 +51,7 @@ export const EventRowDate = ({ happensAt }: EventRowDateProps) => {
     <Tooltip
       content={exactHappensAt}
       delay={TooltipDelay.mediumDelay}
-      side="left"
+      side="inline-start"
     >
       <StyledEventRowDate id={dateElementId} tabIndex={0}>
         {relativeHappensAt}

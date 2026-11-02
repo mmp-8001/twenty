@@ -1,7 +1,9 @@
+import { useLingui } from '@lingui/react/macro';
 import { useRecordTableContextOrThrow } from '@/object-record/record-table/contexts/RecordTableContext';
 import { useRecordTableMoveFocusedCell } from '@/object-record/record-table/hooks/useRecordTableMoveFocusedCell';
 import { useHotkeysOnFocusedElement } from '@/ui/utilities/hotkey/hooks/useHotkeysOnFocusedElement';
 import { Key } from 'ts-key-enum';
+import { getLocaleTextDirection } from 'twenty-shared/translations';
 
 export const useRecordTableCellFocusHotkeys = ({
   focusId,
@@ -11,6 +13,9 @@ export const useRecordTableCellFocusHotkeys = ({
   const { recordTableId } = useRecordTableContextOrThrow();
 
   const { moveFocus } = useRecordTableMoveFocusedCell(recordTableId);
+
+  const { i18n } = useLingui();
+  const isRtl = getLocaleTextDirection(i18n.locale) === 'rtl';
 
   useHotkeysOnFocusedElement({
     keys: [Key.ArrowUp],
@@ -33,18 +38,18 @@ export const useRecordTableCellFocusHotkeys = ({
   useHotkeysOnFocusedElement({
     keys: [Key.ArrowLeft],
     callback: () => {
-      moveFocus('left');
+      moveFocus(isRtl ? 'right' : 'left');
     },
     focusId,
-    dependencies: [moveFocus],
+    dependencies: [moveFocus, isRtl],
   });
 
   useHotkeysOnFocusedElement({
     keys: [Key.ArrowRight],
     callback: () => {
-      moveFocus('right');
+      moveFocus(isRtl ? 'left' : 'right');
     },
     focusId,
-    dependencies: [moveFocus],
+    dependencies: [moveFocus, isRtl],
   });
 };

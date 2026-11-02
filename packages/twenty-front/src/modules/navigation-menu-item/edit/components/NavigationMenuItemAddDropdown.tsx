@@ -54,7 +54,7 @@ export const NavigationMenuItemAddDropdown = ({
             ? navigationMenuItemInsertionAnchor.element
             : undefined
         }
-        side="right"
+        side="inline-end"
         align="start"
         width={GenericDropdownContentWidth.ExtraLarge}
       >

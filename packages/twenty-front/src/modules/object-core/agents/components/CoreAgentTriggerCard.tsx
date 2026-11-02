@@ -1,4 +1,6 @@
 import { styled } from '@linaria/react';
+import { dateLocaleState } from '@/localization/states/dateLocaleState';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useLingui } from '@lingui/react/macro';
 import { isNonEmptyString } from '@sniptt/guards';
 import { type AgentTrigger } from 'twenty-shared/application';
@@ -87,6 +89,7 @@ export const CoreAgentTriggerCard = ({
 }: CoreAgentTriggerCardProps) => {
   const { t } = useLingui();
   const theme = useTheme();
+  const dateLocale = useAtomStateValue(dateLocaleState);
   const { objectMetadataItems } = useFilteredObjectMetadataItems();
 
   const [objectNameSingular = '', action = 'created'] =
@@ -152,9 +155,11 @@ export const CoreAgentTriggerCard = ({
 
     try {
       return {
-        text: describeCronExpression(trigger.settings.pattern, {
-          use24HourTimeFormat: true,
-        }),
+        text: describeCronExpression(
+          trigger.settings.pattern,
+          { use24HourTimeFormat: true },
+          dateLocale.localeCatalog,
+        ),
         isError: false,
       };
     } catch {

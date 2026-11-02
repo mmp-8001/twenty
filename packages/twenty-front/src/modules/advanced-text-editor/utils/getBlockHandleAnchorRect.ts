@@ -60,16 +60,18 @@ const getBlockDecorationOwner = (blockElement: HTMLElement) => {
 type GetBlockHandleAnchorRectArgs = {
   blockElement: HTMLElement;
   handleHeight: number;
+  isRtl: boolean;
 };
 
 export const getBlockHandleAnchorRect = ({
   blockElement,
   handleHeight,
+  isRtl,
 }: GetBlockHandleAnchorRectArgs) => {
   const blockRect = blockElement.getBoundingClientRect();
-  const left =
-    getBlockDecorationOwner(blockElement).getBoundingClientRect().left;
-  const width = blockRect.right - left;
+  const ownerRect = getBlockDecorationOwner(blockElement).getBoundingClientRect();
+  const left = isRtl ? blockRect.left : ownerRect.left;
+  const width = (isRtl ? ownerRect.right : blockRect.right) - left;
   const firstLineRect = blockElement.matches(TEXT_BLOCK_SELECTOR)
     ? getFirstLineRect(blockElement)
     : null;

@@ -47,7 +47,7 @@ export const getRecordFilterTypeAndLabelFromFieldMetadata = ({
   const label = isSystemSearchVectorField(sourceFieldMetadataItem.name)
     ? t`Search`
     : isDefined(relationTargetFieldMetadataItem)
-      ? `${sourceFieldMetadataItem.label} → ${relationTargetFieldMetadataItem.label}`
+      ? t`${sourceFieldMetadataItem.label} → ${relationTargetFieldMetadataItem.label}`
       : sourceFieldMetadataItem.label;
 
   return { type, label };

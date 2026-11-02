@@ -1,3 +1,5 @@
+import { getLocaleTextDirection } from 'twenty-shared/translations';
+import { isDefined } from 'twenty-shared/utils';
 import { Dialog } from 'twenty-ui/primitives/surfaces';
 import { DialogInstance } from '@/ui/layout/dialog/components/DialogInstance';
 import { styled } from '@linaria/react';
@@ -44,8 +46,13 @@ export const SpreadSheetImportModalWrapper = ({
   children,
   onClose,
 }: SpreadSheetImportModalWrapperProps) => {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const { rtl } = useSpreadsheetImportInternal();
+  const direction = isDefined(rtl)
+    ? rtl
+      ? 'rtl'
+      : 'ltr'
+    : getLocaleTextDirection(i18n.locale);
 
   return (
     <DialogInstance
@@ -61,7 +68,7 @@ export const SpreadSheetImportModalWrapper = ({
           size="xl"
         >
           <StyledInnerContainer>
-            <StyledRtlLtr dir={rtl ? 'rtl' : 'ltr'}>
+            <StyledRtlLtr dir={direction}>
               <SpreadSheetImportModalCloseButton onClose={onClose} />
               {children}
             </StyledRtlLtr>

@@ -11,6 +11,7 @@ import { TableHeader } from '@/ui/layout/table/components/TableHeader';
 import { TableRow } from '@/ui/layout/table/components/TableRow';
 import { ScrollWrapper } from '@/ui/utilities/scroll/components/ScrollWrapper';
 import { useScrollWrapperHTMLElement } from '@/ui/utilities/scroll/hooks/useScrollWrapperHTMLElement';
+import { getLocaleTextDirection } from 'twenty-shared/translations';
 import { themeCssVariables } from 'twenty-ui/theme';
 
 import {
@@ -95,7 +96,8 @@ export const EventLogResultsTable = ({
   onLoadMore,
   selectedTable,
 }: EventLogResultsTableProps) => {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
+  const isRtl = getLocaleTextDirection(i18n.locale) === 'rtl';
 
   const baseColumns = getColumnsForEventLogTable(selectedTable);
 
@@ -120,7 +122,8 @@ export const EventLogResultsTable = ({
       const startWidth = columnWidths[columnId] ?? column?.defaultWidth ?? 100;
 
       const handlePointerMove = (moveEvent: PointerEvent) => {
-        const delta = moveEvent.clientX - startX;
+        const physicalDelta = moveEvent.clientX - startX;
+        const delta = isRtl ? -physicalDelta : physicalDelta;
         const newWidth = Math.max(column?.minWidth ?? 50, startWidth + delta);
 
         setColumnWidths((prev) => ({ ...prev, [columnId]: newWidth }));
@@ -135,7 +138,7 @@ export const EventLogResultsTable = ({
       document.addEventListener('pointermove', handlePointerMove);
       document.addEventListener('pointerup', handlePointerUp);
     },
-    [columnWidths, baseColumns],
+    [columnWidths, baseColumns, isRtl],
   );
 
   const gridTemplateColumns = buildGridTemplateColumns(

@@ -20,11 +20,7 @@ const getDayName = (
     baseDate.getTime() + normalizedDay * 24 * 60 * 60 * 1000,
   );
 
-  if (isDefined(localeCatalog)) {
-    return format(dayDate, 'EEEE', { locale: localeCatalog });
-  }
-
-  return format(dayDate, 'EEEE');
+  return format(dayDate, 'EEEE', { locale: localeCatalog });
 };
 
 export const getDayOfWeekDescription = (

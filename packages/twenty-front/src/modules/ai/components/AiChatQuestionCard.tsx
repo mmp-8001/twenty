@@ -437,7 +437,7 @@ export const AiChatQuestionCard = ({
                   <Tooltip
                     content={option.description}
                     delay={TooltipDelay.shortDelay}
-                    side="left"
+                    side="inline-start"
                   >
                     <span onClick={(event) => event.stopPropagation()}>
                       <LightIconButton

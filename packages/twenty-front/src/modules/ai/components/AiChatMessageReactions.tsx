@@ -27,7 +27,7 @@ type AiChatMessageReactionsProps = {
 export const AiChatMessageReactions = ({
   messageId,
 }: AiChatMessageReactionsProps) => {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
   const agentChatMessageReactions = useAtomFamilyStateValue(
     agentChatMessageReactionsFamilyState,
     { messageId },
@@ -67,7 +67,9 @@ export const AiChatMessageReactions = ({
               : []),
             ...(hasAssistantReacted ? [AGENT_CHAT_ASSISTANT_NAME] : []),
           ];
-          const reactorNames = reactorNameList.join(', ');
+          const reactorNames = new Intl.ListFormat(i18n.locale, {
+            type: 'conjunction',
+          }).format(reactorNameList);
           const isSelected =
             isDefined(currentWorkspaceMember) &&
             workspaceMemberIds.includes(currentWorkspaceMember.id);
