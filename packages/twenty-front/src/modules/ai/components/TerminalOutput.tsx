@@ -16,6 +16,7 @@ const StyledContainer = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  text-align: left;
 `;
 
 const StyledHeader = styled.div`

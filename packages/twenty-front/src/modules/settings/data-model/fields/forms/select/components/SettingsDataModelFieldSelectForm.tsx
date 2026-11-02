@@ -73,7 +73,7 @@ const StyledOptionsLabel = styled.div<{
   font-size: ${themeCssVariables.font.size.xs};
   font-weight: ${themeCssVariables.font.weight.semiBold};
   margin-bottom: ${themeCssVariables.spacing['1.5']};
-  margin-left: ${({ isApiValuesVisible, isBulkInputMode }) =>
+  margin-inline-start: ${({ isApiValuesVisible, isBulkInputMode }) =>
     isApiValuesVisible && !isBulkInputMode
       ? themeCssVariables.spacing[10]
       : themeCssVariables.spacing[0]};
@@ -88,7 +88,7 @@ const StyledApiValuesLabel = styled.span`
   font-weight: ${themeCssVariables.font.weight.semiBold};
   margin-bottom: ${themeCssVariables.spacing['1.5']};
   margin-top: ${themeCssVariables.spacing[1]};
-  padding-left: ${themeCssVariables.spacing[5]};
+  padding-inline-start: ${themeCssVariables.spacing[5]};
   white-space: nowrap;
 `;
 

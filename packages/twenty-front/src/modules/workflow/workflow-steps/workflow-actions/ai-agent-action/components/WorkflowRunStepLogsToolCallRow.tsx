@@ -33,7 +33,7 @@ const StyledToggleRow = styled.div<{ isExpandable: boolean }>`
   gap: ${themeCssVariables.spacing[1]};
   justify-content: space-between;
   padding: ${themeCssVariables.spacing[1]} 0;
-  text-align: left;
+  text-align: start;
   transition: color calc(${themeCssVariables.animation.duration.fast} * 1s)
     ease-in-out;
   width: 100%;

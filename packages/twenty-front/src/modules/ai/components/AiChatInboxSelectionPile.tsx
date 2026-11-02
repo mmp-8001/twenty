@@ -28,7 +28,7 @@ const StyledCard = styled.div<{ $depth: number }>`
   isolation: isolate;
   margin: 0 calc(${themeCssVariables.spacing[3]} * ${({ $depth }) => $depth});
   padding: ${themeCssVariables.spacing[4]};
-  text-align: left;
+  text-align: start;
 
   & + & {
     margin-top: calc(-1 * ${themeCssVariables.spacing[8]});

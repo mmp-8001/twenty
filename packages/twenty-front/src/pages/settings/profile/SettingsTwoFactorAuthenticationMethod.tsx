@@ -62,7 +62,7 @@ const StyledCopySetupKeyText = styled.div`
   color: ${themeCssVariables.font.color.tertiary};
   font-size: ${themeCssVariables.font.size.sm};
   line-height: 1.5;
-  text-align: left;
+  text-align: start;
 `;
 
 const StyledDivider = styled.div`

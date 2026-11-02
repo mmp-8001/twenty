@@ -36,14 +36,14 @@ const StyledRecordLevelPermissionPickerContainer = styled.div<{
       : themeCssVariables.font.color.tertiary};
   cursor: ${({ multiline }) => (multiline ? 'default' : 'pointer')};
   display: flex;
+  inset-inline-end: ${({ multiline }) =>
+    multiline ? themeCssVariables.spacing[0] : 'auto'};
   justify-content: center;
   padding: ${({ multiline }) =>
     multiline
       ? `${themeCssVariables.spacing['0.5']} ${themeCssVariables.spacing[0]}`
       : themeCssVariables.spacing[2]};
   position: ${({ multiline }) => (multiline ? 'absolute' : 'relative')};
-  right: ${({ multiline }) =>
-    multiline ? themeCssVariables.spacing[0] : 'auto'};
   top: ${({ multiline }) =>
     multiline ? themeCssVariables.spacing[0] : 'auto'};
 

@@ -9,7 +9,7 @@ const StyledRow = styled.div`
   display: flex;
   gap: ${themeCssVariables.spacing[1]};
   height: ${themeCssVariables.spacing[8]};
-  padding-right: ${themeCssVariables.spacing[1]};
+  padding-inline-end: ${themeCssVariables.spacing[1]};
 `;
 
 type FieldInputDetailsToggleRowProps = {

@@ -44,7 +44,7 @@ const StyledButton = styled.button`
   display: flex;
   font-weight: ${themeCssVariables.font.weight.medium};
   min-width: 0;
-  text-align: left;
+  text-align: start;
 
   &:focus-visible {
     outline: 2px solid ${themeCssVariables.color.blue};

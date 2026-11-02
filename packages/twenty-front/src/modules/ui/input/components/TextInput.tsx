@@ -106,12 +106,8 @@ const StyledInput = styled.input<
         ? themeCssVariables.border.color.danger
         : themeCssVariables.border.color.medium};
 
-  border-radius: ${({ leftAdornment, rightAdornment }) =>
-    leftAdornment
-      ? `0 ${themeCssVariables.border.radius.md} ${themeCssVariables.border.radius.md} 0`
-      : rightAdornment
-        ? `${themeCssVariables.border.radius.md} 0 0 ${themeCssVariables.border.radius.md}`
-        : themeCssVariables.border.radius.md};
+  border-radius: var(--text-input-start-radius) var(--text-input-end-radius)
+    var(--text-input-end-radius) var(--text-input-start-radius);
   box-sizing: border-box;
   color: ${themeCssVariables.font.color.primary};
   display: flex;
@@ -138,23 +134,22 @@ const StyledInput = styled.input<
       : sizeVariant === 'xs'
         ? `${themeCssVariables.spacing[2]} 0`
         : themeCssVariables.spacing[2]};
-  padding-left: ${({ LeftIcon, autoGrow }) =>
-    autoGrow
-      ? themeCssVariables.spacing[1]
-      : LeftIcon
-        ? `calc(${themeCssVariables.spacing[3]} + 16px)`
-        : themeCssVariables.spacing[2]};
-  padding-right: ${({ RightIcon, autoGrow }) =>
-    autoGrow
-      ? themeCssVariables.spacing[1]
-      : RightIcon
-        ? `calc(${themeCssVariables.spacing[3]} + 16px)`
-        : themeCssVariables.spacing[2]};
+  padding-left: var(--text-input-start-padding);
+  padding-right: var(--text-input-end-padding);
   text-overflow: ellipsis;
   width: ${({ width }) =>
     isDefined(width)
       ? `calc(${width}px + ${themeCssVariables.spacing[0.5]})`
       : '100%'};
+
+  /* Follows the icons, whose side can differ from the CSS direction of the input. */
+  ${StyledInputContainer}:dir(rtl) > & {
+    border-radius: var(--text-input-end-radius) var(--text-input-start-radius)
+      var(--text-input-start-radius) var(--text-input-end-radius);
+    padding-left: var(--text-input-end-padding);
+    padding-right: var(--text-input-start-padding);
+  }
+
   &::placeholder,
   &::-webkit-input-placeholder {
     color: ${themeCssVariables.font.color.light};
@@ -194,7 +189,7 @@ const StyledLeftIconContainer = styled.div<{ sizeVariant: TextInputSize }>`
   display: flex;
   justify-content: center;
   margin: auto 0;
-  padding-left: ${({ sizeVariant }) =>
+  padding-inline-start: ${({ sizeVariant }) =>
     sizeVariant === 'xs'
       ? themeCssVariables.spacing[0.5]
       : sizeVariant === 'md' || sizeVariant === 'sm'
@@ -210,11 +205,11 @@ const StyledTrailingIconContainer = styled.div<
   align-items: center;
   bottom: 0;
   display: flex;
+  inset-inline-end: 0;
   justify-content: center;
   margin: auto 0;
-  padding-right: ${themeCssVariables.spacing[2]};
+  padding-inline-end: ${themeCssVariables.spacing[2]};
   position: absolute;
-  right: 0;
   top: 0;
 `;
 

@@ -61,6 +61,7 @@ const StyledUrl = styled.div`
   font-family: ${MONOSPACE_FONT_FAMILY};
   font-size: ${themeCssVariables.font.size.sm};
   overflow-wrap: anywhere;
+  text-align: left;
 `;
 
 const StyledHeaderTable = styled.div`
@@ -71,6 +72,7 @@ const StyledHeaderTable = styled.div`
   gap: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[3]};
   grid-template-columns: max-content 1fr;
   padding: ${themeCssVariables.spacing[3]};
+  text-align: left;
 `;
 
 const StyledHeaderName = styled.span`
@@ -96,6 +98,7 @@ const StyledBodyPre = styled.pre`
   max-height: 300px;
   overflow: auto;
   padding: ${themeCssVariables.spacing[2]};
+  text-align: left;
   white-space: pre-wrap;
   word-break: break-word;
 `;

@@ -79,7 +79,7 @@ const StyledLightMessage = styled.div`
 const StyledCsvTable = styled.table`
   border-collapse: collapse;
   font-size: ${themeCssVariables.font.size.sm};
-  text-align: left;
+  text-align: start;
   width: 100%;
 
   th {

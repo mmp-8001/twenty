@@ -9,6 +9,10 @@ const StyledChevronIcon = styled(IconChevronRight)`
   transition: transform
     calc(${themeCssVariables.animation.duration.normal} * 1s) ease;
 
+  &:dir(rtl) {
+    transform: scaleX(-1);
+  }
+
   &[data-open] {
     transform: rotate(90deg);
   }
