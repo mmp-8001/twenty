@@ -11,13 +11,11 @@ import {
   type DragHandleProps,
 } from '@tiptap/extension-drag-handle-react';
 import { useRef, useState } from 'react';
+import { getLocaleTextDirection } from 'twenty-shared/translations';
 import { isDefined, TIPTAP_NODE_TYPES } from 'twenty-shared/utils';
 import { themeCssVariables } from 'twenty-ui/theme';
 
-const DRAG_HANDLE_OPTIONS: Pick<
-  DragHandleProps,
-  'nested' | 'computePositionConfig'
-> = {
+const DRAG_HANDLE_OPTIONS: Pick<DragHandleProps, 'nested'> = {
   nested: {
     edgeDetection: 'none',
     rules: [
@@ -38,7 +36,6 @@ const DRAG_HANDLE_OPTIONS: Pick<
       },
     ],
   },
-  computePositionConfig: { placement: 'left', middleware: [offset(4)] },
 };
 
 const StyledHandleSlot = styled.div`
@@ -64,6 +61,7 @@ export const AdvancedTextEditorBlockHandle = ({
   onOpenBlockSettings,
 }: AdvancedTextEditorBlockHandleProps) => {
   const { i18n } = useLingui();
+  const isRtl = getLocaleTextDirection(i18n.locale) === 'rtl';
   const dragPreviewRef = useRef<HTMLDivElement>(null);
   const handleSlotRef = useRef<HTMLDivElement>(null);
   const hoveredBlockElementRef = useRef<HTMLElement>(null);
@@ -81,6 +79,7 @@ export const AdvancedTextEditorBlockHandle = ({
         getBlockHandleAnchorRect({
           blockElement,
           handleHeight: handleSlotRef.current?.offsetHeight ?? 0,
+          isRtl,
         }),
     };
   };
@@ -125,7 +124,10 @@ export const AdvancedTextEditorBlockHandle = ({
     <DragHandle
       editor={editor}
       nested={DRAG_HANDLE_OPTIONS.nested}
-      computePositionConfig={DRAG_HANDLE_OPTIONS.computePositionConfig}
+      computePositionConfig={{
+        placement: isRtl ? 'right' : 'left',
+        middleware: [offset(4)],
+      }}
       getReferencedVirtualElement={getHoveredBlockAnchor}
       onNodeChange={handleNodeChange}
       onElementDragStart={replaceDragImageAfterDragHandle}

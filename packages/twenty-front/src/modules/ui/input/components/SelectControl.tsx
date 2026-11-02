@@ -32,17 +32,17 @@ export const StyledControlContainer = styled.div<{
     $variant === 'transparent'
       ? 'none'
       : `1px solid ${themeCssVariables.border.color.medium}`};
-  border-bottom-left-radius: ${({ $variant }) =>
-    $variant === 'transparent' ? '0' : themeCssVariables.border.radius.md};
-  border-bottom-right-radius: ${({ hasRightElement, $variant }) =>
+  border-color: ${({ isFocused, hasRightElement, $variant }) =>
+    getFormFieldBorderColor({ isFocused, hasRightElement, variant: $variant })};
+  border-end-end-radius: ${({ hasRightElement, $variant }) =>
     $variant === 'transparent'
       ? '0'
       : hasRightElement
         ? '0'
         : themeCssVariables.border.radius.md};
-  border-color: ${({ isFocused, hasRightElement, $variant }) =>
-    getFormFieldBorderColor({ isFocused, hasRightElement, variant: $variant })};
-  border-right: ${({ isFocused, hasRightElement, $variant }) =>
+  border-end-start-radius: ${({ $variant }) =>
+    $variant === 'transparent' ? '0' : themeCssVariables.border.radius.md};
+  border-inline-end: ${({ isFocused, hasRightElement, $variant }) =>
     $variant === 'transparent'
       ? 'none'
       : hasRightElement
@@ -52,14 +52,14 @@ export const StyledControlContainer = styled.div<{
             hasRightElement,
             variant: $variant,
           })}`};
-  border-top-left-radius: ${({ $variant }) =>
-    $variant === 'transparent' ? '0' : themeCssVariables.border.radius.md};
-  border-top-right-radius: ${({ hasRightElement, $variant }) =>
+  border-start-end-radius: ${({ hasRightElement, $variant }) =>
     $variant === 'transparent'
       ? '0'
       : hasRightElement
         ? '0'
         : themeCssVariables.border.radius.md};
+  border-start-start-radius: ${({ $variant }) =>
+    $variant === 'transparent' ? '0' : themeCssVariables.border.radius.md};
   box-sizing: border-box;
   color: ${({ disabled, textAccent }) =>
     disabled

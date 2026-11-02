@@ -57,7 +57,7 @@ export const NavigationDrawerInboxChannelActionsDropdown = ({
           </LightIconButton>
         }
       />
-      <DropdownContent side="right" align="start">
+      <DropdownContent side="inline-end" align="start">
         <Dropdown.Section>
           {channel.isAccessible &&
             (isInboxChannelFavorite ? (

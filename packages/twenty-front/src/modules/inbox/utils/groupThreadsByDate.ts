@@ -1,4 +1,5 @@
 import { t } from '@lingui/core/macro';
+import { getLatinDigitsLocale } from '@/localization/utils/getLatinDigitsLocale';
 import { differenceInCalendarDays, startOfWeek } from 'date-fns';
 import { CalendarStartDay } from 'twenty-shared/constants';
 import { isDefined } from 'twenty-shared/utils';
@@ -15,7 +16,7 @@ const getMonthGroupId = (date: Date) =>
   `month:${date.getFullYear()}-${date.getMonth() + 1}`;
 
 const formatMonthGroupTitle = (date: Date) =>
-  new Intl.DateTimeFormat(undefined, {
+  new Intl.DateTimeFormat(getLatinDigitsLocale(), {
     month: 'long',
     year: 'numeric',
   }).format(date);

@@ -43,7 +43,7 @@ export const RecordTableScrollAndZIndexEffect = () => {
         );
       }
 
-      const newIsScrolledHorizontally = target.scrollLeft > 0;
+      const newIsScrolledHorizontally = target.scrollLeft !== 0;
 
       if (newIsScrolledHorizontally !== isRecordTableScrolledHorizontally) {
         setIsRecordTableScrolledHorizontally(newIsScrolledHorizontally);

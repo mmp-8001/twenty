@@ -41,4 +41,11 @@ export const dynamicActivate = async (locale: keyof typeof APP_LOCALES) => {
   i18n.load(locale, messages);
   i18n.activate(locale);
   applyDocumentLocale(locale);
+
+  try {
+    // Lets the next pre-login boot (initialI18nActivate) reuse the member's locale
+    localStorage.setItem('locale', locale);
+  } catch {
+    // storage unavailable (private mode); boot falls back to the browser language
+  }
 };

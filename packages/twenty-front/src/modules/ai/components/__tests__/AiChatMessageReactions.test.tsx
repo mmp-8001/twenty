@@ -96,7 +96,7 @@ describe('AiChatMessageReactions', () => {
     renderReactions();
 
     expect(
-      screen.getByRole('button', { name: '👍 by Tom Martin, You' }),
+      screen.getByRole('button', { name: '👍 by Tom Martin and You' }),
     ).toHaveAttribute('aria-pressed', 'true');
     expect(
       screen.getByRole('button', { name: '🎉 by Tom Martin' }),
@@ -176,7 +176,7 @@ describe('AiChatMessageReactions', () => {
     renderReactions();
 
     expect(
-      screen.getByRole('button', { name: '👍 by Tom Martin, 2 agents, Ada' }),
+      screen.getByRole('button', { name: '👍 by Tom Martin, 2 agents, and Ada' }),
     ).toHaveTextContent('👍4');
     expect(
       screen.getByRole('button', { name: '🎉 by an agent' }),

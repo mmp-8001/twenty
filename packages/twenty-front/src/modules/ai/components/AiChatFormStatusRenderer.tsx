@@ -52,10 +52,11 @@ export const AiChatFormStatusRenderer = ({
         .filter((field) => isDefined(values[field.name]))
         .map((field) => {
           const value = values[field.name];
+          const valueText = isString(value) ? value : JSON.stringify(value);
 
           return (
             <StyledAiChatAskStatusDetail key={field.name}>
-              {`${field.label}: ${isString(value) ? value : JSON.stringify(value)}`}
+              {t`${field.label}: ${valueText}`}
             </StyledAiChatAskStatusDetail>
           );
         })}

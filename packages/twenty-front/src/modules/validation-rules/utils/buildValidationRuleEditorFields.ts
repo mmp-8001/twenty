@@ -83,7 +83,7 @@ const buildScalarEditorFields = ({
     path: `${path}.${property.name}`,
     label: getCompositeSubfieldLabel(fieldMetadataItem.type, property.name),
     parentLabel: isDefined(parentLabel)
-      ? `${parentLabel} › ${fieldMetadataItem.label}`
+      ? t`${parentLabel} › ${fieldMetadataItem.label}`
       : fieldMetadataItem.label,
     type: property.type,
     selectOptionValues: [],

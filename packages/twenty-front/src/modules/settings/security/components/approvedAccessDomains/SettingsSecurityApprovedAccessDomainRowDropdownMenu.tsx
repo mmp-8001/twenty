@@ -64,7 +64,7 @@ export const SettingsSecurityApprovedAccessDomainRowDropdownMenu = ({
           </LightIconButton>
         }
       />
-      <DropdownContent side="right" align="start">
+      <DropdownContent side="inline-end" align="start">
         <Dropdown.Section>
           <Dropdown.ActionItem
             color="danger"

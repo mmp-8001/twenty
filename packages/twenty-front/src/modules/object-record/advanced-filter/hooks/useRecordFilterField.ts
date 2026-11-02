@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro';
 import { useFieldMetadataItemById } from '@/object-metadata/hooks/useFieldMetadataItemById';
 import { getCompositeSubFieldLabel } from '@/object-record/object-filter-dropdown/utils/getCompositeSubFieldLabel';
 import { isCompositeFieldType } from '@/object-record/object-filter-dropdown/utils/isCompositeFieldType';
@@ -44,7 +45,7 @@ export const useRecordFilterField = (recordFilterId: string) => {
   const fieldLabel = fieldMetadataItem?.label ?? '';
 
   const baseLabel = isDefined(relationTargetFieldMetadataItem)
-    ? `${fieldLabel} → ${relationTargetFieldMetadataItem.label}`
+    ? t`${fieldLabel} → ${relationTargetFieldMetadataItem.label}`
     : fieldLabel;
 
   const label = isNonEmptyString(subFieldLabel)

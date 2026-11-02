@@ -1,3 +1,4 @@
+import { getLatinDigitsLocale } from '@/localization/utils/getLatinDigitsLocale';
 import { styled } from '@linaria/react';
 
 import { themeCssVariables } from 'twenty-ui/theme';
@@ -55,7 +56,7 @@ export const SettingsAdminChatMessage = ({
         />
       ))}
       <StyledTimestamp>
-        {new Date(message.createdAt).toLocaleString()}
+        {new Date(message.createdAt).toLocaleString(getLatinDigitsLocale())}
       </StyledTimestamp>
     </StyledMessageBubble>
   );

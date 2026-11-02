@@ -1,4 +1,5 @@
 import { useNumberFormat } from '@/localization/hooks/useNumberFormat';
+import { getLatinDigitsLocale } from '@/localization/utils/getLatinDigitsLocale';
 import { type WorkspaceInfo } from '@/settings/admin-panel/types/WorkspaceInfo';
 import { getUpgradeHealthStatusBadge } from '@/settings/admin-panel/utils/getUpgradeHealthStatusBadge';
 import { getAdminWorkspaceLabel } from '@/settings/admin-panel/utils/getAdminWorkspaceLabel';
@@ -141,7 +142,7 @@ export const SettingsAdminWorkspaceContent = ({
       Icon: IconCalendar,
       label: t`Created`,
       value: activeWorkspace?.createdAt
-        ? new Date(activeWorkspace.createdAt).toLocaleDateString()
+        ? new Date(activeWorkspace.createdAt).toLocaleDateString(getLatinDigitsLocale())
         : '',
     },
   ];

@@ -96,7 +96,7 @@ export const LogConsoleTimeRangeDropdown = ({
         key={itemTimeRange}
         content={retentionDescription}
         disabled={isWithinRetention}
-        side="right"
+        side="inline-end"
       >
         <ListItemButton
           role="option"

@@ -5,6 +5,7 @@ import { useNavigationDrawerExpanded } from '@/ui/navigation/navigation-drawer/h
 import { isResizablePanelDraggingState } from '@/ui/layout/resizable-panel/states/isResizablePanelDraggingState';
 import { ResizeHandle } from 'twenty-ui/primitives/layout';
 import { useLingui } from '@lingui/react/macro';
+import { getLocaleTextDirection } from 'twenty-shared/translations';
 import { getUiZoom } from '@/ui/theme/utils/getUiZoom';
 import { NAVIGATION_DRAWER_COLLAPSED_WIDTH } from '@/ui/navigation/navigation-drawer/constants/NavigationDrawerCollapsedWidth';
 import { NAVIGATION_DRAWER_CONSTRAINTS } from '@/ui/navigation/navigation-drawer/constants/NavigationDrawerConstraints';
@@ -86,7 +87,9 @@ export const NavigationDrawer = ({
   className,
   header,
 }: NavigationDrawerProps) => {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
+  const resizeHandleEdge =
+    getLocaleTextDirection(i18n.locale) === 'rtl' ? 'left' : 'right';
   const resizeHandleRef = useRef<HTMLDivElement>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [liveWidth, setLiveWidth] = useState<number | null>(null);
@@ -162,7 +165,7 @@ export const NavigationDrawer = ({
         {isNavigationDrawerExpanded && !isMobile && (
           <ResizeHandle
             ref={resizeHandleRef}
-            edge="right"
+            edge={resizeHandleEdge}
             min={NAVIGATION_DRAWER_CONSTRAINTS.min}
             max={NAVIGATION_DRAWER_CONSTRAINTS.max}
             value={liveWidth ?? navigationDrawerWidth}

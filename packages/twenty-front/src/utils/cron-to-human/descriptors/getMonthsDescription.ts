@@ -16,11 +16,7 @@ const getMonthName = (
 
   const monthDate = new Date(2024, index, 1);
 
-  if (isDefined(localeCatalog)) {
-    return format(monthDate, 'MMMM', { locale: localeCatalog });
-  }
-
-  return format(monthDate, 'MMMM');
+  return format(monthDate, 'MMMM', { locale: localeCatalog });
 };
 
 export const getMonthsDescription = (

@@ -203,7 +203,7 @@ export const IconPicker = ({
                     }
                   />
                   <DropdownContent
-                    side="right"
+                    side="inline-end"
                     align="start"
                     sideOffset={-24}
                     alignOffset={24}

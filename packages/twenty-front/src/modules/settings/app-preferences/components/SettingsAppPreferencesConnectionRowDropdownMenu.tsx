@@ -46,7 +46,7 @@ export const SettingsAppPreferencesConnectionRowDropdownMenu = ({
             </LightIconButton>
           }
         />
-        <DropdownContent side="right" align="start">
+        <DropdownContent side="inline-end" align="start">
           <Dropdown.Section>
             {canStartAuthorization &&
               isApplicationConnectionReconnectNeeded(connection) && (

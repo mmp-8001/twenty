@@ -57,7 +57,7 @@ export const SettingPublicDomainRowDropdownMenu = ({
           </LightIconButton>
         }
       />
-      <DropdownContent side="right" align="start">
+      <DropdownContent side="inline-end" align="start">
         <Dropdown.Section>
           <Dropdown.ActionItem
             color="danger"

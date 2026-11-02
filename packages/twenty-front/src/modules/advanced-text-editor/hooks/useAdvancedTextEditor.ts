@@ -101,6 +101,7 @@ export const useAdvancedTextEditor = (
         scrollMargin: 60,
         ...editorProps,
       },
+      textDirection: 'auto',
       injectCSS: false,
     },
     dependencies,

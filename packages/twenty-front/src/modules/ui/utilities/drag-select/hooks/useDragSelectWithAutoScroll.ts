@@ -37,7 +37,6 @@ export const useDragSelectWithAutoScroll = () => {
         containerRect.right - mouseX < AUTO_SCROLL_EDGE_THRESHOLD_PX;
 
       const currentScrollTop = scrollWrapperHTMLElement.scrollTop;
-      const currentScrollLeft = scrollWrapperHTMLElement.scrollLeft;
 
       if (nearTop) {
         const newScrollTop = Math.max(
@@ -50,19 +49,15 @@ export const useDragSelectWithAutoScroll = () => {
         scrollWrapperHTMLElement.scrollTo({ top: newScrollTop });
       }
 
+      // scrollBy with a signed delta stays correct when RTL makes scrollLeft negative
       if (nearLeft) {
-        const newScrollLeft = Math.max(
-          0,
-          currentScrollLeft - AUTO_SCROLL_MAX_SPEED_PX,
-        );
-        scrollWrapperHTMLElement.scrollTo({
-          left: newScrollLeft,
+        scrollWrapperHTMLElement.scrollBy({
+          left: -AUTO_SCROLL_MAX_SPEED_PX,
           behavior: 'auto',
         });
       } else if (nearRight) {
-        const newScrollLeft = currentScrollLeft + AUTO_SCROLL_MAX_SPEED_PX;
-        scrollWrapperHTMLElement.scrollTo({
-          left: newScrollLeft,
+        scrollWrapperHTMLElement.scrollBy({
+          left: AUTO_SCROLL_MAX_SPEED_PX,
           behavior: 'auto',
         });
       }

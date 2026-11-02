@@ -124,7 +124,7 @@ export const SidePanelSearchRecordsPage = () => {
           <Tooltip.Portal>
             <Tooltip.Positioner
               anchor={previewAnchorRef}
-              side="left"
+              side="inline-start"
               align="start"
               sideOffset={16}
             >

@@ -92,7 +92,7 @@ export const SettingsAccountsRowDropdownMenu = ({
             </LightIconButton>
           }
         />
-        <DropdownContent side="right" align="start">
+        <DropdownContent side="inline-end" align="start">
           <Dropdown.Section>
             {hasPendingConfiguration && (
               <Dropdown.ActionItem

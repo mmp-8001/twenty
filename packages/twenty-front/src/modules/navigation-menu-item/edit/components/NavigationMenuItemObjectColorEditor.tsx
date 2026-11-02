@@ -76,7 +76,7 @@ export const NavigationMenuItemObjectColorEditor = ({
                 </StyledIconButton>
               }
             />
-            <DropdownContent side="right" align="start">
+            <DropdownContent side="inline-end" align="start">
               <StyledPopupScope data-click-outside-id={dropdownId}>
                 <ThemeColorPickerMenu
                   selectedColor={getObjectColorWithFallback(object)}

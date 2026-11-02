@@ -28,17 +28,7 @@ export const useScrollActiveTabIntoView = ({
         return;
       }
 
-      const activeTabLeft = activeTab.offsetLeft;
-      const activeTabRight = activeTabLeft + activeTab.offsetWidth;
-
-      if (activeTabLeft < tabRow.scrollLeft) {
-        tabRow.scrollLeft = activeTabLeft;
-        return;
-      }
-
-      if (activeTabRight > tabRow.scrollLeft + tabRow.clientWidth) {
-        tabRow.scrollLeft = activeTabRight - tabRow.clientWidth;
-      }
+      activeTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     };
 
     scrollActiveTabIntoView();
