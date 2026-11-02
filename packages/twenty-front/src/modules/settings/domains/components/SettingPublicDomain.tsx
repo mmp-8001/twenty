@@ -190,6 +190,7 @@ export const SettingPublicDomain = () => {
         )}
         <StyledDomainFormWrapper>
           <TextInput
+            dir="ltr"
             value={selectedPublicDomain?.domain ?? newPublicDomain}
             onChange={setNewPublicDomain}
             error={newPublicDomainError}

@@ -81,6 +81,7 @@ export const SettingsCustomDomain = () => {
           <CheckCustomDomainValidRecordsEffect />
           <StyledDomainFormWrapper>
             <TextInput
+              dir="ltr"
               value={customDomain}
               type="text"
               onChange={handleChange}

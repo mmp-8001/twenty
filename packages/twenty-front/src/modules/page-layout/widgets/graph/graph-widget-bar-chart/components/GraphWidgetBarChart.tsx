@@ -250,6 +250,7 @@ export const GraphWidgetBarChart = ({
   return (
     <StyledContainer id={id}>
       <GraphWidgetChartContainer
+        dir="ltr"
         ref={containerRef}
         $isClickable={hasClickableItems}
         $cursorSelector="canvas"

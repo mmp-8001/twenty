@@ -16,6 +16,7 @@ const StyledContainer = styled.div`
 `;
 
 const StyledCodeEditorWrapper = styled.div`
+  direction: ltr;
   display: flex;
   flex: 1;
   flex-direction: column;

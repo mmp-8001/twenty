@@ -306,6 +306,7 @@ export const SignInUpWorkspaceCreationForm = () => {
           <OnboardingStepAnimatedItem index={4}>
             <StyledSubdomainSection>
               <TextInput
+                dir="ltr"
                 label={t`Subdomain`}
                 value={subdomain}
                 placeholder={t`apple`}

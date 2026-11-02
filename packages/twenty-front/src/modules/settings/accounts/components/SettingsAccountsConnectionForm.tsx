@@ -113,6 +113,7 @@ export const SettingsAccountsConnectionForm = ({
           control={control}
           render={({ field, fieldState }) => (
             <SettingsTextInput
+              dir="ltr"
               instanceId="email-address-connection-form"
               label={t`Email Address`}
               placeholder={t`john.doe@example.com`}
@@ -137,6 +138,7 @@ export const SettingsAccountsConnectionForm = ({
             control={control}
             render={({ field, fieldState }) => (
               <SettingsTextInput
+                dir="ltr"
                 instanceId="imap-host-connection-form"
                 label={t`IMAP Server`}
                 placeholder={t`imap.example.com`}
@@ -152,6 +154,7 @@ export const SettingsAccountsConnectionForm = ({
             control={control}
             render={({ field, fieldState }) => (
               <SettingsTextInput
+                dir="ltr"
                 instanceId="imap-username-connection-form"
                 ignorePasswordManagers
                 label={t`IMAP Username (Optional)`}
@@ -185,6 +188,7 @@ export const SettingsAccountsConnectionForm = ({
                 control={control}
                 render={({ field, fieldState }) => (
                   <SettingsTextInput
+                    dir="ltr"
                     instanceId="imap-port-connection-form"
                     label={t`IMAP Port`}
                     type="number"
@@ -235,6 +239,7 @@ export const SettingsAccountsConnectionForm = ({
             control={control}
             render={({ field, fieldState }) => (
               <SettingsTextInput
+                dir="ltr"
                 instanceId="smtp-host-connection-form"
                 label={t`SMTP Server`}
                 placeholder={t`smtp.example.com`}
@@ -250,6 +255,7 @@ export const SettingsAccountsConnectionForm = ({
             control={control}
             render={({ field, fieldState }) => (
               <SettingsTextInput
+                dir="ltr"
                 instanceId="smtp-username-connection-form"
                 ignorePasswordManagers
                 label={t`SMTP Username`}
@@ -282,6 +288,7 @@ export const SettingsAccountsConnectionForm = ({
                 control={control}
                 render={({ field, fieldState }) => (
                   <SettingsTextInput
+                    dir="ltr"
                     instanceId="smtp-port-connection-form"
                     label={t`SMTP Port`}
                     type="number"
@@ -332,6 +339,7 @@ export const SettingsAccountsConnectionForm = ({
             control={control}
             render={({ field, fieldState }) => (
               <SettingsTextInput
+                dir="ltr"
                 instanceId="caldav-host-connection-form"
                 label={t`CalDAV Server`}
                 placeholder={t`caldav.example.com`}
@@ -347,6 +355,7 @@ export const SettingsAccountsConnectionForm = ({
             control={control}
             render={({ field, fieldState }) => (
               <SettingsTextInput
+                dir="ltr"
                 instanceId="caldav-username-connection-form"
                 ignorePasswordManagers
                 label={t`CalDAV Username`}

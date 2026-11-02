@@ -44,6 +44,7 @@ export const SettingsLogicFunctionCronTriggerSection = ({
         <>
           <SettingsTextInput
             instanceId="logic-function-cron-trigger-pattern"
+            dir="ltr"
             label={t`Expression`}
             placeholder="0 */1 * * *"
             value={value.pattern}

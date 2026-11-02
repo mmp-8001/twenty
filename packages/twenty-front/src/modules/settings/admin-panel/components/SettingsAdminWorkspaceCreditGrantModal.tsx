@@ -147,6 +147,7 @@ export const SettingsAdminWorkspaceCreditGrantModal = ({
                 placeholder="200"
                 type="number"
                 min={0}
+                dir="ltr"
                 leftAdornment="$"
                 value={amount}
                 onChange={setAmount}

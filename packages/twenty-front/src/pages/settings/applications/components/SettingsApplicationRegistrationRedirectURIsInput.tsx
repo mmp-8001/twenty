@@ -78,6 +78,7 @@ export const SettingsApplicationRegistrationRedirectURIsInput = ({
             control={control}
             render={({ field: { value, onChange }, fieldState: { error } }) => (
               <SettingsTextInput
+                dir="ltr"
                 instanceId="settings-application-registration-redirect-uris-input"
                 placeholder={t`https://example.com/callback`}
                 value={value}

@@ -25,6 +25,7 @@ export const ApiKeyInput = ({ apiKey }: ApiKeyInputProps) => {
     <StyledContainer>
       <StyledLinkContainer>
         <SettingsTextInput
+          dir="ltr"
           instanceId="api-key-display"
           value={apiKey}
           fullWidth

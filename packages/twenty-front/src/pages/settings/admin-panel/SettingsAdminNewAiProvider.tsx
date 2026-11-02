@@ -444,6 +444,7 @@ export const SettingsAdminNewAiProvider = () => {
                       fieldState: { error },
                     }) => (
                       <TextInput
+                        dir="ltr"
                         value={value}
                         onChange={onChange}
                         placeholder={t`https://api.example.com/v1`}
@@ -493,6 +494,7 @@ export const SettingsAdminNewAiProvider = () => {
                         fieldState: { error },
                       }) => (
                         <TextInput
+                          dir="ltr"
                           value={value}
                           onChange={onChange}
                           placeholder={t`us-east-1`}
@@ -539,6 +541,7 @@ export const SettingsAdminNewAiProvider = () => {
                         fieldState: { error },
                       }) => (
                         <TextInput
+                          dir="ltr"
                           value={value}
                           onChange={onChange}
                           placeholder={t`AKIA...`}

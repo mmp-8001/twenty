@@ -138,6 +138,7 @@ export const SettingsDevelopersWebhookForm = ({
               }) => {
                 return (
                   <SettingsTextInput
+                    dir="ltr"
                     instanceId={targetUrlTextInputId}
                     placeholder={t`https://example.com/webhook`}
                     value={value}
@@ -214,6 +215,7 @@ export const SettingsDevelopersWebhookForm = ({
               control={formConfig.control}
               render={({ field: { onChange, value } }) => (
                 <SettingsTextInput
+                  dir="ltr"
                   instanceId={secretTextInputId}
                   placeholder={t`Secret (optional)`}
                   value={value || ''}

@@ -113,6 +113,7 @@ export const EmailBoxSidesInput = ({
           </StyledSidesGrid>
         ) : (
           <TextInput
+            dir="ltr"
             value={toDisplayAmount(sides.top)}
             onChange={commitAllSides}
             placeholder={placeholder ?? '0'}

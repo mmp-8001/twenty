@@ -40,6 +40,7 @@ const StyledStackTrace = styled.pre`
   background: ${themeCssVariables.background.tertiary};
   border-radius: ${themeCssVariables.border.radius.xs};
   color: ${themeCssVariables.font.color.tertiary};
+  direction: ltr;
   font-family: ${MONOSPACE_FONT_FAMILY};
   font-size: ${themeCssVariables.font.size.xs};
   margin: 0;

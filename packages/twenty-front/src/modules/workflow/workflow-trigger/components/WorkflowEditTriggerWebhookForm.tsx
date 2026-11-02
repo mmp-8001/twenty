@@ -80,6 +80,7 @@ export const WorkflowEditTriggerWebhookForm = ({
     <>
       <WorkflowStepBody>
         <TextInput
+          dir="ltr"
           label={t`Live URL`}
           value={displayWebhookUrl}
           RightIcon={() => (

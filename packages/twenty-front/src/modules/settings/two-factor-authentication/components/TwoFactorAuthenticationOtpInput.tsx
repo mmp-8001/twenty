@@ -6,6 +6,7 @@ import { OTPInput, type SlotProps } from 'input-otp';
 import { themeCssVariables } from 'twenty-ui/theme';
 
 const StyledOTPContainer = styled.div`
+  direction: ltr;
   display: flex;
   gap: ${themeCssVariables.spacing[1]};
 

@@ -39,6 +39,7 @@ const StyledPhoneInputWrapper = styled.div<{
   background-color: transparent;
   border: none;
   color: ${themeCssVariables.font.color.primary};
+  direction: ltr;
   font-family: ${themeCssVariables.font.family};
   font-size: inherit;
   font-weight: inherit;

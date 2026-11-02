@@ -26,6 +26,7 @@ export const EllipsisDisplay = ({
 }: EllipsisDisplayProps) => (
   <Text
     truncate
+    dir="auto"
     className={clsx(styles.ellipsis, className)}
     style={isDefined(maxWidth) ? { maxWidth: `${maxWidth}px` } : undefined}
   >

@@ -151,6 +151,7 @@ const FakeDash = () => {
 
 const StyledOTPContainer = styled.div`
   align-items: center;
+  direction: ltr;
   display: flex;
 
   &:has(:disabled) {

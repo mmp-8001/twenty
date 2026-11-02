@@ -320,6 +320,7 @@ export const RecordFormLinksFieldInput = ({
     >
       {isDomainField && <LinksFieldDomainFavicon domain={inputValue} />}
       <MultiItemFieldTextInput
+        dir="ltr"
         ref={inputRef}
         autoFocus={shouldFocusInput}
         spacing={inputSpacing}
