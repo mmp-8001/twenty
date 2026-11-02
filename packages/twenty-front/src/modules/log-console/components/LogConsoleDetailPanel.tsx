@@ -221,7 +221,7 @@ export const LogConsoleDetailPanel = () => {
           aria-label={closeLabel}
           onClick={() => setLogConsoleSelectedLog(null)}
         >
-          <IconLayoutSidebarRightCollapse />
+          <IconLayoutSidebarRightCollapse className="rtl-mirror" />
         </IconButton>
         <HeaderIdentifier
           avatar={

@@ -202,7 +202,12 @@ export const EventCardCalendarEvent = ({
           )}
         </StyledCalendarEventTop>
         <StyledCalendarEventBody>
-          {startsAtTime} {isDefined(endsAtTime) && <>→ {endsAtTime}</>}
+          {startsAtTime}{' '}
+          {isDefined(endsAtTime) && (
+            <>
+              <span className="rtl-mirror">→</span> {endsAtTime}
+            </>
+          )}
         </StyledCalendarEventBody>
       </StyledCalendarEventContent>
     </StyledEventCardCalendarEventContainer>

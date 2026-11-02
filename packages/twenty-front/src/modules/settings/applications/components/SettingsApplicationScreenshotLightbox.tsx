@@ -132,7 +132,7 @@ export const SettingsApplicationScreenshotLightbox = ({
                   aria-label={t`Previous screenshot`}
                   onClick={showPrevious}
                 >
-                  <IconChevronLeft />
+                  <IconChevronLeft className="rtl-mirror" />
                 </IconButton>
               </StyledPreviousButton>
             )}
@@ -149,7 +149,7 @@ export const SettingsApplicationScreenshotLightbox = ({
                     aria-label={t`Next screenshot`}
                     onClick={showNext}
                   >
-                    <IconChevronRight />
+                    <IconChevronRight className="rtl-mirror" />
                   </IconButton>
                 </StyledNextButton>
                 <StyledCounter aria-live="polite">

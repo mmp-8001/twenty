@@ -99,7 +99,7 @@ export const SettingsRolesTableRow = ({ role }: SettingsRolesTableRowProps) => {
           </StyledAssignedToCell>
         </TableCell>
         <TableCell align="right" color={theme.font.color.tertiary}>
-          <IconChevronRight size={theme.icon.size.md} />
+          <IconChevronRight className="rtl-mirror" size={theme.icon.size.md} />
         </TableCell>
       </TableRow>
     </StyledTableRowContainer>

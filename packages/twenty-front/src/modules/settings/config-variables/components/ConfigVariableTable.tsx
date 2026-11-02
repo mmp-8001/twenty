@@ -80,6 +80,7 @@ export const ConfigVariableTable = ({
               </TableCell>
               <TableCell align="right" color={theme.font.color.secondary}>
                 <IconChevronRight
+                  className="rtl-mirror"
                   size={theme.icon.size.md}
                   color={theme.font.color.tertiary}
                 />

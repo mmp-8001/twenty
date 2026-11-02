@@ -109,7 +109,7 @@ export const WorkflowIteratorSubStepSwitcher = ({
         disabled={!canGoToPreviousIndex}
         onClick={handleDecrementIndex}
       >
-        <IconChevronLeft />
+        <IconChevronLeft className="rtl-mirror" />
       </IconButton>
 
       <StyledCounter>
@@ -126,7 +126,7 @@ export const WorkflowIteratorSubStepSwitcher = ({
         disabled={!canGoToNextIndex}
         onClick={handleIncrementIndex}
       >
-        <IconChevronRight />
+        <IconChevronRight className="rtl-mirror" />
       </IconButton>
     </StyledContainer>
   );
