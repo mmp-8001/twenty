@@ -58,6 +58,7 @@ const StyledNetworkErrorBadge = styled.span`
 
 const StyledUrl = styled.div`
   color: ${themeCssVariables.font.color.tertiary};
+  direction: ltr;
   font-family: ${MONOSPACE_FONT_FAMILY};
   font-size: ${themeCssVariables.font.size.sm};
   overflow-wrap: anywhere;
@@ -68,6 +69,7 @@ const StyledHeaderTable = styled.div`
   background: ${themeCssVariables.background.transparent.lighter};
   border: 1px solid ${themeCssVariables.border.color.light};
   border-radius: ${themeCssVariables.border.radius.sm};
+  direction: ltr;
   display: grid;
   gap: ${themeCssVariables.spacing[1]} ${themeCssVariables.spacing[3]};
   grid-template-columns: max-content 1fr;
@@ -92,6 +94,7 @@ const StyledBodyPre = styled.pre`
   background: ${themeCssVariables.background.tertiary};
   border-radius: ${themeCssVariables.border.radius.sm};
   color: ${themeCssVariables.font.color.primary};
+  direction: ltr;
   font-family: ${MONOSPACE_FONT_FAMILY};
   font-size: ${themeCssVariables.font.size.sm};
   margin: 0;

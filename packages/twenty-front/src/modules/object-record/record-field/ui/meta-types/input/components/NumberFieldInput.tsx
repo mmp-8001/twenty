@@ -97,6 +97,7 @@ export const NumberFieldInput = () => {
     <FieldInputContainer onKeyDown={handleKeyDown} onPaste={handlePaste}>
       <TextInput
         instanceId={instanceId}
+        dir="ltr"
         placeholder={fieldDefinition.metadata.placeHolder}
         autoFocus
         value={draftValue?.toString() ?? ''}

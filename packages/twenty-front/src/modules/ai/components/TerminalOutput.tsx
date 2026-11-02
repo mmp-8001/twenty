@@ -13,6 +13,7 @@ import { useCopyToClipboard } from '~/hooks/useCopyToClipboard';
 
 const StyledContainer = styled.div`
   border-radius: ${themeCssVariables.border.radius.sm};
+  direction: ltr;
   display: flex;
   flex-direction: column;
   overflow: hidden;

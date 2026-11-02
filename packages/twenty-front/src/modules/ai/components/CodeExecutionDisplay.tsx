@@ -83,6 +83,7 @@ const StyledSectionHeaderLeft = styled.div`
 `;
 
 const StyledCodeEditorContainer = styled.div`
+  direction: ltr;
   max-height: 300px;
   overflow: hidden;
   text-align: left;

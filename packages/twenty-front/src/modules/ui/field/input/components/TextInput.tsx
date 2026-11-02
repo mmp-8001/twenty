@@ -47,6 +47,7 @@ export type TextInputProps = {
   disabled?: boolean;
   className?: string;
   'aria-label'?: string;
+  dir?: 'ltr' | 'rtl';
 };
 
 const getValue = (value: string, shouldTrim: boolean) => {
@@ -74,6 +75,7 @@ export const TextInput = ({
   disabled,
   className,
   'aria-label': ariaLabel,
+  dir,
 }: TextInputProps) => {
   const [internalText, setInternalText] = useState(value);
 
@@ -116,6 +118,7 @@ export const TextInput = ({
         disabled={disabled}
         className={className}
         aria-label={ariaLabel}
+        dir={dir}
       />
       {copyButton && (
         <div ref={copyRef}>

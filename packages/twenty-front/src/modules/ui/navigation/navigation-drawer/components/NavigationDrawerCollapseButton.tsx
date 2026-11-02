@@ -3,8 +3,17 @@ import { useNavigationDrawerTogglePresentation } from '@/ui/navigation/navigatio
 import { useToggleNavigationDrawer } from '@/ui/navigation/navigation-drawer/hooks/useToggleNavigationDrawer';
 import { TooltipDelay } from '@/ui/layout/tooltip/constants/TooltipDelay';
 import { useNavigationDrawerExpandButtonFocusHandOff } from '@/ui/navigation/navigation-drawer/hooks/useNavigationDrawerExpandButtonFocusHandOff';
+import { styled } from '@linaria/react';
 import { useIsMobile } from 'twenty-ui/utilities';
 import { LightIconButton } from 'twenty-ui/components/input';
+
+const StyledDirectionalIcon = styled.span`
+  display: inline-flex;
+
+  &:dir(rtl) {
+    transform: scaleX(-1);
+  }
+`;
 
 type NavigationDrawerCollapseButtonProps = {
   direction?: 'left' | 'right';
@@ -41,7 +50,9 @@ export const NavigationDrawerCollapseButton = ({
       tooltipPlace="bottom"
       tooltipOffset={5}
     >
-      <Icon />
+      <StyledDirectionalIcon>
+        <Icon />
+      </StyledDirectionalIcon>
     </LightIconButton>
   );
 };

@@ -70,6 +70,7 @@ export const SettingsSubdomain = () => {
             />
             <StyledDomainFormWrapper>
               <TextInput
+                dir="ltr"
                 value={subdomain}
                 type="text"
                 onChange={handleChange}
