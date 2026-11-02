@@ -52,7 +52,7 @@ export const DropdownMenuHeaderLeftComponent = ({
             onClick={onClick}
             aria-label={t`Go back`}
           >
-            <props.Icon />
+            <props.Icon className="rtl-mirror" />
           </LightIconButton>
         ) : (
           <StyledNonClickableStartIcon>

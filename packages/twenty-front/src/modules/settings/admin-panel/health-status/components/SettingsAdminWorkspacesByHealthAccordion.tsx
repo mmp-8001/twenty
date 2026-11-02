@@ -68,7 +68,7 @@ export const SettingsAdminWorkspacesByHealthAccordion = ({
           {isExpanded ? (
             <IconChevronDown size={16} />
           ) : (
-            <IconChevronRight size={16} />
+            <IconChevronRight className="rtl-mirror" size={16} />
           )}
         </StyledAccordionHeader>
         <Collapsible.Panel dimension="height">

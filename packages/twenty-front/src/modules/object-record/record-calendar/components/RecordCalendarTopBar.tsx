@@ -204,7 +204,7 @@ export const RecordCalendarTopBar = () => {
           <Button
             aria-label={t`Previous period`}
             size="sm"
-            startIcon={<IconChevronLeft />}
+            startIcon={<IconChevronLeft className="rtl-mirror" />}
             onClick={handlePreviousPeriod}
             variant="ghost"
           />
@@ -218,7 +218,7 @@ export const RecordCalendarTopBar = () => {
           <Button
             aria-label={t`Next period`}
             size="sm"
-            startIcon={<IconChevronRight />}
+            startIcon={<IconChevronRight className="rtl-mirror" />}
             onClick={handleNextPeriod}
             variant="ghost"
           />

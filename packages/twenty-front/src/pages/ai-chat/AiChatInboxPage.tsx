@@ -232,7 +232,7 @@ const AiChatInboxPageContent = () => {
       onClick={() => selectThread(null)}
       aria-label={t`Back to inbox`}
     >
-      <IconChevronLeft />
+      <IconChevronLeft className="rtl-mirror" />
     </IconButton>
   );
 

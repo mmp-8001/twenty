@@ -55,6 +55,7 @@ export const CoreAgentRunConversation = ({
       >
         <TableCell gap={themeCssVariables.spacing[1]}>
           <ChevronIcon
+            className="rtl-mirror"
             size={theme.icon.size.sm}
             stroke={theme.icon.stroke.sm}
           />

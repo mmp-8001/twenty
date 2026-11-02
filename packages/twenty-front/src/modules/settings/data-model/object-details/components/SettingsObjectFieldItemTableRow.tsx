@@ -247,6 +247,7 @@ export const SettingsObjectFieldItemTableRow = ({
             <UndecoratedLink to={linkToNavigate}>
               <StyledIconChevronRightContainer>
                 <IconChevronRight
+                  className="rtl-mirror"
                   size={theme.icon.size.md}
                   stroke={theme.icon.stroke.sm}
                 />

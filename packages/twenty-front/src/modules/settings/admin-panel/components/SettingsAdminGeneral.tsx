@@ -194,6 +194,7 @@ export const SettingsAdminGeneral = () => {
                     </TableCell>
                     <TableCell align="center">
                       <IconChevronRight
+                        className="rtl-mirror"
                         size={theme.icon.size.md}
                         stroke={theme.icon.stroke.sm}
                         color={theme.font.color.tertiary}
@@ -274,6 +275,7 @@ export const SettingsAdminGeneral = () => {
                       </TableCell>
                       <TableCell align="center">
                         <IconChevronRight
+                          className="rtl-mirror"
                           size={theme.icon.size.md}
                           stroke={theme.icon.stroke.sm}
                           color={theme.font.color.tertiary}

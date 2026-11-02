@@ -79,7 +79,10 @@ export const SettingsObjectRelatedRecordPathTableRow = ({
               <Fragment key={fieldMetadataItem.id}>
                 {index > 0 && (
                   <StyledInlineIcon isSeparator>
-                    <IconChevronRight size={theme.icon.size.sm} />
+                    <IconChevronRight
+                      className="rtl-mirror"
+                      size={theme.icon.size.sm}
+                    />
                   </StyledInlineIcon>
                 )}
                 <StyledInlineIcon>

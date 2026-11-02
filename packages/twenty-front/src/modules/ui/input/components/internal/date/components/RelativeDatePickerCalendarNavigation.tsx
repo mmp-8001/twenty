@@ -52,7 +52,7 @@ export const RelativeDatePickerCalendarNavigation = ({
         disabled={prevMonthButtonDisabled}
         aria-label={t`Previous`}
       >
-        <IconChevronLeft />
+        <IconChevronLeft className="rtl-mirror" />
       </LightIconButton>
       <StyledMonthYearLabel>{monthYearLabel}</StyledMonthYearLabel>
       <LightIconButton
@@ -61,7 +61,7 @@ export const RelativeDatePickerCalendarNavigation = ({
         disabled={nextMonthButtonDisabled}
         aria-label={t`Next`}
       >
-        <IconChevronRight />
+        <IconChevronRight className="rtl-mirror" />
       </LightIconButton>
     </StyledContainer>
   );

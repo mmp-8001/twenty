@@ -70,6 +70,7 @@ export const SettingsAgentSkillsTable = ({
               action={
                 skill.isActive ? (
                   <IconChevronRight
+                    className="rtl-mirror"
                     size={theme.icon.size.md}
                     stroke={theme.icon.stroke.sm}
                   />

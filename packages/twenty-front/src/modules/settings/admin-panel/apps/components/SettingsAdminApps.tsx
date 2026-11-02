@@ -354,6 +354,7 @@ const SettingsAdminAppsTableRow = ({
       </TableCell>
       <TableCell align="right">
         <IconChevronRight
+          className="rtl-mirror"
           size={theme.icon.size.md}
           color={theme.font.color.tertiary}
         />
