@@ -87,7 +87,7 @@ export const OnboardingHeader = ({
             disabled={isBackDisabled}
             aria-label={t`Go back`}
           >
-            <IconChevronLeft />
+            <IconChevronLeft className="rtl-mirror" />
           </LightIconButton>
         )}
       </StyledLeftSide>

@@ -46,7 +46,7 @@ export const SettingsAccountsConfigurationStepEmail = ({
       actionButton={
         hasNextStep ? (
           <Button
-            startIcon={<IconChevronRight />}
+            startIcon={<IconChevronRight className="rtl-mirror" />}
             size="sm"
             onClick={onNext}
             disabled={isSubmitting}

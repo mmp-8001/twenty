@@ -125,7 +125,7 @@ export const WorkflowDropdownStepOutputItems = ({
     <>
       <Dropdown.Header>
         <LightIconButton size="sm" aria-label={t`Back`} onClick={goBack}>
-          <IconChevronLeft />
+          <IconChevronLeft className="rtl-mirror" />
         </LightIconButton>
         <Dropdown.Title>{getStepHeaderLabel(step, currentPath)}</Dropdown.Title>
         <Dropdown.Close aria-label={t`Close`} />

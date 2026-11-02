@@ -58,7 +58,7 @@ export const SettingsWizardStepBar = ({
             onClick={onBack}
             aria-label={t`Previous`}
           >
-            <IconChevronLeft />
+            <IconChevronLeft className="rtl-mirror" />
           </LightIconButton>
         )}
       </StyledLeft>

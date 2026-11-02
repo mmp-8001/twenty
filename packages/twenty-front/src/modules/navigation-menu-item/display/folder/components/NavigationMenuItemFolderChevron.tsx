@@ -25,6 +25,7 @@ export const NavigationMenuItemFolderChevron = ({
   return (
     <StyledContainer isOpen={isOpen}>
       <IconChevronRight
+        className={isOpen ? undefined : 'rtl-mirror'}
         size={theme.icon.size.sm}
         stroke={theme.icon.stroke.sm}
         color={themeCssVariables.font.color.tertiary}

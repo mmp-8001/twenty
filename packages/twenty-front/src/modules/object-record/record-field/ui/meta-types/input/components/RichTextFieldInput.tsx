@@ -136,7 +136,7 @@ export const RichTextFieldInput = () => {
           }}
           aria-label={t`Open in side panel`}
         >
-          <IconLayoutSidebarLeftCollapse />
+          <IconLayoutSidebarLeftCollapse className="rtl-mirror" />
         </IconButton>
       </StyledCollapseButton>
     </StyledContainer>

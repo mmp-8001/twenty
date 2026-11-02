@@ -268,7 +268,10 @@ export const SettingsWorkspaceMembersTeamTab = () => {
                   <TableCell align="right">
                     <StyledChevronWrapper>
                       {currentWorkspaceMember?.id !== workspaceMember.id && (
-                        <IconChevronRight size={theme.icon.size.sm} />
+                        <IconChevronRight
+                          className="rtl-mirror"
+                          size={theme.icon.size.sm}
+                        />
                       )}
                     </StyledChevronWrapper>
                   </TableCell>

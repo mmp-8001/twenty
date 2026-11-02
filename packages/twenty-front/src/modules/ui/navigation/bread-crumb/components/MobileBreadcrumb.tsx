@@ -76,7 +76,11 @@ export const MobileBreadcrumb = ({ links }: MobileBreadcrumbProps) => {
     <StyledWrapper aria-label={t`Breadcrumb`}>
       {isNonEmptyString(previousLink.href) ? (
         <>
-          <IconChevronLeft size={theme.icon.size.md} aria-hidden />
+          <IconChevronLeft
+            className="rtl-mirror"
+            size={theme.icon.size.md}
+            aria-hidden
+          />
           <StyledLinkContainer>
             <Link title={title} to={previousLink.href}>
               <Trans>Back to {text}</Trans>

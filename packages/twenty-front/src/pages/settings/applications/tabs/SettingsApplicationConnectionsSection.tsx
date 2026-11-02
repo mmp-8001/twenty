@@ -105,6 +105,7 @@ export const SettingsApplicationConnectionsSection = ({
                         padding={`0 ${themeCssVariables.spacing[2]} 0 0`}
                       >
                         <IconChevronRight
+                          className="rtl-mirror"
                           size={theme.icon.size.md}
                           stroke={theme.icon.stroke.sm}
                           color={theme.font.color.light}

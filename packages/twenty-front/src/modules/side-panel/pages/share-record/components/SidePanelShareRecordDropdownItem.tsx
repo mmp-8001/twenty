@@ -55,7 +55,7 @@ export const SidePanelShareRecordDropdownItem = ({
             }
             description={description}
             descriptionPlacement="end"
-            endIcon={<IconChevronRight />}
+            endIcon={<IconChevronRight className="rtl-mirror" />}
             focusableWhenDisabled
           >
             {label}

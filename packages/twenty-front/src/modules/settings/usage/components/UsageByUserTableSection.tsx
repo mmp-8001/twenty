@@ -131,6 +131,7 @@ export const UsageByUserTableSection = ({
             <TableCell align="center">
               <StyledIconChevronRightContainer>
                 <IconChevronRight
+                  className="rtl-mirror"
                   size={theme.icon.size.md}
                   stroke={theme.icon.stroke.sm}
                 />

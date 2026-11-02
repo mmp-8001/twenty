@@ -213,7 +213,7 @@ export const DateTimePickerHeader = ({
               disabled={prevMonthButtonDisabled}
               aria-label={t`Previous`}
             >
-              <IconChevronLeft />
+              <IconChevronLeft className="rtl-mirror" />
             </LightIconButton>
             <LightIconButton
               onClick={onAddMonth}
@@ -221,7 +221,7 @@ export const DateTimePickerHeader = ({
               disabled={nextMonthButtonDisabled}
               aria-label={t`Next`}
             >
-              <IconChevronRight />
+              <IconChevronRight className="rtl-mirror" />
             </LightIconButton>
           </StyledNavigationButtons>
         </StyledRightControls>

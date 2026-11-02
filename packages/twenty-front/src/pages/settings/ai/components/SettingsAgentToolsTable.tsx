@@ -84,6 +84,7 @@ export const SettingsAgentToolsTable = ({
                 applicationId={getToolApplicationId(tool, currentWorkspace)}
                 action={
                   <IconChevronRight
+                    className="rtl-mirror"
                     size={theme.icon.size.md}
                     stroke={theme.icon.stroke.sm}
                     color={theme.font.color.tertiary}
