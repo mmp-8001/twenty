@@ -4353,6 +4353,9 @@ exports[`STANDARD_OBJECTS universal identifiers should never change without an e
       "blocklist": {
         "universalIdentifier": "20202020-6cb2-4161-9f29-a4b7f1283859",
       },
+      "calendar": {
+        "universalIdentifier": "cb82f151-ea68-45fa-abd5-10536d368df8",
+      },
       "calendarEventParticipants": {
         "universalIdentifier": "20202020-0dbc-4841-9ce1-3e793b5b3512",
       },
