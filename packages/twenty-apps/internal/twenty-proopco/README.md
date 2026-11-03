@@ -2,6 +2,8 @@
 
 Private Twenty app for the proopco sales CRM. See `GLOSSARY.md` and `docs/adr/` at the repo root.
 
+The app installs on its own: it needs neither the `twenty-sms` app nor a proopco connection. Every server variable is optional, and each connection switches on once its variables are set in Settings > Applications > twenty-proopco: `PROOPCO_SYNC_TOKEN` for sync, `SMS_ENQUEUE_URL` and `SMS_ENQUEUE_TOKEN` for Campaigns, `PROOPCO_API_BASE_URL` and `PROOPCO_API_KEY` for Gift discount code. Until then those routes refuse with an error naming the missing variables.
+
 ## Sync route
 
 `POST /s/proopco/sync` with header `x-proopco-sync-token` (the `PROOPCO_SYNC_TOKEN` server variable).
@@ -34,7 +36,7 @@ Jobs also exposed as routes guarded by the same `x-proopco-sync-token`, so tests
 
 Commission Tiers and Followup Types are records; `RETRY_WINDOW_DAYS`, `POOL_DAYS`, `COMMISSION_BASIS`, `COMMISSION_SCOPE` and `INSTALLMENT_REMAINING_EARNS` are app variables. `COMMISSION_BASIS=list_price` is refused until proopco syncs a list price.
 
-`twenty app apply` skips the post-install hook (seeds and deactivating Opportunity); the integration tests run its steps directly.
+The post-install hook (seeds, `activeTraderKey` backfill, deactivating Opportunity) runs on `twenty app install` and on version upgrades, not on `twenty app apply`.
 
 ## Campaigns and Gift discount code
 

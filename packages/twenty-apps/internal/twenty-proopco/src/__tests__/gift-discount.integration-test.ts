@@ -45,7 +45,8 @@ describe('Gift discount code', () => {
 
     expect(await gift({ personId, code: 'WELCOME' })).toEqual({
       success: false,
-      error: 'PROOPCO_API_BASE_URL and PROOPCO_API_KEY must be set',
+      error:
+        'The proopco API is not configured: set PROOPCO_API_BASE_URL and PROOPCO_API_KEY in Settings > Applications > twenty-proopco',
     });
   });
 

@@ -66,7 +66,8 @@ export const sendCampaign = async ({
   if (!process.env.SMS_ENQUEUE_URL || !process.env.SMS_ENQUEUE_TOKEN) {
     return {
       success: false,
-      error: 'SMS_ENQUEUE_URL and SMS_ENQUEUE_TOKEN must be set before sending',
+      error:
+        'SMS is not configured: set SMS_ENQUEUE_URL and SMS_ENQUEUE_TOKEN in Settings > Applications > twenty-proopco',
     };
   }
 
