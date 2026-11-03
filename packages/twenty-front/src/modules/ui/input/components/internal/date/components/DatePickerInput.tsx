@@ -1,7 +1,7 @@
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
 import { useEffect, useState } from 'react';
-import { useIMask } from 'react-imask';
+import { IMask, useIMask } from 'react-imask';
 
 import { useDateTimeFormat } from '@/localization/hooks/useDateTimeFormat';
 import { DATE_BLOCKS } from '@/ui/input/components/internal/date/constants/DateBlocks';
@@ -16,6 +16,14 @@ import { useParseDateInputStringToPlainDate } from '@/ui/input/components/intern
 import { useParseJSDateToIMaskDateInputString } from '@/ui/input/components/internal/date/hooks/useParseJSDateToIMaskDateInputString';
 import { isDefined } from 'twenty-shared/utils';
 import { themeCssVariables } from 'twenty-ui/theme';
+import { WorkspaceMemberCalendarEnum } from '~/generated-metadata/graphql';
+
+// Jalali years matching MIN_DATE and MAX_DATE (1900 to 2100 Gregorian).
+const JALALI_YEAR_BLOCK = {
+  mask: IMask.MaskedRange,
+  from: 1279,
+  to: 1479,
+};
 
 const StyledInputContainer = styled.div<{
   $variant: FormFieldInputVariant;
@@ -65,7 +73,7 @@ export const DatePickerInput = ({
   variant = 'default',
 }: DatePickerInputProps) => {
   const { t } = useLingui();
-  const { dateFormat } = useDateTimeFormat();
+  const { dateFormat, calendar } = useDateTimeFormat();
 
   const [internalDate, setInternalDate] = useState(date);
 
@@ -85,7 +93,10 @@ export const DatePickerInput = ({
   };
 
   const pattern = getDateMask(dateFormat);
-  const blocks = DATE_BLOCKS;
+  const blocks =
+    calendar === WorkspaceMemberCalendarEnum.JALALI
+      ? { ...DATE_BLOCKS, YYYY: JALALI_YEAR_BLOCK }
+      : DATE_BLOCKS;
 
   const defaultValue = internalDate
     ? (parsePlainDateToDateInputString(internalDate) ?? undefined)
