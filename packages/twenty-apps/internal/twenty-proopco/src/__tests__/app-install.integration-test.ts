@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { CoreApiClient } from 'twenty-client-sdk/core';
-import { MetadataApiClient } from 'twenty-client-sdk/metadata';
-
-import { runPostInstall } from 'src/logic-functions/utils/run-post-install.util';
 
 import { metadataRequest } from './metadata-request';
+import { createFollowup, createTrader, getFollowup, mutate } from './sales-core-helpers';
+import { runDeployedPostInstall } from './seeded-sessions';
 
 type NamedNode = { id: string; nameSingular?: string; name?: string };
 
@@ -276,20 +275,57 @@ describe('twenty-proopco install', () => {
       },
     });
     const tier = commissionTiers?.edges?.[0]?.node;
+    const updateName = (name: string) =>
+      client.mutation({
+        updateCommissionTier: { __args: { id: tier!.id, data: { name } }, id: true },
+      });
 
-    await client.mutation({
-      updateCommissionTier: {
-        __args: { id: tier!.id, data: { name: 'Edited by a manager' } },
-        id: true,
-      },
-    });
-    await runPostInstall({ client, metadataClient: new MetadataApiClient() });
+    await updateName('Edited by a manager');
+    await runDeployedPostInstall();
 
     const { commissionTier } = await client.query({
       commissionTier: { __args: { filter: { id: { eq: tier!.id } } }, name: true },
     });
 
+    // Later suites read the seeded tier names.
+    await updateName(String(tier!.name));
+
     expect(commissionTier?.name).toBe('Edited by a manager');
+  });
+
+  it('backfills the active-trader key of keyless active Followups and skips a conflict', async () => {
+    const firstTraderId = await createTrader('backfill-a');
+    const secondTraderId = await createTrader('backfill-b');
+    const pendingId = await createFollowup({ traderId: firstTraderId });
+    const retryId = await createFollowup({
+      traderId: secondTraderId,
+      stage: 'RETRY_PENDING',
+    });
+    const duplicateIds = [
+      await createFollowup({ traderId: secondTraderId }),
+      await createFollowup({ traderId: secondTraderId }),
+    ];
+    const succeededId = await createFollowup({
+      traderId: firstTraderId,
+      stage: 'SUCCEEDED',
+    });
+    const keyOf = async (id: string) =>
+      (await getFollowup(id, { activeTraderKey: true })).activeTraderKey;
+
+    expect(await keyOf(pendingId)).toBeFalsy();
+
+    await runDeployedPostInstall();
+
+    expect(await keyOf(pendingId)).toBe(firstTraderId);
+    expect(await keyOf(succeededId)).toBeFalsy();
+
+    const keys = await Promise.all([retryId, ...duplicateIds].map(keyOf));
+
+    expect(keys.filter((key) => key === secondTraderId)).toHaveLength(1);
+
+    for (const id of [pendingId, retryId, succeededId, ...duplicateIds]) {
+      await mutate({ destroyFollowup: { __args: { id }, id: true } });
+    }
   });
 
   it('deactivates Opportunity without deleting navigation items', async () => {
