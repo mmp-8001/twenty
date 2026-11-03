@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { MONTHLY_INCOME_ROUTE_PATH } from 'src/constants/proopco-jobs.constant';
 
@@ -44,7 +44,41 @@ const monthlyIncomesOf = async (agentId: string) => {
   return monthlyIncomes.edges.map(({ node }: { node: Record<string, any> }) => node);
 };
 
+const getCommission = async (id: string) => {
+  const { commission } = await query({
+    commission: {
+      __args: { filter: { id: { eq: id } } },
+      id: true,
+      name: true,
+      deletedAt: true,
+    },
+  });
+
+  return commission;
+};
+
 describe('Monthly Income', () => {
+  it('lets a Commission outside a Paid Monthly Income be edited', async () => {
+    const agentId = await firstMemberId();
+    const traderId = await createTrader('income-unlocked');
+
+    await createFollowup({ traderId, ownerId: agentId });
+    const paymentId = await createPayment({ traderId, amountUsd: 100 });
+
+    await runCommission(paymentId);
+
+    const [commission] = await commissionsOfPayment(paymentId);
+
+    await mutate({
+      updateCommission: {
+        __args: { id: commission.id, data: { name: 'edited' } },
+        id: true,
+      },
+    });
+
+    expect((await getCommission(commission.id)).name).toBe('edited');
+  });
+
   it('sums an agent\'s Commissions once, however often it runs, and locks them when Paid', async () => {
     const agentId = await firstMemberId();
     const paymentIds: string[] = [];
@@ -106,17 +140,19 @@ describe('Monthly Income', () => {
       },
     });
 
-    await expect(
-      mutate({
-        updateCommission: {
-          __args: { id: linkedIds[0], data: { name: 'tampered' } },
-          id: true,
-        },
-      }),
-    ).rejects.toThrow();
-    await expect(
-      mutate({ deleteCommission: { __args: { id: linkedIds[0] }, id: true } }),
-    ).rejects.toThrow();
+    const original = await getCommission(linkedIds[0]);
+
+    await mutate({
+      updateCommission: {
+        __args: { id: linkedIds[0], data: { name: 'tampered' } },
+        id: true,
+      },
+    });
+    await mutate({ deleteCommission: { __args: { id: linkedIds[0] }, id: true } });
+
+    await vi.waitFor(async () => {
+      expect(await getCommission(linkedIds[0])).toEqual(original);
+    }, { timeout: 30_000, interval: 1_000 });
 
     expect(await runMonthlyIncomes()).toMatchObject({ created: 0 });
     expect(await monthlyIncomesOf(agentId)).toHaveLength(1);

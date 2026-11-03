@@ -26,28 +26,26 @@ const seedWhenEmpty = async (
   }
 };
 
-const hideOpportunityFromNavigation = async (
+// Deactivating keeps the data and every user's navigation items intact.
+const deactivateOpportunity = async (
   metadataClient: Pick<MetadataApiClient, 'query' | 'mutation'>,
 ) => {
   const { objects } = await metadataClient.query({
     objects: {
       __args: { filter: {}, paging: { first: 200 } },
-      edges: { node: { id: true, nameSingular: true } },
+      edges: { node: { id: true, nameSingular: true, isActive: true } },
     },
   });
-  const opportunityId = objects.edges.find(
+  const opportunity = objects.edges.find(
     ({ node }) => node.nameSingular === 'opportunity',
-  )?.node.id;
-  const { navigationMenuItems } = await metadataClient.query({
-    navigationMenuItems: { id: true, targetObjectMetadataId: true },
-  });
-  const ids = navigationMenuItems
-    .filter((item) => item.targetObjectMetadataId === opportunityId)
-    .map((item) => item.id);
+  )?.node;
 
-  if (opportunityId && ids.length > 0) {
+  if (opportunity?.isActive) {
     await metadataClient.mutation({
-      deleteManyNavigationMenuItems: { __args: { ids }, id: true },
+      updateOneObject: {
+        __args: { input: { id: opportunity.id, update: { isActive: false } } },
+        id: true,
+      },
     });
   }
 };
@@ -61,5 +59,5 @@ export const runPostInstall = async ({
 }) => {
   await seedWhenEmpty(client, 'followupTypes', 'FollowupType', DEFAULT_FOLLOWUP_TYPES);
   await seedWhenEmpty(client, 'commissionTiers', 'CommissionTier', DEFAULT_COMMISSION_TIERS);
-  await hideOpportunityFromNavigation(metadataClient);
+  await deactivateOpportunity(metadataClient);
 };

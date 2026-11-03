@@ -1,8 +1,10 @@
+import { isArray, isBoolean, isNull, isNumber, isString } from '@sniptt/guards';
+
 import { PAYMENT_KINDS } from 'src/constants/proopco-sync.constant';
 import { type ProopcoSyncItemType } from 'src/logic-functions/types/proopco-sync.type';
 import { SyncItemError } from 'src/logic-functions/utils/sync-item-error.util';
 
-type Data = Record<string, unknown>;
+type SyncItemData = Record<string, unknown>;
 
 export type BuiltSyncFields = {
   fields: Record<string, unknown>;
@@ -16,7 +18,7 @@ const fail = (message: string): never => {
 
 // undefined when the key is absent, so a partial item leaves other fields alone.
 const readValue = <TValue>(
-  data: Data,
+  data: SyncItemData,
   key: string,
   isValid: (value: unknown) => value is TValue,
   expected: string,
@@ -27,40 +29,37 @@ const readValue = <TValue>(
 
   const value = data[key];
 
-  if (value === null) {
+  if (isNull(value)) {
     return null;
   }
 
   return isValid(value) ? value : fail(`${key} must be ${expected}`);
 };
 
-const isString = (value: unknown): value is string => typeof value === 'string';
 const isFiniteNumber = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value);
-const isBoolean = (value: unknown): value is boolean =>
-  typeof value === 'boolean';
+  isNumber(value) && Number.isFinite(value);
 const isStringArray = (value: unknown): value is string[] =>
-  Array.isArray(value) && value.every(isString);
+  isArray(value) && value.every(isString);
 const isDateTime = (value: unknown): value is string =>
   isString(value) && !Number.isNaN(new Date(value).getTime());
 
-const readString = (data: Data, key: string) =>
+const readString = (data: SyncItemData, key: string) =>
   readValue(data, key, isString, 'a string');
-const readNumber = (data: Data, key: string) =>
+const readNumber = (data: SyncItemData, key: string) =>
   readValue(data, key, isFiniteNumber, 'a number');
-const readDateTime = (data: Data, key: string) => {
+const readDateTime = (data: SyncItemData, key: string) => {
   const value = readValue(data, key, isDateTime, 'an ISO date-time string');
 
   return isString(value) ? new Date(value).toISOString() : value;
 };
 
-const requireString = (data: Data, key: string): string => {
+const requireString = (data: SyncItemData, key: string): string => {
   const value = readString(data, key);
 
   return isString(value) ? value : fail(`${key} is required`);
 };
 
-const setDefined = (fields: Data, key: string, value: unknown) => {
+const setDefined = (fields: SyncItemData, key: string, value: unknown) => {
   if (value !== undefined) {
     fields[key] = value;
   }
@@ -68,8 +67,8 @@ const setDefined = (fields: Data, key: string, value: unknown) => {
 
 const toMicros = (usd: number) => Math.round(usd * 1_000_000);
 
-const buildTraderFields = (data: Data): BuiltSyncFields => {
-  const fields: Data = {};
+const buildTraderFields = (data: SyncItemData): BuiltSyncFields => {
+  const fields: SyncItemData = {};
   const references: BuiltSyncFields['references'] = {};
   const firstName = readString(data, 'firstName');
   const lastName = readString(data, 'lastName');
@@ -121,15 +120,15 @@ const buildTraderFields = (data: Data): BuiltSyncFields => {
       collection: 'people',
       proopcoId: referredByProopcoId,
     };
-  } else if (referredByProopcoId === null) {
+  } else if (isNull(referredByProopcoId)) {
     fields.referredById = null;
   }
 
   return { fields, references };
 };
 
-const buildTradingAccountFields = (data: Data): BuiltSyncFields => {
-  const fields: Data = {};
+const buildTradingAccountFields = (data: SyncItemData): BuiltSyncFields => {
+  const fields: SyncItemData = {};
 
   setDefined(fields, 'status', readString(data, 'status'));
   setDefined(fields, 'failureReason', readString(data, 'failureReason'));
@@ -146,11 +145,11 @@ const buildTradingAccountFields = (data: Data): BuiltSyncFields => {
   };
 };
 
-const buildPaymentFields = (data: Data): BuiltSyncFields => {
+const buildPaymentFields = (data: SyncItemData): BuiltSyncFields => {
   const amountUsd = readNumber(data, 'amountUsd');
   const kind = readString(data, 'kind');
   const tradingAccountProopcoId = readString(data, 'tradingAccountProopcoId');
-  const fields: Data = {};
+  const fields: SyncItemData = {};
   const references: BuiltSyncFields['references'] = {
     traderId: {
       collection: 'people',
@@ -184,7 +183,7 @@ const buildPaymentFields = (data: Data): BuiltSyncFields => {
 
 export const buildSyncFields = (
   type: ProopcoSyncItemType,
-  data: Data,
+  data: SyncItemData,
 ): BuiltSyncFields => {
   switch (type) {
     case 'trader':
