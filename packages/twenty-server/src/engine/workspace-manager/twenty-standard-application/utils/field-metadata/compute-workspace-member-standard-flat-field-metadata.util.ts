@@ -15,7 +15,10 @@ import {
   createStandardFieldFlatMetadata,
 } from 'src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/create-standard-field-flat-metadata.util';
 import { createStandardRelationFieldFlatMetadata } from 'src/engine/workspace-manager/twenty-standard-application/utils/field-metadata/create-standard-relation-field-flat-metadata.util';
-import { WorkspaceMemberNumberFormatEnum } from 'src/modules/workspace-member/standard-objects/workspace-member.workspace-entity';
+import {
+  WorkspaceMemberCalendarEnum,
+  WorkspaceMemberNumberFormatEnum,
+} from 'src/modules/workspace-member/standard-objects/workspace-member.workspace-entity';
 
 export const buildWorkspaceMemberStandardFlatFieldMetadatas = ({
   now,
@@ -629,6 +632,52 @@ export const buildWorkspaceMemberStandardFlatFieldMetadatas = ({
           ),
           position: 4,
           color: 'purple',
+        },
+      ],
+    },
+    standardObjectMetadataRelatedEntityIds,
+    dependencyFlatEntityMaps,
+    twentyStandardApplicationId,
+    now,
+  }),
+  calendar: createStandardFieldFlatMetadata({
+    objectName,
+    workspaceId,
+    context: {
+      fieldName: 'calendar',
+      type: FieldMetadataType.SELECT,
+      label: i18nLabel(
+        msg({ message: `Calendar`, context: 'fieldMetadata.label' }),
+      ),
+      description: i18nLabel(
+        msg({
+          message: `User's preferred calendar`,
+          context: 'fieldMetadata.description',
+        }),
+      ),
+      icon: 'IconCalendar',
+      isSystem: true,
+      isNullable: false,
+      isUIEditable: false,
+      defaultValue: `'${WorkspaceMemberCalendarEnum.GREGORIAN}'`,
+      options: [
+        {
+          id: '9b3f2c1e-6a41-4d7e-8f53-2c0a7e5d1b84',
+          value: WorkspaceMemberCalendarEnum.GREGORIAN,
+          label: i18nLabel(
+            msg({ message: `Gregorian`, context: 'fieldMetadata.label' }),
+          ),
+          position: 0,
+          color: 'turquoise',
+        },
+        {
+          id: 'e41d7a96-0b2c-4f38-a5d1-7c68b3f9e205',
+          value: WorkspaceMemberCalendarEnum.JALALI,
+          label: i18nLabel(
+            msg({ message: `Jalali`, context: 'fieldMetadata.label' }),
+          ),
+          position: 1,
+          color: 'green',
         },
       ],
     },
