@@ -44,17 +44,28 @@ export const throttle = async () => {
   }
 };
 
-export const query = async (request: Record<string, unknown>): Promise<Loose> => {
-  await throttle();
+// Each test file counts its own requests, so the window can already be full from the previous file.
+const withRateLimitRetry = async (send: () => Promise<unknown>): Promise<Loose> => {
+  for (let attempt = 1; ; attempt += 1) {
+    await throttle();
 
-  return (await core.query(request as never)) as Loose;
+    try {
+      return (await send()) as Loose;
+    } catch (error) {
+      if (attempt === 20 || !String(error).includes('Rate limit exceeded')) {
+        throw error;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 5_000));
+    }
+  }
 };
 
-export const mutate = async (request: Record<string, unknown>): Promise<Loose> => {
-  await throttle();
+export const query = (request: Record<string, unknown>): Promise<Loose> =>
+  withRateLimitRetry(() => core.query(request as never));
 
-  return (await core.mutation(request as never)) as Loose;
-};
+export const mutate = (request: Record<string, unknown>): Promise<Loose> =>
+  withRateLimitRetry(() => core.mutation(request as never));
 
 let cachedMemberId: string | undefined;
 
@@ -64,7 +75,7 @@ export const firstMemberId = async (): Promise<string> => {
   }
 
   const { workspaceMembers } = await query({
-    workspaceMembers: { __args: { first: 1 }, edges: { node: { id: true } } },
+    workspaceMembers: { __args: { first: 1, orderBy: [{ id: 'AscNullsFirst' }] }, edges: { node: { id: true } } },
   });
 
   cachedMemberId = workspaceMembers.edges[0].node.id as string;
@@ -153,7 +164,10 @@ export const createFollowup = async (data: {
   return created.id;
 };
 
-export const getFollowup = async (id: string): Promise<Loose> => {
+export const getFollowup = async (
+  id: string,
+  extraFields: Record<string, true> = {},
+): Promise<Loose> => {
   const { followup } = await query({
     followup: {
       __args: { filter: { id: { eq: id } } },
@@ -163,6 +177,7 @@ export const getFollowup = async (id: string): Promise<Loose> => {
       expiresAt: true,
       retryExpiresAt: true,
       failureReason: true,
+      ...extraFields,
     },
   });
 
