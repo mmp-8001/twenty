@@ -8,6 +8,7 @@ import {
 
 import {
   COMMISSIONS_ON_FOLLOWUP_FIELD_UNIVERSAL_IDENTIFIER,
+  FOLLOWUP_ACTIVE_TRADER_KEY_FIELD_UNIVERSAL_IDENTIFIER,
   FOLLOWUP_EXPIRES_AT_FIELD_UNIVERSAL_IDENTIFIER,
   FOLLOWUP_FAILURE_REASON_FIELD_UNIVERSAL_IDENTIFIER,
   FOLLOWUP_NAME_FIELD_UNIVERSAL_IDENTIFIER,
@@ -57,6 +58,16 @@ export default defineObject({
       icon: 'IconProgress',
       defaultValue: "'PENDING'",
       options: [...FOLLOWUP_STAGE_OPTIONS],
+    },
+    {
+      universalIdentifier: FOLLOWUP_ACTIVE_TRADER_KEY_FIELD_UNIVERSAL_IDENTIFIER,
+      type: FieldType.TEXT,
+      name: 'activeTraderKey',
+      label: 'Active trader key',
+      description:
+        'The Trader id while the Followup is active, empty otherwise. Its unique index allows one active Followup per Trader.',
+      icon: 'IconKey',
+      isNullable: true,
     },
     {
       universalIdentifier: FOLLOWUP_EXPIRES_AT_FIELD_UNIVERSAL_IDENTIFIER,
