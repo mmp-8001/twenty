@@ -10,6 +10,8 @@ export type DatePickerProps = Omit<
   'children' | 'onChange' | 'defaultValue'
 > & {
   value: string | null;
+  // With 'persian', viewedMonth is a Jalali YYYY-MM; value and callbacks stay Gregorian ISO dates.
+  calendar?: 'gregorian' | 'persian';
   onValueChange: (date: string) => void;
   onValueSelect?: (date: string) => void;
   viewedMonth: string;

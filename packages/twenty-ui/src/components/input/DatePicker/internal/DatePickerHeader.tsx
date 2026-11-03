@@ -8,6 +8,7 @@ import { type DatePickerHeaderProps } from '../types/DatePickerHeaderProps';
 import { DATE_PICKER_CONSTANTS } from './datePickerConstants';
 import { DatePickerSelect } from './DatePickerSelect';
 import { parseDatePickerDateOrThrow } from './parseDatePickerDateOrThrow';
+import { persianDateToIso } from './persianCalendar';
 
 const YEAR_WINDOW = 100;
 
@@ -27,6 +28,7 @@ export const DatePickerHeader = ({
   portalContainer,
   onNavigationOpenChange,
   disabled,
+  calendar = 'gregorian',
 }: DatePickerHeaderProps &
   Pick<
     DatePickerProps,
@@ -38,21 +40,29 @@ export const DatePickerHeader = ({
     | 'portalContainer'
     | 'onNavigationOpenChange'
     | 'disabled'
+    | 'calendar'
   >) => {
   const monthDate = parseDatePickerDateOrThrow(`${viewedMonth}-01`);
   const year = monthDate.getUTCFullYear();
   const month = monthDate.getUTCMonth() + 1;
   const monthFormatter = new Intl.DateTimeFormat(locale, {
     month: 'long',
-    calendar: 'gregory',
+    calendar: calendar === 'persian' ? 'persian' : 'gregory',
     timeZone: doNotTranslate('UTC'),
   });
   const yearFormatter = new Intl.NumberFormat(locale, { useGrouping: false });
   const months = [];
 
   for (let index = 1; index <= DATE_PICKER_CONSTANTS.MONTHS_PER_YEAR; index++) {
-    const date = new Date(monthDate);
-    date.setUTCMonth(index - 1);
+    const date =
+      calendar === 'persian'
+        ? new Date(
+            `${persianDateToIso({ year, month: index, day: 1 })}T00:00:00Z`,
+          )
+        : new Date(monthDate);
+    if (calendar !== 'persian') {
+      date.setUTCMonth(index - 1);
+    }
     months.push({ value: index, label: monthFormatter.format(date) });
   }
 

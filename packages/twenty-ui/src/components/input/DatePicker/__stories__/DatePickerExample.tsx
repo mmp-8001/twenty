@@ -11,6 +11,7 @@ export const DatePickerExample = ({
   readOnly,
   isGridHidden,
   disabled,
+  calendar,
   isDateUnavailable,
   onValueChange,
   onValueSelect,
@@ -23,6 +24,7 @@ export const DatePickerExample = ({
     | 'readOnly'
     | 'isGridHidden'
     | 'disabled'
+    | 'calendar'
     | 'isDateUnavailable'
     | 'onValueChange'
     | 'onValueSelect'
@@ -62,6 +64,7 @@ export const DatePickerExample = ({
       monthLabel="Month"
       yearLabel="Year"
       disabled={disabled}
+      calendar={calendar}
       isDateUnavailable={isDateUnavailable}
     />
   );
