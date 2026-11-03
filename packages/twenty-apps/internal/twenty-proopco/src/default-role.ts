@@ -58,6 +58,10 @@ export default defineApplicationRole({
       ...(objectUniversalIdentifier === COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER && {
         canSoftDeleteObjectRecords: true,
       }),
+      // The creation guard removes Followups made outside Track.
+      ...(objectUniversalIdentifier === FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER && {
+        canDestroyObjectRecords: true,
+      }),
     }),
   ),
   fieldPermissions: [],

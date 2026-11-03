@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
   SWEEP_ROUTE_PATH,
@@ -8,6 +8,7 @@ import {
 import {
   createFollowup,
   createTrader,
+  findFollowupTypeId,
   daysFromNow,
   firstMemberId,
   getFollowup,
@@ -18,6 +19,12 @@ import {
   uniqueId,
 } from './sales-core-helpers';
 import { postRoute, postSyncRoute } from './post-sync-route';
+import {
+  assignSeededRoles,
+  SEEDED_AGENT_EMAIL,
+  signIn,
+  userRequest,
+} from './seeded-sessions';
 
 // Track is an authenticated route; the API key stands in for a session.
 const track = async (body: Record<string, unknown>) => {
@@ -238,5 +245,72 @@ describe('Agent marks a Followup Failed', () => {
       stage: 'FAILED',
       failureReason: 'NOT_INTERESTED',
     });
+  });
+});
+
+describe('Followup creation guard', () => {
+  let restoreRoles: () => Promise<void>;
+  let agentId: string;
+  let agentToken: string;
+
+  beforeAll(async () => {
+    const assigned = await assignSeededRoles([
+      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Agent' },
+    ]);
+
+    restoreRoles = assigned.restore;
+    agentId = assigned.memberIds[SEEDED_AGENT_EMAIL];
+    agentToken = await signIn(SEEDED_AGENT_EMAIL);
+  });
+
+  afterAll(async () => {
+    await restoreRoles?.();
+  });
+
+  const exists = async (id: string) =>
+    (
+      await query({
+        followups: {
+          __args: { filter: { id: { eq: id } } },
+          edges: { node: { id: true } },
+        },
+      })
+    ).followups.edges.length === 1;
+
+  it('removes a Followup an agent creates directly and keeps one made by Track', async () => {
+    const traderId = await createTrader('guard-agent');
+    const { data, errors } = await userRequest<{
+      createFollowup: { id: string };
+    }>({
+      token: agentToken,
+      query: `mutation ($data: FollowupCreateInput!) { createFollowup(data: $data) { id } }`,
+      variables: {
+        data: {
+          name: uniqueId('agent-followup'),
+          stage: 'PENDING',
+          traderId,
+          ownerId: agentId,
+          followupTypeId: await findFollowupTypeId('Sales'),
+        },
+      },
+    });
+
+    expect(errors).toBeUndefined();
+
+    const agentFollowupId = data!.createFollowup.id;
+    const tracked = await track({
+      traderId: await createTrader('guard-track'),
+      ownerId: agentId,
+    });
+
+    expect(tracked.success).toBe(true);
+    await vi.waitFor(
+      async () => expect(await exists(agentFollowupId)).toBe(false),
+      {
+        timeout: 30_000,
+        interval: 1_000,
+      },
+    );
+    expect(await exists(tracked.followupId!)).toBe(true);
   });
 });
