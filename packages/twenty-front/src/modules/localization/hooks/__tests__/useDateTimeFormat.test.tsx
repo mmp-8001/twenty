@@ -1,3 +1,4 @@
+import { WorkspaceMemberCalendarEnum } from '~/generated-metadata/graphql';
 import { renderHook } from '@testing-library/react';
 import { Provider as JotaiProvider } from 'jotai';
 import { type ReactNode } from 'react';
@@ -15,6 +16,7 @@ const mockPreferences = {
   timeFormat: TimeFormat.HOUR_24,
   numberFormat: '1,000.00' as any,
   calendarStartDay: CalendarStartDay.MONDAY,
+  calendar: WorkspaceMemberCalendarEnum.GREGORIAN,
 };
 
 const Wrapper = ({ children }: { children: ReactNode }) => (
@@ -40,6 +42,7 @@ describe('useDateTimeFormat', () => {
       dateFormat: DateFormat.MONTH_FIRST,
       timeFormat: TimeFormat.HOUR_24,
       calendarStartDay: CalendarStartDay.MONDAY,
+      calendar: WorkspaceMemberCalendarEnum.GREGORIAN,
     });
   });
 
@@ -71,6 +74,7 @@ describe('useDateTimeFormat', () => {
       'dateFormat',
       'timeFormat',
       'calendarStartDay',
+      'calendar',
     ]);
   });
 });

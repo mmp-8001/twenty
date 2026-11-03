@@ -10,7 +10,7 @@ import { dateLocaleState } from '@/localization/states/dateLocaleState';
 // Today reads as its time alone, other days in the member's date format
 export const useFormatAiChatThreadDate = () => {
   const { t } = useLingui();
-  const { timeZone, dateFormat, timeFormat } = useDateTimeFormat();
+  const { timeZone, dateFormat, timeFormat, calendar } = useDateTimeFormat();
   const { localeCatalog } = useAtomStateValue(dateLocaleState);
 
   const isTodayInTimeZone = (date: Date) =>
@@ -28,6 +28,7 @@ export const useFormatAiChatThreadDate = () => {
           timeZone,
           dateFormat,
           localeCatalog,
+          calendar,
         });
 
   const formatAiChatThreadDateTime = (date: Date) => {
@@ -43,6 +44,7 @@ export const useFormatAiChatThreadDate = () => {
       dateFormat,
       timeFormat,
       localeCatalog,
+      calendar,
     });
   };
 

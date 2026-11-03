@@ -8,6 +8,7 @@ import {
   FieldDateDisplayFormat,
   type FieldDateMetadataSettings,
 } from '@/object-record/record-field/ui/types/FieldMetadata';
+import { type WorkspaceMemberCalendarEnum } from '~/generated-metadata/graphql';
 import { isDefined } from 'twenty-shared/utils';
 
 export const formatDateString = ({
@@ -16,12 +17,14 @@ export const formatDateString = ({
   dateFormat,
   dateFieldSettings,
   localeCatalog,
+  calendar,
 }: {
   timeZone: string;
   dateFormat: DateFormat;
   value?: string | null;
   dateFieldSettings?: FieldDateMetadataSettings;
   localeCatalog: Locale;
+  calendar?: WorkspaceMemberCalendarEnum;
 }): string => {
   if (!isDefined(value)) {
     return '';
@@ -41,6 +44,7 @@ export const formatDateString = ({
         timeZone,
         dateFormat,
         localeCatalog,
+        calendar,
       });
     case FieldDateDisplayFormat.CUSTOM:
       return formatDateISOStringToCustomUnicodeFormat({
@@ -55,6 +59,7 @@ export const formatDateString = ({
         timeZone,
         dateFormat,
         localeCatalog,
+        calendar,
       });
   }
 };

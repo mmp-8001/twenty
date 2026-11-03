@@ -1,3 +1,4 @@
+import { WorkspaceMemberCalendarEnum } from '~/generated-metadata/graphql';
 import { act, renderHook } from '@testing-library/react';
 
 import { type CurrentWorkspaceMember } from '@/auth/states/currentWorkspaceMemberState';
@@ -45,6 +46,7 @@ describe('useInitializeFormatPreferences', () => {
       timeFormat: 'HH:mm' as any,
       numberFormat: '1,000.00' as any,
       calendarStartDay: 'MONDAY' as any,
+      calendar: WorkspaceMemberCalendarEnum.GREGORIAN,
     };
 
     mockGetFormatPreferencesFromWorkspaceMember.mockReturnValue(

@@ -5,6 +5,7 @@ import { isOpenRecordIn } from '@/workspace-member/utils/toOpenRecordInPreferenc
 import { type OpenRecordIn } from 'twenty-shared/types';
 import { isDefined, isPlainObject } from 'twenty-shared/utils';
 import {
+  WorkspaceMemberCalendarEnum,
   WorkspaceMemberDateFormatEnum,
   WorkspaceMemberNumberFormatEnum,
   WorkspaceMemberTimeFormatEnum,
@@ -60,6 +61,15 @@ const isWorkspaceMemberNumberFormat = (
   value: unknown,
 ): value is NonNullable<CurrentWorkspaceMember['numberFormat']> =>
   isString(value) && WORKSPACE_MEMBER_NUMBER_FORMAT_VALUES.has(value);
+
+const WORKSPACE_MEMBER_CALENDAR_VALUES: ReadonlySet<string> = new Set(
+  Object.values(WorkspaceMemberCalendarEnum),
+);
+
+const isWorkspaceMemberCalendar = (
+  value: unknown,
+): value is NonNullable<CurrentWorkspaceMember['calendar']> =>
+  isString(value) && WORKSPACE_MEMBER_CALENDAR_VALUES.has(value);
 
 export const mergeWorkspaceMemberSettingsIntoCurrent = (
   previous: CurrentWorkspaceMember,
@@ -181,6 +191,18 @@ export const mergeWorkspaceMemberSettingsIntoCurrent = (
       next = { ...next, calendarStartDay: null };
     } else if (isNumber(value) && Number.isFinite(value)) {
       next = { ...next, calendarStartDay: value };
+    }
+  }
+
+  if (
+    'calendar' in payload &&
+    (isNull(payload.calendar) || isDefined(payload.calendar))
+  ) {
+    const value = payload.calendar;
+    if (isNull(value)) {
+      next = { ...next, calendar: null };
+    } else if (isWorkspaceMemberCalendar(value)) {
+      next = { ...next, calendar: value };
     }
   }
 

@@ -23,7 +23,8 @@ export const DateTimeDisplay = ({
   value,
   dateFieldSettings,
 }: DateTimeDisplayProps) => {
-  const { dateFormat, timeFormat, timeZone } = useContext(UserContext);
+  const { dateFormat, timeFormat, timeZone, calendar } =
+    useContext(UserContext);
   const dateLocale = useAtomStateValue(dateLocaleState);
 
   const formattedDate = formatDateTimeString({
@@ -33,6 +34,7 @@ export const DateTimeDisplay = ({
     timeFormat,
     dateFieldSettings,
     localeCatalog: dateLocale.localeCatalog,
+    calendar,
   });
 
   return (

@@ -7,6 +7,7 @@ import { detectNumberFormat } from '@/localization/utils/detection/detectNumberF
 import { detectTimeFormat } from '@/localization/utils/detection/detectTimeFormat';
 import { detectTimeZone } from '@/localization/utils/detection/detectTimeZone';
 import { createAtomState } from '@/ui/utilities/state/jotai/utils/createAtomState';
+import { WorkspaceMemberCalendarEnum } from '~/generated-metadata/graphql';
 import { CalendarStartDay } from 'twenty-shared/constants';
 
 export type WorkspaceMemberFormatPreferences = {
@@ -15,6 +16,7 @@ export type WorkspaceMemberFormatPreferences = {
   timeFormat: TimeFormat;
   numberFormat: NumberFormat;
   calendarStartDay: CalendarStartDay;
+  calendar: WorkspaceMemberCalendarEnum;
 };
 
 export const workspaceMemberFormatPreferencesState =
@@ -26,5 +28,6 @@ export const workspaceMemberFormatPreferencesState =
       timeFormat: TimeFormat[detectTimeFormat()],
       numberFormat: NumberFormat[detectNumberFormat()],
       calendarStartDay: CalendarStartDay[detectCalendarStartDay()],
+      calendar: WorkspaceMemberCalendarEnum.GREGORIAN,
     },
   });

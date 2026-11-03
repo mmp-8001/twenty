@@ -1,4 +1,5 @@
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
+import { useDateTimeFormat } from '@/localization/hooks/useDateTimeFormat';
 import { getDatePickerWeekStartOrThrow } from '@/ui/input/components/internal/date/utils/getDatePickerWeekStartOrThrow';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { useState } from 'react';
@@ -7,6 +8,22 @@ import { SOURCE_LOCALE } from 'twenty-shared/translations';
 import { isDefined } from 'twenty-shared/utils';
 import { DatePicker, type DatePickerProps } from 'twenty-ui/components/input';
 import { useLingui } from '@lingui/react/macro';
+import { WorkspaceMemberCalendarEnum } from '~/generated-metadata/graphql';
+
+// Jalali pickers navigate by Jalali month, so their viewed month is a Jalali YYYY-MM.
+const getViewedMonth = (
+  isoDate: string,
+  calendar: WorkspaceMemberCalendarEnum,
+) => {
+  if (calendar !== WorkspaceMemberCalendarEnum.JALALI) {
+    return isoDate.slice(0, 7);
+  }
+
+  const { year, month } =
+    Temporal.PlainDate.from(isoDate).withCalendar('persian');
+
+  return `${year.toString().padStart(4, '0')}-${month.toString().padStart(2, '0')}`;
+};
 
 type DatePickerCalendarProps = {
   value: string | null;
@@ -36,24 +53,35 @@ export const DatePickerCalendar = ({
   loadingFallback,
 }: DatePickerCalendarProps) => {
   const { t } = useLingui();
+  const { calendar } = useDateTimeFormat();
   const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
   const currentToday = today ?? Temporal.Now.plainDateISO().toString();
   const referenceDate = highlightedRange?.start ?? value ?? currentToday;
-  const referenceKey = isDefined(highlightedRange)
-    ? `${highlightedRange.start}-${highlightedRange.end}`
-    : referenceDate;
+  const referenceKey = `${calendar}-${
+    isDefined(highlightedRange)
+      ? `${highlightedRange.start}-${highlightedRange.end}`
+      : referenceDate
+  }`;
   const [calendarState, setCalendarState] = useState({
     referenceKey,
-    viewedMonth: referenceDate.slice(0, 7),
+    viewedMonth: getViewedMonth(referenceDate, calendar),
   });
   if (calendarState.referenceKey !== referenceKey) {
-    setCalendarState({ referenceKey, viewedMonth: referenceDate.slice(0, 7) });
+    setCalendarState({
+      referenceKey,
+      viewedMonth: getViewedMonth(referenceDate, calendar),
+    });
   }
 
   return (
     <DatePicker
       aria-label={t`Choose a date`}
       value={value}
+      calendar={
+        calendar === WorkspaceMemberCalendarEnum.JALALI
+          ? 'persian'
+          : 'gregorian'
+      }
       onValueChange={(date) => onChange?.(date)}
       onValueSelect={onSelect}
       viewedMonth={calendarState.viewedMonth}
