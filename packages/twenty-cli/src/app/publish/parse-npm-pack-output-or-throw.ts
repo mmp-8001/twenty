@@ -24,7 +24,13 @@ export const parseNpmPackOutputOrThrow = (stdout: string): NpmPackOutput => {
     });
   }
 
-  const packed = isArray(result) && result.length === 1 ? result[0] : undefined;
+  // npm 12 prints an object keyed by package name instead of an array.
+  const entries = isArray(result)
+    ? result
+    : isPlainObject(result)
+      ? Object.values(result)
+      : [];
+  const packed = entries.length === 1 ? entries[0] : undefined;
 
   if (
     !isPlainObject(packed) ||
