@@ -9,6 +9,8 @@ import {
 } from 'twenty-shared/utils';
 import { Temporal } from 'temporal-polyfill';
 
+import { useDateTimeFormat } from '@/localization/hooks/useDateTimeFormat';
+import { getViewedMonthStartPlainDate } from '@/ui/input/components/internal/date/utils/getViewedMonthStartPlainDate';
 import { DatePickerCalendar } from '@/ui/input/components/internal/date/components/DatePickerCalendar';
 import { DatePickerClearButton } from '@/ui/input/components/internal/date/components/DatePickerClearButton';
 import { DateTimePickerHeader } from '@/ui/input/components/internal/date/components/DateTimePickerHeader';
@@ -55,6 +57,7 @@ export const DateTimePicker = ({
   hideHeaderInput,
   timeZone,
 }: DateTimePickerProps) => {
+  const { calendar } = useDateTimeFormat();
   const { userTimezone } = useUserTimezone();
   const { userFirstDayOfTheWeek } = useUserFirstDayOfTheWeek();
   const resolvedTimeZone = timeZone ?? userTimezone;
@@ -147,7 +150,7 @@ export const DateTimePicker = ({
                   onChange={onRelativeDateChange}
                   allowIntraDayUnits
                   calendarMonthDate={turnPlainDateToShiftedDateInSystemTimeZone(
-                    Temporal.PlainDate.from(`${header.viewedMonth}-01`),
+                    getViewedMonthStartPlainDate(header.viewedMonth, calendar),
                   )}
                   onPreviousMonth={header.onPreviousMonth}
                   onNextMonth={header.onNextMonth}

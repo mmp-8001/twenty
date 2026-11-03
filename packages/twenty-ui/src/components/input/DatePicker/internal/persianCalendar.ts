@@ -1,8 +1,9 @@
-const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
-const FIRST_DAY_OF_YEAR_OFFSET_FROM_GREGORIAN = 621;
+export const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+export const GREGORIAN_TO_PERSIAN_YEAR_OFFSET = 621;
 const AVERAGE_DAYS_PER_PERSIAN_MONTH = 30.44;
 
 export type PersianDateParts = { year: number; month: number; day: number };
+export type PersianYearMonth = Pick<PersianDateParts, 'year' | 'month'>;
 
 const persianPartsFormatter = new Intl.DateTimeFormat('en-u-nu-latn', {
   calendar: 'persian',
@@ -20,8 +21,8 @@ const getPersianPartsOfTimestamp = (timestamp: number): PersianDateParts => {
   return { year: read('year'), month: read('month'), day: read('day') };
 };
 
-const comparePersianParts = (a: PersianDateParts, b: PersianDateParts) =>
-  a.year - b.year || a.month - b.month || a.day - b.day;
+const comparePersianParts = (left: PersianDateParts, right: PersianDateParts) =>
+  left.year - right.year || left.month - right.month || left.day - right.day;
 
 const toTimestamp = (isoDate: string) => Date.parse(`${isoDate}T00:00:00Z`);
 
@@ -35,7 +36,7 @@ export const persianDateToIso = ({
   day,
 }: PersianDateParts): string => {
   let timestamp =
-    Date.UTC(year + FIRST_DAY_OF_YEAR_OFFSET_FROM_GREGORIAN, 2, 21) +
+    Date.UTC(year + GREGORIAN_TO_PERSIAN_YEAR_OFFSET, 2, 21) +
     Math.round((month - 1) * AVERAGE_DAYS_PER_PERSIAN_MONTH + day - 1) *
       MILLISECONDS_PER_DAY;
   const target = { year, month, day };
@@ -57,7 +58,7 @@ export const persianDateToIso = ({
 };
 
 export const getPersianMonthLength = (year: number, month: number): number => {
-  const nextMonth =
+  const nextMonth: PersianDateParts =
     month === 12
       ? { year: year + 1, month: 1, day: 1 }
       : { year, month: month + 1, day: 1 };
@@ -70,19 +71,13 @@ export const getPersianMonthLength = (year: number, month: number): number => {
 };
 
 export const addPersianMonths = (
-  { year, month }: { year: number; month: number },
+  { year, month }: PersianYearMonth,
   months: number,
-) => {
+): PersianYearMonth => {
   const index = year * 12 + (month - 1) + months;
 
   return { year: Math.floor(index / 12), month: (index % 12) + 1 };
 };
 
-export const formatPersianYearMonth = ({
-  year,
-  month,
-}: {
-  year: number;
-  month: number;
-}) =>
+export const formatPersianYearMonth = ({ year, month }: PersianYearMonth) =>
   `${year.toString().padStart(4, '0')}-${month.toString().padStart(2, '0')}`;

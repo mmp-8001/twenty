@@ -12,7 +12,8 @@ import { type Nullable } from 'twenty-shared/types';
 import { dateLocaleState } from '@/localization/states/dateLocaleState';
 
 export const useSetRecordIndexAggregateDisplayValueForRecordGroupValue = () => {
-  const { dateFormat, timeFormat, timeZone } = useContext(UserContext);
+  const { dateFormat, timeFormat, timeZone, calendar } =
+    useContext(UserContext);
   const dateLocale = useAtomStateValue(dateLocaleState);
   const { numberFormat } = useNumberFormat();
 
@@ -40,6 +41,7 @@ export const useSetRecordIndexAggregateDisplayValueForRecordGroupValue = () => {
           timeFormat,
           timeZone,
           localeCatalog: dateLocale.localeCatalog,
+          calendar,
           numberFormat,
         });
 
@@ -53,6 +55,7 @@ export const useSetRecordIndexAggregateDisplayValueForRecordGroupValue = () => {
     [
       recordIndexAggregateValueByGroupValueCallbackState,
       dateFormat,
+      calendar,
       dateLocale,
       store,
       timeFormat,

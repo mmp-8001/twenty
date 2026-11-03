@@ -5,10 +5,13 @@ import { isDefined } from '@ui/utilities/utils/isDefined';
 import styles from '../DatePicker.module.scss';
 import { type DatePickerProps } from '../types/DatePickerProps';
 import { DATE_PICKER_CONSTANTS } from './datePickerConstants';
-import { getPersianMonthLength, persianDateToIso } from './persianCalendar';
+import {
+  getPersianMonthLength,
+  MILLISECONDS_PER_DAY,
+  persianDateToIso,
+} from './persianCalendar';
 
 const REFERENCE_SUNDAY_TIMESTAMP = Date.UTC(2023, 0, 1);
-const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 
 type PersianCalendarGridProps = Pick<
   DatePickerProps,

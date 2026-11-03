@@ -1,10 +1,13 @@
+import { useDateTimeFormat } from '@/localization/hooks/useDateTimeFormat';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { styled } from '@linaria/react';
 import { SOURCE_LOCALE } from 'twenty-shared/translations';
+import { doNotTranslate } from 'twenty-shared/i18n';
 import { LightIconButton } from 'twenty-ui/components/input';
 import { IconChevronLeft, IconChevronRight } from 'twenty-ui/icon';
 import { themeCssVariables } from 'twenty-ui/theme';
+import { WorkspaceMemberCalendarEnum } from '~/generated-metadata/graphql';
 import { useLingui } from '@lingui/react/macro';
 
 const StyledContainer = styled.div`
@@ -38,11 +41,15 @@ export const RelativeDatePickerCalendarNavigation = ({
 }: RelativeDatePickerCalendarNavigationProps) => {
   const { t } = useLingui();
   const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
+  const { calendar } = useDateTimeFormat();
   const userLocale = currentWorkspaceMember?.locale ?? SOURCE_LOCALE;
 
   const monthYearLabel = new Intl.DateTimeFormat(userLocale, {
     month: 'long',
     year: 'numeric',
+    ...(calendar === WorkspaceMemberCalendarEnum.JALALI && {
+      calendar: doNotTranslate('persian'),
+    }),
   }).format(monthLabelDate);
 
   return (
