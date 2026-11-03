@@ -1724,5 +1724,8 @@ export const STANDARD_OBJECT_FIELDS = {
     numberFormat: {
       universalIdentifier: '20202020-7f40-4e7f-b126-11c0eda6b141',
     },
+    calendar: {
+      universalIdentifier: 'cb82f151-ea68-45fa-abd5-10536d368df8',
+    },
   },
 } satisfies Record<string, Record<string, { universalIdentifier: string }>>;

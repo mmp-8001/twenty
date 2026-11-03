@@ -31,6 +31,11 @@ export enum WorkspaceMemberTimeFormatEnum {
   HOUR_24 = 'HOUR_24',
 }
 
+export enum WorkspaceMemberCalendarEnum {
+  GREGORIAN = 'GREGORIAN',
+  JALALI = 'JALALI',
+}
+
 export enum WorkspaceMemberNumberFormatEnum {
   SYSTEM = 'SYSTEM',
   COMMAS_AND_DOT = 'COMMAS_AND_DOT',
@@ -38,6 +43,11 @@ export enum WorkspaceMemberNumberFormatEnum {
   DOTS_AND_COMMA = 'DOTS_AND_COMMA',
   APOSTROPHE_AND_DOT = 'APOSTROPHE_AND_DOT',
 }
+
+registerEnumType(WorkspaceMemberCalendarEnum, {
+  name: 'WorkspaceMemberCalendarEnum',
+  description: 'Calendar used to display and pick dates',
+});
 
 registerEnumType(WorkspaceMemberNumberFormatEnum, {
   name: 'WorkspaceMemberNumberFormatEnum',
@@ -70,6 +80,7 @@ export class WorkspaceMemberWorkspaceEntity extends BaseWorkspaceEntity {
   timeZone: string;
   dateFormat: string;
   timeFormat: string;
+  calendar: string;
   assignedTasks: Relation<TaskWorkspaceEntity[]>;
   accountOwnerForCompanies: Relation<CompanyWorkspaceEntity[]>;
   authoredAttachments: Relation<AttachmentWorkspaceEntity[]>;
