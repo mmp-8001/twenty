@@ -6,6 +6,7 @@ import { DateFormat } from '@/localization/constants/DateFormat';
 import { NumberFormat } from '@/localization/constants/NumberFormat';
 import { TimeFormat } from '@/localization/constants/TimeFormat';
 import { useFormatPreferences } from '@/localization/hooks/useFormatPreferences';
+import { DateTimeSettingsCalendarSelect } from '@/settings/experience/components/DateTimeSettingsCalendarSelect';
 import { DateTimeSettingsDateFormatSelect } from '@/settings/experience/components/DateTimeSettingsDateFormatSelect';
 import { DateTimeSettingsTimeFormatSelect } from '@/settings/experience/components/DateTimeSettingsTimeFormatSelect';
 import { DateTimeSettingsTimeZoneSelect } from '@/settings/experience/components/DateTimeSettingsTimeZoneSelect';
@@ -13,6 +14,7 @@ import { NumberFormatSelect } from '@/settings/experience/components/NumberForma
 import { CalendarStartDay } from 'twenty-shared/constants';
 import { isDefined } from 'twenty-shared/utils';
 import {
+  type WorkspaceMemberCalendarEnum,
   WorkspaceMemberDateFormatEnum,
   WorkspaceMemberNumberFormatEnum,
   WorkspaceMemberTimeFormatEnum,
@@ -52,6 +54,10 @@ export const FormatPreferencesSettings = () => {
     updateFormatPreference('calendarStartDay', value);
   };
 
+  const handleCalendarChange = (value: WorkspaceMemberCalendarEnum) => {
+    updateFormatPreference('calendar', value);
+  };
+
   const displayTimeZone =
     currentWorkspaceMember.timeZone === 'system'
       ? 'system'
@@ -89,6 +95,10 @@ export const FormatPreferencesSettings = () => {
         value={displayDateFormat}
         onChange={handleDateFormatChange}
         timeZone={displayTimeZone}
+      />
+      <DateTimeSettingsCalendarSelect
+        value={formatPreferences.calendar}
+        onChange={handleCalendarChange}
       />
       <DateTimeSettingsTimeFormatSelect
         value={displayTimeFormat}

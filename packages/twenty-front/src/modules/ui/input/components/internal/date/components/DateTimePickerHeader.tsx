@@ -9,7 +9,7 @@ import { DateTimePickerInput } from '@/ui/input/components/internal/date/compone
 import { DateTimePickerTimeValueEffect } from '@/ui/input/components/internal/date/components/DateTimePickerTimeValueEffect';
 import { useTimeInput } from '@/ui/input/components/internal/date/hooks/useTimeInput';
 import { getDatePickerDropdownIds } from '@/ui/input/components/internal/date/utils/getDatePickerDropdownIds';
-import { DATE_PICKER_YEAR_SELECT_OPTIONS } from '@/ui/input/components/internal/date/constants/DatePickerYearSelectOptions';
+import { getYearSelectOptions } from '@/ui/input/components/internal/date/utils/getYearSelectOptions';
 import { getMonthSelectOptions } from '@/ui/input/components/internal/date/utils/getMonthSelectOptions';
 import { getTimeBlocks } from '@/ui/input/components/internal/date/utils/getTimeBlocks';
 import { getTimeMask } from '@/ui/input/components/internal/date/utils/getTimeMask';
@@ -101,7 +101,7 @@ export const DateTimePickerHeader = ({
   onChangeYear,
 }: DateTimePickerHeaderProps) => {
   const { t } = useLingui();
-  const { timeFormat } = useDateTimeFormat();
+  const { timeFormat, calendar } = useDateTimeFormat();
   const { formatTime, parseTime, isHour12 } = useTimeInput(timeFormat);
   const displayedMonth = Temporal.PlainYearMonth.from(viewedMonth);
   const formattedTime = isDefined(date)
@@ -189,7 +189,7 @@ export const DateTimePickerHeader = ({
               <StyledMonthYearSelector>
                 <Select
                   dropdownId={monthSelectDropdownId}
-                  options={getMonthSelectOptions(userLocale)}
+                  options={getMonthSelectOptions(userLocale, calendar)}
                   onChange={onChangeMonth}
                   value={displayedMonth.month}
                   fullWidth={false}
@@ -199,7 +199,7 @@ export const DateTimePickerHeader = ({
                   dropdownId={yearSelectDropdownId}
                   onChange={onChangeYear}
                   value={displayedMonth.year}
-                  options={DATE_PICKER_YEAR_SELECT_OPTIONS}
+                  options={getYearSelectOptions(calendar)}
                   fullWidth={false}
                   dropdownWidth={160}
                 />

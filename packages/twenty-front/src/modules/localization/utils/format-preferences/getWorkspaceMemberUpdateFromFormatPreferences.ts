@@ -35,5 +35,9 @@ export const getWorkspaceMemberUpdateFromFormatPreferences = (
     update.calendarStartDay = preferences.calendarStartDay;
   }
 
+  if (preferences.calendar !== undefined) {
+    update.calendar = preferences.calendar;
+  }
+
   return update;
 };

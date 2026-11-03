@@ -1,3 +1,4 @@
+import { WorkspaceMemberCalendarEnum } from '~/generated-metadata/graphql';
 import { renderHook } from '@testing-library/react';
 import { Provider as JotaiProvider } from 'jotai';
 import { type ReactNode } from 'react';
@@ -25,6 +26,7 @@ describe('useNumberFormat', () => {
       timeFormat: 'HH:mm' as any,
       numberFormat: '1,000.00' as any,
       calendarStartDay: 'MONDAY' as any,
+      calendar: WorkspaceMemberCalendarEnum.GREGORIAN,
     });
   });
 
