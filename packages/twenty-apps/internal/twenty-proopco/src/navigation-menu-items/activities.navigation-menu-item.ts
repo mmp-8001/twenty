@@ -12,7 +12,7 @@ export default defineNavigationMenuItem({
   universalIdentifier: ACTIVITIES_NAVIGATION_UNIVERSAL_IDENTIFIER,
   type: NavigationMenuItemType.VIEW,
   name: 'Activities',
-  icon: 'IconChecklist',
+  icon: 'IconCheckbox',
   position: 106,
   viewUniversalIdentifier: ACTIVITIES_VIEW_UNIVERSAL_IDENTIFIER,
 });

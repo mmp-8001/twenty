@@ -54,6 +54,10 @@ export default defineApplicationRole({
     (objectUniversalIdentifier) => ({
       objectUniversalIdentifier,
       ...readAndUpdate,
+      // The Paid-lock guard restores a deleted Commission.
+      ...(objectUniversalIdentifier === COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER && {
+        canSoftDeleteObjectRecords: true,
+      }),
     }),
   ),
   fieldPermissions: [],
