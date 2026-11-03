@@ -14,7 +14,7 @@ describe('buildSyncFields', () => {
 
     expect(fields).toEqual({
       amount: { amountMicros: 149_990_000, currencyCode: 'USD' },
-      kind: 'installment_initial',
+      kind: 'INSTALLMENT_INITIAL',
       paidAt: '2026-01-02T03:04:05.000Z',
     });
     expect(references).toEqual({

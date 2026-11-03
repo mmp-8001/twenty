@@ -77,5 +77,6 @@ export default defineLogicFunction({
     httpMethod: 'POST',
     // Proopco has no Twenty credentials; the shared token is the guard.
     isAuthRequired: false,
+    forwardedRequestHeaders: [PROOPCO_SYNC_TOKEN_HEADER],
   },
 });

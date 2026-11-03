@@ -168,7 +168,8 @@ const buildPaymentFields = (data: Data): BuiltSyncFields => {
     fail(`kind must be one of ${PAYMENT_KINDS.join(', ')}`);
   }
 
-  fields.kind = kind;
+  // select option values are UPPER_SNAKE_CASE; the wire format stays lowercase
+  fields.kind = String(kind).toUpperCase();
   setDefined(fields, 'paidAt', readDateTime(data, 'paidAt'));
 
   if (isString(tradingAccountProopcoId)) {

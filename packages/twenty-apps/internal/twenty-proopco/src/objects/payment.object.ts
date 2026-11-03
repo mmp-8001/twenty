@@ -66,21 +66,21 @@ export default defineObject({
       options: [
         {
           id: '0d1b7a52-2f10-4a67-9d1f-3b0e5d6f7c11',
-          value: 'purchase',
+          value: 'PURCHASE',
           label: 'Purchase',
           position: 0,
           color: 'green',
         },
         {
           id: '5c2e8f34-9a41-4b7d-8e63-1f4a7b9c2d22',
-          value: 'installment_initial',
+          value: 'INSTALLMENT_INITIAL',
           label: 'Installment initial',
           position: 1,
           color: 'blue',
         },
         {
           id: 'a93d6c18-7e05-4f2b-b4a9-6d8e0c1f3a33',
-          value: 'installment_remaining',
+          value: 'INSTALLMENT_REMAINING',
           label: 'Installment remaining',
           position: 2,
           color: 'purple',
