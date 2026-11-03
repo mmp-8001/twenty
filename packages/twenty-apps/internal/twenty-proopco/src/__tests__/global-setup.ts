@@ -1,3 +1,7 @@
+import { CoreApiClient } from 'twenty-client-sdk/core';
+import { MetadataApiClient } from 'twenty-client-sdk/metadata';
+
+import { runPostInstall } from 'src/logic-functions/utils/run-post-install.util';
 import { APPLICATION_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { metadataRequest } from './metadata-request';
 import { runTwenty } from './run-twenty';
@@ -80,6 +84,11 @@ export async function setup() {
   }
 
   await setSyncTokenOrThrow();
+  // `app apply` skips the post-install hook, so run its steps directly.
+  await runPostInstall({
+    client: new CoreApiClient(),
+    metadataClient: new MetadataApiClient(),
+  });
 }
 
 export async function teardown() {

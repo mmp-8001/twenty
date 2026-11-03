@@ -1,30 +1,60 @@
 import { describe, expect, it } from 'vitest';
 
+import { CoreApiClient } from 'twenty-client-sdk/core';
+import { MetadataApiClient } from 'twenty-client-sdk/metadata';
+
+import { runPostInstall } from 'src/logic-functions/utils/run-post-install.util';
+
 import { metadataRequest } from './metadata-request';
 
 type NamedNode = { id: string; nameSingular?: string; name?: string };
 
+const FIELD_PAGE_SIZE = 500;
+
+type FieldNode = {
+  name: string;
+  type: string;
+  options: { value: string }[] | null;
+  objectMetadataId: string;
+};
+
+// The workspace holds more than one page of fields.
+const loadAllFields = async (): Promise<FieldNode[]> => {
+  const fields: FieldNode[] = [];
+  let after: string | null = null;
+
+  for (;;) {
+    const data: {
+      fields: {
+        edges: { node: FieldNode }[];
+        pageInfo: { hasNextPage: boolean; endCursor: string | null };
+      };
+    } = await metadataRequest(
+      `query ($after: ConnectionCursor) {
+        fields(paging: { first: ${FIELD_PAGE_SIZE}, after: $after }) {
+          edges { node { name type options objectMetadataId } }
+          pageInfo { hasNextPage endCursor }
+        }
+      }`,
+      { after },
+    );
+
+    fields.push(...data.fields.edges.map(({ node }) => node));
+
+    if (!data.fields.pageInfo.hasNextPage) {
+      return fields;
+    }
+
+    after = data.fields.pageInfo.endCursor;
+  }
+};
+
 const loadMetadata = async () => {
   const data = await metadataRequest<{
     objects: { edges: { node: { id: string; nameSingular: string } }[] };
-    fields: {
-      edges: {
-        node: {
-          name: string;
-          type: string;
-          options: { value: string }[] | null;
-          objectMetadataId: string;
-        };
-      }[];
-    };
-  }>(`{
-    objects(paging: { first: 200 }) { edges { node { id nameSingular } } }
-    fields(paging: { first: 1000 }) {
-      edges { node { name type options objectMetadataId } }
-    }
-  }`);
+  }>(`{ objects(paging: { first: 200 }) { edges { node { id nameSingular } } } }`);
   const objects = data.objects.edges.map(({ node }) => node);
-  const fields = data.fields.edges.map(({ node }) => node);
+  const fields = await loadAllFields();
   const fieldNamesOf = (nameSingular: string) => {
     const objectId = objects.find(
       (object) => object.nameSingular === nameSingular,
@@ -139,5 +169,185 @@ describe('twenty-proopco install', () => {
         canDestroyObjectRecords: false,
       });
     }
+  });
+
+  it('creates the sales objects', async () => {
+    const { fieldNamesOf } = await loadMetadata();
+
+    expect(fieldNamesOf('followup')).toEqual(
+      expect.arrayContaining([
+        'stage',
+        'expiresAt',
+        'retryExpiresAt',
+        'failureReason',
+        'followupType',
+        'trader',
+        'owner',
+        'commissions',
+      ]),
+    );
+    expect(fieldNamesOf('followupType')).toEqual(
+      expect.arrayContaining(['name', 'expiryDays', 'commissionable']),
+    );
+    expect(fieldNamesOf('commissionTier')).toEqual(
+      expect.arrayContaining(['name', 'minDay', 'maxDay', 'rate']),
+    );
+    expect(fieldNamesOf('commission')).toEqual(
+      expect.arrayContaining([
+        'payment',
+        'followup',
+        'owner',
+        'amount',
+        'rateApplied',
+        'tierName',
+        'basis',
+        'scope',
+        'monthlyIncome',
+      ]),
+    );
+    expect(fieldNamesOf('monthlyIncome')).toEqual(
+      expect.arrayContaining(['agent', 'month', 'total', 'payoutStatus', 'commissions']),
+    );
+  });
+
+  it('gives Followup the five stages and Task an activity type', async () => {
+    const { fields, fieldNamesOf } = await loadMetadata();
+    const stage = fields.find(
+      (field) => field.name === 'stage' && field.type === 'SELECT',
+    );
+    const activityType = fields.find((field) => field.name === 'activityType');
+
+    expect(stage?.options?.map((option) => option.value)).toEqual([
+      'PENDING',
+      'RETRY_PENDING',
+      'SUCCEEDED',
+      'FAILED',
+      'EXPIRED',
+    ]);
+    expect(activityType?.options?.map((option) => option.value)).toEqual([
+      'CALL',
+      'SMS',
+      'EMAIL',
+      'MEETING',
+      'OTHER',
+    ]);
+    expect(fieldNamesOf('task')).toContain('activityType');
+  });
+
+  it('builds the Followups kanban with one group per stage and the Activities board', async () => {
+    const { views } = await metadataRequest<{
+      views: { id: string; name: string; type: string }[];
+    }>('{ views: getViews { id name type } }');
+    const followups = views.find((view) => view.name === 'Followups');
+    const activities = views.find((view) => view.name === 'Activities');
+
+    expect(followups?.type).toBe('KANBAN');
+    expect(activities?.type).toBe('KANBAN');
+
+    for (const [view, expected] of [
+      [followups, 5],
+      [activities, 3],
+    ] as const) {
+      const { groups } = await metadataRequest<{ groups: { fieldValue: string }[] }>(
+        'query ($viewId: String) { groups: getViewGroups(viewId: $viewId) { fieldValue } }',
+        { viewId: view?.id },
+      );
+
+      expect(groups).toHaveLength(expected);
+    }
+  });
+
+  it('seeds default Followup Types and Commission Tiers', async () => {
+    const { followupTypes, commissionTiers } = await new CoreApiClient().query({
+      followupTypes: { totalCount: true },
+      commissionTiers: { totalCount: true },
+    });
+
+    expect(followupTypes?.totalCount).toBeGreaterThan(0);
+    expect(commissionTiers?.totalCount).toBeGreaterThan(0);
+  });
+
+  it('keeps a manager edit when the seed runs again', async () => {
+    const client = new CoreApiClient();
+    const { commissionTiers } = await client.query({
+      commissionTiers: {
+        __args: { first: 1 },
+        edges: { node: { id: true, name: true } },
+      },
+    });
+    const tier = commissionTiers?.edges?.[0]?.node;
+
+    await client.mutation({
+      updateCommissionTier: {
+        __args: { id: tier!.id, data: { name: 'Edited by a manager' } },
+        id: true,
+      },
+    });
+    await runPostInstall({ client, metadataClient: new MetadataApiClient() });
+
+    const { commissionTier } = await client.query({
+      commissionTier: { __args: { filter: { id: { eq: tier!.id } } }, name: true },
+    });
+
+    expect(commissionTier?.name).toBe('Edited by a manager');
+  });
+
+  it('removes Opportunity from the navigation', async () => {
+    const { objects } = await loadMetadata();
+    const opportunityId = objects.find(
+      (object) => object.nameSingular === 'opportunity',
+    )?.id;
+    const { navigationMenuItems } = await metadataRequest<{
+      navigationMenuItems: { targetObjectMetadataId: string | null }[];
+    }>('{ navigationMenuItems { targetObjectMetadataId } }');
+
+    expect(
+      navigationMenuItems.some(
+        (item) => item.targetObjectMetadataId === opportunityId,
+      ),
+    ).toBe(false);
+  });
+
+  it('configures the Sales Agent and Sales Manager roles', async () => {
+    const { objects } = await loadMetadata();
+    const { getRoles } = await metadataRequest<{
+      getRoles: {
+        label: string;
+        canReadAllObjectRecords: boolean;
+        canUpdateAllObjectRecords: boolean;
+        objectPermissions: {
+          objectMetadataId: string;
+          canReadObjectRecords: boolean;
+          canUpdateObjectRecords: boolean;
+        }[];
+      }[];
+    }>(`{
+      getRoles {
+        label canReadAllObjectRecords canUpdateAllObjectRecords
+        objectPermissions { objectMetadataId canReadObjectRecords canUpdateObjectRecords }
+      }
+    }`);
+    const agent = getRoles.find((role) => role.label === 'Sales Agent');
+    const manager = getRoles.find((role) => role.label === 'Sales Manager');
+    const idOf = (nameSingular: string) =>
+      objects.find((object) => object.nameSingular === nameSingular)?.id;
+    const permissionOn = (nameSingular: string) =>
+      agent?.objectPermissions.find(
+        (permission) => permission.objectMetadataId === idOf(nameSingular),
+      );
+
+    for (const nameSingular of ['followupType', 'commissionTier']) {
+      expect(permissionOn(nameSingular)).toMatchObject({
+        canReadObjectRecords: true,
+        canUpdateObjectRecords: false,
+      });
+    }
+
+    expect(permissionOn('followup')).toMatchObject({ canUpdateObjectRecords: true });
+
+    expect(manager).toMatchObject({
+      canReadAllObjectRecords: true,
+      canUpdateAllObjectRecords: true,
+    });
   });
 });
