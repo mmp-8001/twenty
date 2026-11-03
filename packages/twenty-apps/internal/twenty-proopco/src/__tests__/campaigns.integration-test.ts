@@ -183,6 +183,31 @@ const tag = (name: string) => `<${uniqueId(name)}>`;
 const sentMessages = () => stub.requests.flatMap(({ body }) => body.messages);
 
 describe('Campaigns', () => {
+  it('explains a missing SMS configuration without calling out', async () => {
+    await setServerVariable('SMS_ENQUEUE_URL', '');
+    await setServerVariable('SMS_ENQUEUE_TOKEN', '');
+
+    try {
+      const campaignId = await createCampaign(
+        await createSegment([
+          { field: 'source', operand: 'CONTAINS', value: tag('unset') },
+        ]),
+      );
+      const before = stub.requests.length;
+
+      expect(await send(campaignId)).toEqual({
+        success: false,
+        error:
+          'SMS is not configured: set SMS_ENQUEUE_URL and SMS_ENQUEUE_TOKEN in Settings > Applications > twenty-proopco',
+      });
+      expect(stub.requests).toHaveLength(before);
+      expect((await getCampaign(campaignId)).status).toBe('DRAFT');
+    } finally {
+      await setServerVariable('SMS_ENQUEUE_URL', `${stub.url}/s/sms/enqueue`);
+      await setServerVariable('SMS_ENQUEUE_TOKEN', ENQUEUE_TOKEN);
+    }
+  });
+
   it('queues one SMS per Trader matching the Segment, once', async () => {
     const source = tag('segment-is');
     const matching = await createPerson({ source, purchaseCount: 3, phone: '7911123456' });
