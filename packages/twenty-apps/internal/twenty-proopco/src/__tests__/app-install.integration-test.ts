@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { CoreApiClient } from 'twenty-client-sdk/core';
 
+import { APPLICATION_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
+
 import { metadataRequest } from './metadata-request';
 import { createFollowup, createTrader, getFollowup, mutate } from './sales-core-helpers';
 import { runDeployedPostInstall } from './seeded-sessions';
@@ -68,6 +70,35 @@ const loadMetadata = async () => {
 };
 
 describe('twenty-proopco install', () => {
+  it('needs neither the SMS app nor a proopco connection to be configured', async () => {
+    const { findApplicationRegistrationByUniversalIdentifier: registration } =
+      await metadataRequest<{
+        findApplicationRegistrationByUniversalIdentifier: {
+          id: string;
+          isConfigured: boolean;
+        };
+      }>(
+        `query ($universalIdentifier: String!) {
+          findApplicationRegistrationByUniversalIdentifier(universalIdentifier: $universalIdentifier) { id isConfigured }
+        }`,
+        { universalIdentifier: APPLICATION_UNIVERSAL_IDENTIFIER },
+      );
+    const { findApplicationRegistrationVariables: variables } =
+      await metadataRequest<{
+        findApplicationRegistrationVariables: { key: string; isRequired: boolean }[];
+      }>(
+        `query ($id: String!) {
+          findApplicationRegistrationVariables(applicationRegistrationId: $id) { key isRequired }
+        }`,
+        { id: registration.id },
+      );
+
+    expect(registration.isConfigured).toBe(true);
+    expect(
+      variables.filter((variable) => variable.isRequired).map(({ key }) => key),
+    ).toEqual([]);
+  });
+
   it('creates the Person trading fields', async () => {
     const { fieldNamesOf } = await loadMetadata();
 
