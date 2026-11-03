@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import { useEffect, useRef, type KeyboardEvent } from 'react';
 
 import { isDefined } from '@ui/utilities/utils/isDefined';
 
@@ -6,6 +7,8 @@ import styles from '../DatePicker.module.scss';
 import { type DatePickerProps } from '../types/DatePickerProps';
 import { DATE_PICKER_CONSTANTS } from './datePickerConstants';
 import {
+  getPersianDateParts,
+  getPersianKeyboardTarget,
   getPersianMonthLength,
   MILLISECONDS_PER_DAY,
   persianDateToIso,
@@ -27,6 +30,7 @@ type PersianCalendarGridProps = Pick<
   year: number;
   month: number;
   onDayClick: (isoDate: string) => void;
+  onViewedMonthChange: (target: { year: number; month: number }) => void;
 };
 
 export const PersianCalendarGrid = ({
@@ -41,7 +45,24 @@ export const PersianCalendarGrid = ({
   readOnly,
   disabled,
   onDayClick,
+  onViewedMonthChange,
 }: PersianCalendarGridProps) => {
+  const gridRef = useRef<HTMLDivElement>(null);
+  const pendingFocusIsoRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (pendingFocusIsoRef.current === null) {
+      return;
+    }
+
+    gridRef.current
+      ?.querySelector<HTMLButtonElement>(
+        `[aria-label="${pendingFocusIsoRef.current}"]`,
+      )
+      ?.focus();
+    pendingFocusIsoRef.current = null;
+  }, [year, month]);
+
   const firstDayIso = persianDateToIso({ year, month, day: 1 });
   const leadingBlankCount =
     (new Date(`${firstDayIso}T00:00:00Z`).getUTCDay() -
@@ -78,8 +99,41 @@ export const PersianCalendarGrid = ({
     return { day, isoDate };
   });
 
+  const tabStopIso = days.some(({ isoDate }) => isoDate === value)
+    ? value
+    : firstDayIso;
+
+  const handleKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    isoDate: string,
+  ) => {
+    const target = getPersianKeyboardTarget({
+      isoDate,
+      key: event.key,
+      shiftKey: event.shiftKey,
+      weekStart,
+    });
+
+    if (target === null) {
+      return;
+    }
+
+    event.preventDefault();
+    const targetParts = getPersianDateParts(target);
+
+    if (targetParts.year === year && targetParts.month === month) {
+      gridRef.current
+        ?.querySelector<HTMLButtonElement>(`[aria-label="${target}"]`)
+        ?.focus();
+      return;
+    }
+
+    pendingFocusIsoRef.current = target;
+    onViewedMonthChange(targetParts);
+  };
+
   return (
-    <div className={styles.persianGrid}>
+    <div ref={gridRef} className={styles.persianGrid}>
       {weekdayNames.map((name, index) => (
         <span key={index} className={styles.persianDayName}>
           {name}
@@ -110,6 +164,8 @@ export const PersianCalendarGrid = ({
             }
             aria-pressed={isSelected}
             aria-label={isoDate}
+            tabIndex={isoDate === tabStopIso ? 0 : -1}
+            onKeyDown={(event) => handleKeyDown(event, isoDate)}
             onClick={() => onDayClick(isoDate)}
           >
             {day}

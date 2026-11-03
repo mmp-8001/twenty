@@ -1,6 +1,7 @@
 import {
   addPersianMonths,
   getPersianDateParts,
+  getPersianKeyboardTarget,
   getPersianMonthLength,
   persianDateToIso,
 } from '../persianCalendar';
@@ -43,5 +44,42 @@ describe('persianCalendar', () => {
       year: 1404,
       month: 12,
     });
+  });
+});
+
+describe('getPersianKeyboardTarget', () => {
+  const base = { shiftKey: false, weekStart: 6 };
+
+  it.each([
+    ['ArrowRight', '2026-11-04'],
+    ['ArrowLeft', '2026-11-02'],
+    ['ArrowDown', '2026-11-10'],
+    ['ArrowUp', '2026-10-27'],
+    ['PageDown', '2026-12-03'],
+    ['PageUp', '2026-10-04'],
+    ['Home', '2026-10-31'],
+    ['End', '2026-11-06'],
+  ])('%s from 2026-11-03', (key, expected) => {
+    expect(
+      getPersianKeyboardTarget({ ...base, isoDate: '2026-11-03', key }),
+    ).toBe(expected);
+  });
+
+  it('moves a year with Shift+PageDown and clamps the day', () => {
+    // 30 Esfand 1403 (leap) -> 29 Esfand 1404
+    expect(
+      getPersianKeyboardTarget({
+        isoDate: persianDateToIso({ year: 1403, month: 12, day: 30 }),
+        key: 'PageDown',
+        shiftKey: true,
+        weekStart: 6,
+      }),
+    ).toBe(persianDateToIso({ year: 1404, month: 12, day: 29 }));
+  });
+
+  it('ignores other keys', () => {
+    expect(
+      getPersianKeyboardTarget({ ...base, isoDate: '2026-11-03', key: 'a' }),
+    ).toBeNull();
   });
 });

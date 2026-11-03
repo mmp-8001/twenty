@@ -81,3 +81,53 @@ export const addPersianMonths = (
 
 export const formatPersianYearMonth = ({ year, month }: PersianYearMonth) =>
   `${year.toString().padStart(4, '0')}-${month.toString().padStart(2, '0')}`;
+
+const addIsoDays = (isoDate: string, days: number) =>
+  new Date(toTimestamp(isoDate) + days * MILLISECONDS_PER_DAY)
+    .toISOString()
+    .slice(0, 10);
+
+// Mirrors react-datepicker's day keys; month and year steps clamp the day like date-fns.
+export const getPersianKeyboardTarget = ({
+  isoDate,
+  key,
+  shiftKey,
+  weekStart,
+}: {
+  isoDate: string;
+  key: string;
+  shiftKey: boolean;
+  weekStart: number;
+}): string | null => {
+  const dayOfWeek = new Date(toTimestamp(isoDate)).getUTCDay();
+  const dayOffsets: Record<string, number> = {
+    ArrowRight: 1,
+    ArrowLeft: -1,
+    ArrowDown: 7,
+    ArrowUp: -7,
+    Home: -((dayOfWeek - weekStart + 7) % 7),
+    End: 6 - ((dayOfWeek - weekStart + 7) % 7),
+  };
+
+  const dayOffset = dayOffsets[key];
+
+  if (dayOffset !== undefined) {
+    return addIsoDays(isoDate, dayOffset);
+  }
+
+  if (key !== 'PageUp' && key !== 'PageDown') {
+    return null;
+  }
+
+  const direction = key === 'PageUp' ? -1 : 1;
+  const { year, month, day } = getPersianDateParts(isoDate);
+  const target = addPersianMonths(
+    { year, month },
+    direction * (shiftKey ? 12 : 1),
+  );
+
+  return persianDateToIso({
+    ...target,
+    day: Math.min(day, getPersianMonthLength(target.year, target.month)),
+  });
+};
