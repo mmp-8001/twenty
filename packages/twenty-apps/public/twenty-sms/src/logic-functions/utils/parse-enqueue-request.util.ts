@@ -1,16 +1,16 @@
+import { isArray, isNonEmptyString, isString } from '@sniptt/guards';
+
 import { MAX_ENQUEUE_BATCH_SIZE } from 'src/constants/sms.constant';
 
 export type EnqueueMessage = { to: string; body: string; sourceRef: string };
 
-const isNonEmptyString = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0;
-
 export const parseEnqueueRequest = (
   body: unknown,
 ): { messages: EnqueueMessage[] } | { error: string } => {
-  const messages = (body as { messages?: unknown } | null)?.messages;
+  const messages = (body as { messages?: Partial<EnqueueMessage>[] } | null)
+    ?.messages;
 
-  if (!Array.isArray(messages) || messages.length === 0) {
+  if (!isArray(messages) || messages.length === 0) {
     return { error: 'messages must be a non-empty array' };
   }
 
@@ -20,7 +20,7 @@ export const parseEnqueueRequest = (
 
   for (const [index, message] of messages.entries()) {
     if (
-      typeof message?.to !== 'string' ||
+      !isString(message?.to) ||
       !isNonEmptyString(message?.body) ||
       !isNonEmptyString(message?.sourceRef)
     ) {
@@ -30,5 +30,5 @@ export const parseEnqueueRequest = (
     }
   }
 
-  return { messages };
+  return { messages: messages as EnqueueMessage[] };
 };

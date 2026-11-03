@@ -4,7 +4,7 @@ import {
 } from 'src/logic-functions/utils/list-records.util';
 import { type SmsProvider } from 'src/providers/sms-provider.type';
 
-// ponytail: overlapping runs could double-send; a SENDING status would close it.
+// Overlapping runs could double-send; a SENDING status would close it.
 export const sendQueuedMessages = async ({
   client,
   provider,
