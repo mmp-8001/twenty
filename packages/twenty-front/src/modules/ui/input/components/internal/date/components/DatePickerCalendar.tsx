@@ -7,10 +7,13 @@ import { useState } from 'react';
 import { Temporal } from 'temporal-polyfill';
 import { SOURCE_LOCALE } from 'twenty-shared/translations';
 import { isDefined } from 'twenty-shared/utils';
-import { DatePicker, type DatePickerProps } from 'twenty-ui/components/input';
+import {
+  DatePicker,
+  formatPersianYearMonth,
+  type DatePickerProps,
+} from 'twenty-ui/components/input';
 import { WorkspaceMemberCalendarEnum } from '~/generated-metadata/graphql';
 
-// Jalali pickers navigate by Jalali month, so their viewed month is a Jalali YYYY-MM.
 const getViewedMonth = (
   isoDate: string,
   calendar: WorkspaceMemberCalendarEnum,
@@ -22,7 +25,7 @@ const getViewedMonth = (
   const { year, month } =
     Temporal.PlainDate.from(isoDate).withCalendar('persian');
 
-  return `${year.toString().padStart(4, '0')}-${month.toString().padStart(2, '0')}`;
+  return formatPersianYearMonth({ year, month });
 };
 
 type DatePickerCalendarProps = {

@@ -1,3 +1,5 @@
+import { useDateTimeFormat } from '@/localization/hooks/useDateTimeFormat';
+import { getViewedMonthStartPlainDate } from '@/ui/input/components/internal/date/utils/getViewedMonthStartPlainDate';
 import { DatePickerCalendar } from '@/ui/input/components/internal/date/components/DatePickerCalendar';
 import { DatePickerLoadingFallback } from '@/ui/input/components/internal/date/components/DatePickerLoadingFallback';
 import { DatePickerClearButton } from '@/ui/input/components/internal/date/components/DatePickerClearButton';
@@ -47,6 +49,8 @@ export const DatePicker = ({
   onRelativeDateChange,
   hideHeaderInput,
 }: DatePickerProps) => {
+  const { calendar } = useDateTimeFormat();
+
   const plainDate = isDefined(plainDateString)
     ? Temporal.PlainDate.from(plainDateString)
     : Temporal.Now.plainDateISO();
@@ -79,7 +83,7 @@ export const DatePicker = ({
                 unit={relativeDate?.unit ?? doNotTranslate('DAY')}
                 onChange={onRelativeDateChange}
                 calendarMonthDate={turnPlainDateToShiftedDateInSystemTimeZone(
-                  Temporal.PlainDate.from(`${header.viewedMonth}-01`),
+                  getViewedMonthStartPlainDate(header.viewedMonth, calendar),
                 )}
                 onPreviousMonth={header.onPreviousMonth}
                 onNextMonth={header.onNextMonth}
