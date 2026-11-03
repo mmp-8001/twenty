@@ -9,10 +9,9 @@ import { isNonEmptyString } from '@sniptt/guards';
 import { useId } from 'react';
 import { Tooltip } from 'twenty-ui/primitives/surfaces';
 import { dateLocaleState } from '@/localization/states/dateLocaleState';
-import {
-  beautifyExactDateTime,
-  beautifyPastDateRelativeToNow,
-} from '~/utils/date-utils';
+import { useDateTimeFormat } from '@/localization/hooks/useDateTimeFormat';
+import { formatDateTimeString } from '@/object-record/record-field/ui/utils/formatDateTimeString';
+import { beautifyPastDateRelativeToNow } from '~/utils/date-utils';
 
 const StyledCreatedAt = styled(StyledHeaderIdentifierLabel)`
   cursor: pointer;
@@ -30,6 +29,7 @@ export const RecordIdentifierBarCreatedAt = ({
     { recordId: objectRecordId, fieldName: 'createdAt' },
   );
   const { localeCatalog } = useAtomStateValue(dateLocaleState);
+  const { timeZone, dateFormat, timeFormat, calendar } = useDateTimeFormat();
   const instanceId = useId().replace(/:/g, '');
 
   if (!isNonEmptyString(recordCreatedAt)) {
@@ -45,7 +45,14 @@ export const RecordIdentifierBarCreatedAt = ({
   return (
     <Tooltip
       delay={TooltipDelay.mediumDelay}
-      content={beautifyExactDateTime(recordCreatedAt)}
+      content={formatDateTimeString({
+        value: recordCreatedAt,
+        timeZone,
+        dateFormat,
+        timeFormat,
+        localeCatalog,
+        calendar,
+      })}
       side="inline-start"
     >
       <StyledCreatedAt id={createdAtElementId}>
