@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   SWEEP_ROUTE_PATH,
@@ -80,6 +80,33 @@ describe('Track', () => {
       success: false,
       error: expect.stringContaining('active Followup'),
     });
+  });
+
+  it('lets only one of two simultaneous Tracks succeed', async () => {
+    const traderId = await createTrader('track-race');
+    const ownerId = await firstMemberId();
+    const results = await Promise.all([
+      track({ traderId, ownerId }),
+      track({ traderId, ownerId }),
+    ]);
+
+    expect(results.filter(({ success }) => success)).toHaveLength(1);
+  });
+
+  it('frees the Trader when an active Followup is edited to Failed', async () => {
+    const traderId = await createTrader('track-key-sync');
+    const ownerId = await firstMemberId();
+    const { followupId } = await track({ traderId, ownerId });
+
+    await mutate({
+      updateFollowup: {
+        __args: { id: followupId, data: { stage: 'FAILED' } },
+        id: true,
+      },
+    });
+    await vi.waitFor(async () => {
+      expect((await track({ traderId, ownerId })).success).toBe(true);
+    }, { timeout: 30_000, interval: 1_000 });
   });
 
   it('refuses a Trader whose Followup sits in the Pool', async () => {

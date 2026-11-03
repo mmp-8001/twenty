@@ -1,9 +1,6 @@
 import { defineRole } from 'twenty-sdk/define';
 
-import {
-  COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
-  SALES_MANAGER_ROLE_UNIVERSAL_IDENTIFIER,
-} from 'src/constants/universal-identifiers';
+import { SALES_MANAGER_ROLE_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 
 export default defineRole({
   universalIdentifier: SALES_MANAGER_ROLE_UNIVERSAL_IDENTIFIER,
@@ -19,14 +16,4 @@ export default defineRole({
   canBeAssignedToUsers: true,
   canBeAssignedToAgents: false,
   canBeAssignedToApiKeys: false,
-  objectPermissions: [
-    // Commissions are written by the app only, so a Paid month stays locked.
-    {
-      objectUniversalIdentifier: COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
-      canReadObjectRecords: true,
-      canUpdateObjectRecords: false,
-      canSoftDeleteObjectRecords: false,
-      canDestroyObjectRecords: false,
-    },
-  ],
 });
