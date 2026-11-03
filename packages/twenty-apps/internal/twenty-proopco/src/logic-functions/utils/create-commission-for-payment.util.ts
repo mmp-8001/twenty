@@ -1,3 +1,5 @@
+import { isString } from '@sniptt/guards';
+
 import {
   computeCommissionMicros,
   countWholeDays,
@@ -202,7 +204,7 @@ export const createCommissionForPayment = async ({
       stage === 'RETRY_PENDING' ||
       (settings.scope === 'all_purchases_in_window' &&
         stage === 'SUCCEEDED' &&
-        expiresAt !== null &&
+        isString(expiresAt) &&
         new Date(expiresAt) >= new Date(paidAt)),
   );
 
@@ -244,6 +246,7 @@ export const createCommissionForPayment = async ({
   if (followup.stage !== 'SUCCEEDED') {
     await updateRecord(client, 'Followup', followupId, {
       stage: 'SUCCEEDED',
+      activeTraderKey: null,
       retryExpiresAt: null,
     });
   }

@@ -1,17 +1,19 @@
+import { isArray, isNull, isNumber, isString, isUndefined } from '@sniptt/guards';
+
+import { isPlainObject } from 'src/utils/is-plain-object';
+
 const ISO_DATE_TIME = /^\d{4}-\d{2}-\d{2}T/;
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 // Whether every field we would write already holds that value.
 export const isSameValue = (written: unknown, stored: unknown): boolean => {
-  if (written === null || written === undefined) {
-    return stored === null || stored === undefined;
+  if (isNull(written) || isUndefined(written)) {
+    return isNull(stored) || isUndefined(stored);
   }
 
-  if (Array.isArray(written)) {
+  if (isArray(written)) {
     return (
-      Array.isArray(stored) &&
+      isArray(stored) &&
       written.length === stored.length &&
       written.every((item, index) => isSameValue(item, stored[index]))
     );
@@ -26,11 +28,11 @@ export const isSameValue = (written: unknown, stored: unknown): boolean => {
     );
   }
 
-  if (typeof written === 'number') {
+  if (isNumber(written)) {
     return Number(stored) === written;
   }
 
-  if (typeof written === 'string' && typeof stored === 'string') {
+  if (isString(written) && isString(stored)) {
     return (
       written === stored ||
       (ISO_DATE_TIME.test(written) &&

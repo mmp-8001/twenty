@@ -35,14 +35,8 @@ export default defineObject({
   labelPlural: 'Commissions',
   description: 'Money an agent earned on a Payment.',
   icon: 'IconCoin',
-  // Written only by the app; the Paid lock follows from nobody else editing.
-  disabledObjectPermissionActions: [
-    'canUpdateObjectRecords',
-    'canSoftDeleteObjectRecords',
-    'canDestroyObjectRecords',
-  ],
+  disabledObjectPermissionActions: ['canDestroyObjectRecords'],
   isUICreatable: false,
-  isUIEditable: false,
   labelIdentifierFieldMetadataUniversalIdentifier:
     COMMISSION_NAME_FIELD_UNIVERSAL_IDENTIFIER,
   fields: [

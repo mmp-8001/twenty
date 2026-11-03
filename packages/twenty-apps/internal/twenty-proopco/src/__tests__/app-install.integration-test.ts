@@ -51,8 +51,8 @@ const loadAllFields = async (): Promise<FieldNode[]> => {
 
 const loadMetadata = async () => {
   const data = await metadataRequest<{
-    objects: { edges: { node: { id: string; nameSingular: string } }[] };
-  }>(`{ objects(paging: { first: 200 }) { edges { node { id nameSingular } } } }`);
+    objects: { edges: { node: { id: string; nameSingular: string; isActive: boolean } }[] };
+  }>(`{ objects(paging: { first: 200 }) { edges { node { id nameSingular isActive } } } }`);
   const objects = data.objects.edges.map(({ node }) => node);
   const fields = await loadAllFields();
   const fieldNamesOf = (nameSingular: string) => {
@@ -292,19 +292,11 @@ describe('twenty-proopco install', () => {
     expect(commissionTier?.name).toBe('Edited by a manager');
   });
 
-  it('removes Opportunity from the navigation', async () => {
+  it('deactivates Opportunity without deleting navigation items', async () => {
     const { objects } = await loadMetadata();
-    const opportunityId = objects.find(
-      (object) => object.nameSingular === 'opportunity',
-    )?.id;
-    const { navigationMenuItems } = await metadataRequest<{
-      navigationMenuItems: { targetObjectMetadataId: string | null }[];
-    }>('{ navigationMenuItems { targetObjectMetadataId } }');
 
     expect(
-      navigationMenuItems.some(
-        (item) => item.targetObjectMetadataId === opportunityId,
-      ),
+      objects.find((object) => object.nameSingular === 'opportunity')?.isActive,
     ).toBe(false);
   });
 
@@ -344,6 +336,7 @@ describe('twenty-proopco install', () => {
     }
 
     expect(permissionOn('followup')).toMatchObject({ canUpdateObjectRecords: true });
+    expect(permissionOn('commission')).toMatchObject({ canUpdateObjectRecords: true });
 
     expect(manager).toMatchObject({
       canReadAllObjectRecords: true,

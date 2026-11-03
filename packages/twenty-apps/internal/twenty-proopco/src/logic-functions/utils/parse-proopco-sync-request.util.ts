@@ -1,17 +1,17 @@
+import { isArray, isNonEmptyString, isString } from '@sniptt/guards';
+
 import { PROOPCO_SYNC_MAX_BATCH_SIZE } from 'src/constants/proopco-sync.constant';
 import { type ProopcoSyncItem } from 'src/logic-functions/types/proopco-sync.type';
+import { isPlainObject } from 'src/utils/is-plain-object';
 
 const ITEM_TYPES = ['trader', 'tradingAccount', 'payment'];
-
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 export const parseProopcoSyncRequest = (
   body: unknown,
 ): { items: ProopcoSyncItem[] } | { error: string } => {
   const items = isPlainObject(body) ? body.items : undefined;
 
-  if (!Array.isArray(items)) {
+  if (!isArray(items)) {
     return { error: 'Body must be { items: [...] }' };
   }
 
@@ -26,10 +26,9 @@ export const parseProopcoSyncRequest = (
   for (const [index, item] of items.entries()) {
     if (
       !isPlainObject(item) ||
-      typeof item.type !== 'string' ||
+      !isString(item.type) ||
       !ITEM_TYPES.includes(item.type) ||
-      typeof item.proopcoId !== 'string' ||
-      item.proopcoId === '' ||
+      !isNonEmptyString(item.proopcoId) ||
       !isPlainObject(item.data)
     ) {
       return {

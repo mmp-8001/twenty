@@ -24,7 +24,7 @@ export default defineView({
   name: 'Activities',
   objectUniversalIdentifier: task.universalIdentifier,
   type: ViewType.KANBAN,
-  icon: 'IconChecklist',
+  icon: 'IconCheckbox',
   position: 0,
   mainGroupByFieldMetadataUniversalIdentifier:
     task.fields.status.universalIdentifier,

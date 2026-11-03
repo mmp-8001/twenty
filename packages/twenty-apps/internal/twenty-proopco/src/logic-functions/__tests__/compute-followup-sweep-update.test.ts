@@ -14,7 +14,7 @@ const sweep = (followup: Parameters<typeof computeFollowupSweepUpdate>[0]['follo
 
 describe('computeFollowupSweepUpdate', () => {
   it('expires a Pending Followup once its window passed', () => {
-    expect(sweep({ ...base, expiresAt: '2026-03-10T00:00:00Z' })).toEqual({ stage: 'EXPIRED' });
+    expect(sweep({ ...base, expiresAt: '2026-03-10T00:00:00Z' })).toEqual({ stage: 'EXPIRED', activeTraderKey: null });
   });
 
   it('leaves a Pending Followup inside its window', () => {
@@ -30,7 +30,7 @@ describe('computeFollowupSweepUpdate', () => {
   it('expires an overdue Pool Followup as not followed up', () => {
     expect(
       sweep({ ...base, stage: 'RETRY_PENDING', ownerId: null, retryExpiresAt: '2026-03-09T00:00:00Z' }),
-    ).toEqual({ stage: 'EXPIRED', failureReason: 'NOT_FOLLOWED_UP' });
+    ).toEqual({ stage: 'EXPIRED', activeTraderKey: null, failureReason: 'NOT_FOLLOWED_UP' });
   });
 
   it.each(['SUCCEEDED', 'FAILED', 'EXPIRED'] as const)('ignores a %s Followup', (stage) => {

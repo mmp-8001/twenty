@@ -18,7 +18,7 @@ export default definePostInstallLogicFunction({
   universalIdentifier: PROOPCO_POST_INSTALL_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'post-install',
   description:
-    'Seeds default Followup Types and Commission Tiers when empty and hides Opportunity.',
+    'Seeds default Followup Types and Commission Tiers when empty and deactivates Opportunity.',
   timeoutSeconds: 120,
   shouldRunSynchronously: true,
   handler: postInstallHandler,

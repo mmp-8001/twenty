@@ -1,3 +1,5 @@
+import { isNull, isString } from '@sniptt/guards';
+
 import { MILLISECONDS_PER_DAY } from 'src/constants/proopco-jobs.constant';
 import {
   NOT_FOLLOWED_UP_REASON,
@@ -13,13 +15,14 @@ export type SweepFollowup = {
 
 export type FollowupSweepUpdate = {
   stage?: FollowupStage;
+  activeTraderKey?: null;
   ownerId?: null;
   retryExpiresAt?: string;
   failureReason?: string;
 };
 
 const hasPassed = (value: string | null, referenceDate: Date): boolean =>
-  value !== null && new Date(value).getTime() <= referenceDate.getTime();
+  isString(value) && new Date(value).getTime() <= referenceDate.getTime();
 
 export const computeFollowupSweepUpdate = ({
   followup,
@@ -34,7 +37,7 @@ export const computeFollowupSweepUpdate = ({
     followup.stage === 'PENDING' &&
     hasPassed(followup.expiresAt, referenceDate)
   ) {
-    return { stage: 'EXPIRED' };
+    return { stage: 'EXPIRED', activeTraderKey: null };
   }
 
   if (
@@ -44,8 +47,12 @@ export const computeFollowupSweepUpdate = ({
     return null;
   }
 
-  if (followup.ownerId === null) {
-    return { stage: 'EXPIRED', failureReason: NOT_FOLLOWED_UP_REASON };
+  if (isNull(followup.ownerId)) {
+    return {
+      stage: 'EXPIRED',
+      activeTraderKey: null,
+      failureReason: NOT_FOLLOWED_UP_REASON,
+    };
   }
 
   return {

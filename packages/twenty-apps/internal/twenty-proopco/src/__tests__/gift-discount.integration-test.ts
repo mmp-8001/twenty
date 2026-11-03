@@ -33,6 +33,8 @@ const createSyncedPerson = async (proopcoId: string | null) =>
     })
   ).createPerson.id as string;
 
+type DiscountBody = { userId: string; code: string };
+
 describe('Gift discount code', () => {
   it('explains a missing proopco configuration without calling out', async () => {
     // Server variables outlive an uninstall, so clear what a previous run left.
@@ -57,10 +59,10 @@ describe('Gift discount code', () => {
   describe('against proopco', () => {
     const rejected = new Set<string>(['TAKEN']);
     let stop: (() => Promise<void>) | undefined;
-    let requests: Awaited<ReturnType<typeof startStubServer>>['requests'] = [];
+    let requests: Awaited<ReturnType<typeof startStubServer<DiscountBody>>>['requests'] = [];
 
     const startProopco = async () => {
-      const stub = await startStubServer(({ body }) =>
+      const stub = await startStubServer<DiscountBody>(({ body }) =>
         rejected.has(body.code)
           ? { status: 422, body: { message: 'Code already applied' } }
           : { status: 200, body: { ok: true } },

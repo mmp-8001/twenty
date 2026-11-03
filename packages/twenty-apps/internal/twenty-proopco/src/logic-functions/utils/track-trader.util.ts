@@ -18,6 +18,16 @@ type FollowupTypeNode = {
   createdAt: string;
 };
 
+const ACTIVE_FOLLOWUP_ERROR = 'This Trader already has an active Followup';
+
+const hasActiveFollowup = async (client: RecordsClient, traderId: string) =>
+  (
+    await listRecords(client, 'followups', {
+      traderId: { eq: traderId },
+      stage: { in: ACTIVE_FOLLOWUP_STAGES },
+    }, {})
+  ).length > 0;
+
 export const trackTrader = async ({
   client,
   traderId,
@@ -42,17 +52,9 @@ export const trackTrader = async ({
     return { success: false, error: 'Trader not found' };
   }
 
-  // ponytail: check-then-create, two simultaneous Tracks can both pass; add a unique key if that happens.
-  const active = await listRecords(client, 'followups', {
-    traderId: { eq: traderId },
-    stage: { in: ACTIVE_FOLLOWUP_STAGES },
-  }, {});
-
-  if (active.length > 0) {
-    return {
-      success: false,
-      error: 'This Trader already has an active Followup',
-    };
+  // Fast path for the message; the unique activeTraderKey settles concurrent Tracks.
+  if (await hasActiveFollowup(client, traderId)) {
+    return { success: false, error: ACTIVE_FOLLOWUP_ERROR };
   }
 
   // The command names no type, so the oldest one (the seeded default) applies.
@@ -72,16 +74,25 @@ export const trackTrader = async ({
   const traderName = [trader.name?.firstName, trader.name?.lastName]
     .filter(Boolean)
     .join(' ');
-  const followupId = await createRecord(client, 'Followup', {
-    name: `${traderName || 'Trader'} - ${followupType.name}`,
-    stage: 'PENDING',
-    traderId,
-    ownerId,
-    followupTypeId: followupType.id,
-    expiresAt: new Date(
-      now.getTime() + followupType.expiryDays * MILLISECONDS_PER_DAY,
-    ).toISOString(),
-  });
+  try {
+    const followupId = await createRecord(client, 'Followup', {
+      name: `${traderName || 'Trader'} - ${followupType.name}`,
+      stage: 'PENDING',
+      traderId,
+      activeTraderKey: traderId,
+      ownerId,
+      followupTypeId: followupType.id,
+      expiresAt: new Date(
+        now.getTime() + followupType.expiryDays * MILLISECONDS_PER_DAY,
+      ).toISOString(),
+    });
 
-  return { success: true, followupId };
+    return { success: true, followupId };
+  } catch (error) {
+    if (await hasActiveFollowup(client, traderId)) {
+      return { success: false, error: ACTIVE_FOLLOWUP_ERROR };
+    }
+
+    throw error;
+  }
 };

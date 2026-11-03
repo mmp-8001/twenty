@@ -19,12 +19,14 @@ let enqueueResponse: StubResponse = {
   status: 200,
   body: { success: true, results: [] },
 };
-let stub: Awaited<ReturnType<typeof startStubServer>>;
+type EnqueueBody = { messages: { to: string; body: string; sourceRef: string }[] };
+
+let stub: Awaited<ReturnType<typeof startStubServer<EnqueueBody>>>;
 let personObjectId: string;
 const fieldIdByName = new Map<string, string>();
 
 beforeAll(async () => {
-  stub = await startStubServer(() => enqueueResponse);
+  stub = await startStubServer<EnqueueBody>(() => enqueueResponse);
   await setServerVariable('SMS_ENQUEUE_URL', `${stub.url}/s/sms/enqueue`);
   await setServerVariable('SMS_ENQUEUE_TOKEN', ENQUEUE_TOKEN);
 
@@ -244,7 +246,7 @@ describe('Campaigns', () => {
 
     expect(await send(campaignId)).toMatchObject({ success: true, recipientCount: 2 });
     expect(
-      stub.requests.slice(before).flatMap(({ body }) => body.messages.map((message: any) => message.sourceRef)).sort(),
+      stub.requests.slice(before).flatMap(({ body }) => body.messages.map((message) => message.sourceRef)).sort(),
     ).toEqual(
       [people[0], people[1]].map((id) => `campaign:${campaignId}:person:${id}`).sort(),
     );
@@ -302,7 +304,7 @@ describe('Campaigns', () => {
 
     expect(await send(campaignId)).toEqual({ success: true, recipientCount: 1 });
     // Both attempts carry the same sourceRef, which the SMS app dedups.
-    const refs = sentMessages().map((message: any) => message.sourceRef);
+    const refs = sentMessages().map((message) => message.sourceRef);
     const campaignRefs = refs.filter((ref: string) => ref.startsWith(`campaign:${campaignId}:`));
 
     expect(new Set(campaignRefs).size).toBe(1);

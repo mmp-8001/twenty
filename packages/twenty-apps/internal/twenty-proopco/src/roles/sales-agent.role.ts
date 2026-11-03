@@ -86,6 +86,7 @@ export default defineRole({
     },
     ...[
       FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
+      COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
       task.universalIdentifier,
       note.universalIdentifier,
     ].map((objectUniversalIdentifier) => ({
@@ -95,7 +96,6 @@ export default defineRole({
     ...[
       FOLLOWUP_TYPE_OBJECT_UNIVERSAL_IDENTIFIER,
       COMMISSION_TIER_OBJECT_UNIVERSAL_IDENTIFIER,
-      COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
       MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
     ].map((objectUniversalIdentifier) => ({
       objectUniversalIdentifier,
@@ -145,6 +145,16 @@ export default defineRole({
       objectUniversalIdentifier: MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
       fieldUniversalIdentifier:
         AGENT_ON_MONTHLY_INCOME_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: 'IS',
+      workspaceMemberFieldUniversalIdentifier:
+        workspaceMember.fields.id.universalIdentifier,
+    },
+    // A Note belongs to the agent who created it.
+    {
+      universalIdentifier: '6f1c2f0e-5d1a-4b0e-9c3e-8a4b7d2e1f63',
+      objectUniversalIdentifier: note.universalIdentifier,
+      fieldUniversalIdentifier: note.fields.createdBy.universalIdentifier,
+      subFieldName: 'workspaceMemberId',
       operand: 'IS',
       workspaceMemberFieldUniversalIdentifier:
         workspaceMember.fields.id.universalIdentifier,

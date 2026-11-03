@@ -34,7 +34,7 @@ Jobs also exposed as routes guarded by the same `x-proopco-sync-token`, so tests
 
 Commission Tiers and Followup Types are records; `RETRY_WINDOW_DAYS`, `POOL_DAYS`, `COMMISSION_BASIS`, `COMMISSION_SCOPE` and `INSTALLMENT_REMAINING_EARNS` are app variables. `COMMISSION_BASIS=list_price` is refused until proopco syncs a list price.
 
-`twenty app apply` skips the post-install hook (seeds and hiding Opportunity); the integration tests run its steps directly.
+`twenty app apply` skips the post-install hook (seeds and deactivating Opportunity); the integration tests run its steps directly.
 
 ## Campaigns and Gift discount code
 

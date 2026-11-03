@@ -1,24 +1,24 @@
 import { createServer, type IncomingMessage, type Server } from 'http';
 
-export type StubRequest = {
+export type StubRequest<TBody> = {
   url: string;
   headers: IncomingMessage['headers'];
-  body: any;
+  body: TBody;
 };
 
 export type StubResponse = { status: number; body: unknown };
 
 // External HTTP (proopco, the SMS app) is the only thing the suite stubs.
-export const startStubServer = async (
-  respond: (request: StubRequest) => StubResponse,
-): Promise<{ url: string; requests: StubRequest[]; stop: () => Promise<void> }> => {
-  const requests: StubRequest[] = [];
+export const startStubServer = async <TBody>(
+  respond: (request: StubRequest<TBody>) => StubResponse,
+): Promise<{ url: string; requests: StubRequest<TBody>[]; stop: () => Promise<void> }> => {
+  const requests: StubRequest<TBody>[] = [];
   const server: Server = createServer((incoming, outgoing) => {
     let raw = '';
 
     incoming.on('data', (chunk) => (raw += chunk));
     incoming.on('end', () => {
-      const request = {
+      const request: StubRequest<TBody> = {
         url: incoming.url ?? '',
         headers: incoming.headers,
         body: raw ? JSON.parse(raw) : undefined,

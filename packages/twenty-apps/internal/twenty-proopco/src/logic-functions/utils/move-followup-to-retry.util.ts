@@ -49,6 +49,7 @@ export const moveFollowupToRetry = async ({
 
   await updateRecord(client, 'Followup', succeeded.id, {
     stage: 'RETRY_PENDING',
+    activeTraderKey: account.traderId,
     retryExpiresAt: new Date(
       now.getTime() + retryWindowDays * MILLISECONDS_PER_DAY,
     ).toISOString(),
