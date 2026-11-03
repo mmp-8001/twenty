@@ -1,12 +1,23 @@
 import { useDateTimeFormat } from '@/localization/hooks/useDateTimeFormat';
+import { parseJalaliInputStringToPlainDate } from '@/ui/input/components/internal/date/utils/jalaliDateInput';
 import { format, isValid, parse } from 'date-fns';
 import { DATE_TYPE_FORMAT } from 'twenty-shared/constants';
+import { WorkspaceMemberCalendarEnum } from '~/generated-metadata/graphql';
 import { getDateFormatStringForDatePickerInputMask } from '~/utils/date-utils';
 
 export const useParseDateInputStringToPlainDate = () => {
-  const { dateFormat } = useDateTimeFormat();
+  const { dateFormat, calendar } = useDateTimeFormat();
 
   const parseDateInputStringToPlainDate = (dateAsString: string) => {
+    if (calendar === WorkspaceMemberCalendarEnum.JALALI) {
+      return (
+        parseJalaliInputStringToPlainDate(
+          dateAsString,
+          dateFormat,
+        )?.toString() ?? null
+      );
+    }
+
     const parsingFormat = getDateFormatStringForDatePickerInputMask(dateFormat);
 
     const parsedDate = parse(dateAsString, parsingFormat, new Date());
