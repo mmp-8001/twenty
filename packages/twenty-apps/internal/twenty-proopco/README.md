@@ -35,3 +35,12 @@ Jobs also exposed as routes guarded by the same `x-proopco-sync-token`, so tests
 Commission Tiers and Followup Types are records; `RETRY_WINDOW_DAYS`, `POOL_DAYS`, `COMMISSION_BASIS`, `COMMISSION_SCOPE` and `INSTALLMENT_REMAINING_EARNS` are app variables. `COMMISSION_BASIS=list_price` is refused until proopco syncs a list price.
 
 `twenty app apply` skips the post-install hook (seeds and hiding Opportunity); the integration tests run its steps directly.
+
+## Campaigns and Gift discount code
+
+| route (authenticated) | body | what |
+|---|---|---|
+| `POST /s/proopco/campaigns/send` | `{ campaignId }` | claims a Draft Campaign, resolves its Segment View (filters via the metadata API) into a Person query, posts `campaign:<id>:person:<id>` messages to `SMS_ENQUEUE_URL` (the twenty-sms enqueue route) |
+| `POST /s/proopco/gift-discount` | `{ personId, code }` | `POST {PROOPCO_API_BASE_URL}/crm/gift-discount` with `{ userId, code }` and `PROOPCO_API_KEY`; proopco's error text is returned as is |
+
+Segment operands follow what the server allows per field type; relative-date operands, `IS` on date-times and array fields are rejected with an error naming the operand. The gift endpoint path and body are assumed: proopco's real contract is not in this repo.

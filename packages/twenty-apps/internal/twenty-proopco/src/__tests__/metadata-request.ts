@@ -13,11 +13,11 @@ export const metadataRequest = async <TData>(
 
   const { data, errors } = (await response.json()) as {
     data: TData;
-    errors?: { message: string }[];
+    errors?: { message: string; extensions?: unknown }[];
   };
 
   if (errors?.length) {
-    throw new Error(`Metadata request failed: ${errors[0].message}`);
+    throw new Error(`Metadata request failed: ${errors[0].message} ${JSON.stringify(errors[0].extensions)}`);
   }
 
   return data;

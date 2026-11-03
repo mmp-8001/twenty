@@ -5,6 +5,7 @@ import {
 
 import {
   APP_DISPLAY_NAME,
+  CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
   COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
   COMMISSION_TIER_OBJECT_UNIVERSAL_IDENTIFIER,
   FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
@@ -34,12 +35,13 @@ const APP_OBJECT_UNIVERSAL_IDENTIFIERS = [
   COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
   COMMISSION_TIER_OBJECT_UNIVERSAL_IDENTIFIER,
   MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
 ];
 
 export default defineApplicationRole({
   universalIdentifier: DEFAULT_ROLE_UNIVERSAL_IDENTIFIER,
   label: `${APP_DISPLAY_NAME} default role`,
-  description: 'Writes synced trading facts, Followups and Commissions.',
+  description: 'Writes synced trading facts, Followups, Commissions and Campaigns.',
   canReadAllObjectRecords: false,
   canUpdateAllObjectRecords: false,
   canSoftDeleteAllObjectRecords: false,
