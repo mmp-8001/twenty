@@ -91,9 +91,9 @@ describe('twenty-proopco install', () => {
       ]),
     );
     expect(kind?.options?.map((option) => option.value)).toEqual([
-      'purchase',
-      'installment_initial',
-      'installment_remaining',
+      'PURCHASE',
+      'INSTALLMENT_INITIAL',
+      'INSTALLMENT_REMAINING',
     ]);
   });
 

@@ -35,12 +35,15 @@ const findByProopcoId = async (
   proopcoId: string,
   selection: Record<string, unknown>,
 ): Promise<Record<string, unknown> | undefined> => {
-  const result = await client.query({
+  const result = (await client.query({
     [collection]: {
       __args: { filter: { proopcoId: { eq: proopcoId } }, first: 1 },
       edges: { node: { id: true, ...selection } },
     },
-  });
+  })) as unknown as Record<
+    string,
+    { edges?: { node?: Record<string, unknown> }[] } | undefined
+  >;
 
   return result[collection]?.edges?.[0]?.node;
 };
