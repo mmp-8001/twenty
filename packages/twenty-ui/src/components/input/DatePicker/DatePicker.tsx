@@ -18,12 +18,18 @@ import { formatDatePickerLocalDate } from './internal/formatDatePickerLocalDate'
 import { parseDatePickerLocalDateOrThrow } from './internal/parseDatePickerLocalDateOrThrow';
 import { ReactDatePickerLibrary } from './internal/ReactDatePickerLibrary';
 import { validateDatePickerHighlightedRangeOrThrow } from './internal/validateDatePickerHighlightedRangeOrThrow';
+import { PersianCalendarGrid } from './internal/PersianCalendarGrid';
+import {
+  addPersianMonths,
+  formatPersianYearMonth,
+} from './internal/persianCalendar';
 import { type DatePickerProps } from './types/DatePickerProps';
 
 const DATE_PICKER_LOADING_HEIGHT = 300;
 
 export const DatePicker = ({
   value,
+  calendar = 'gregorian',
   onValueChange,
   onValueSelect,
   viewedMonth,
@@ -170,7 +176,75 @@ export const DatePicker = ({
     },
   };
 
+  const renderPersianCalendar = () => {
+    const [yearString, monthString] = viewedMonth.split('-');
+    const year = Number(yearString);
+    const month = Number(monthString);
+    const goToMonth = (target: { year: number; month: number }) =>
+      onViewedMonthChange(formatPersianYearMonth(target));
+    const navigationProps = {
+      viewedMonth,
+      onPreviousMonth: () => goToMonth(addPersianMonths({ year, month }, -1)),
+      onNextMonth: () => goToMonth(addPersianMonths({ year, month }, 1)),
+      onMonthChange: (nextMonth: number) =>
+        goToMonth({ year, month: nextMonth }),
+      onYearChange: (nextYear: number) => goToMonth({ year: nextYear, month }),
+      isPreviousMonthDisabled: disabled,
+      isNextMonthDisabled: disabled,
+    };
+    const handleDayClick = (isoDate: string) => {
+      if (isDefined(highlightedRange)) {
+        if (isoDate !== value) {
+          onValueChange(isoDate);
+        }
+      } else {
+        onValueChange(isoDate);
+      }
+
+      onValueSelect?.(isoDate);
+    };
+
+    return (
+      <>
+        {isDefined(renderHeader) ? (
+          renderHeader(navigationProps)
+        ) : (
+          <DatePickerHeader
+            // oxlint-disable-next-line react/jsx-props-no-spreading
+            {...navigationProps}
+            calendar="persian"
+            locale={locale}
+            previousMonthLabel={previousMonthLabel}
+            nextMonthLabel={nextMonthLabel}
+            monthLabel={monthLabel}
+            yearLabel={yearLabel}
+            portalContainer={portalContainer}
+            onNavigationOpenChange={onNavigationOpenChange}
+            disabled={disabled}
+          />
+        )}
+        <PersianCalendarGrid
+          year={year}
+          month={month}
+          value={value}
+          highlightedRange={highlightedRange}
+          weekStart={weekStart}
+          locale={locale}
+          weekdayLabels={weekdayLabels}
+          isDateUnavailable={isDateUnavailable}
+          readOnly={readOnly}
+          disabled={disabled}
+          onDayClick={handleDayClick}
+        />
+      </>
+    );
+  };
+
   const renderCalendar = () => {
+    if (calendar === 'persian') {
+      return renderPersianCalendar();
+    }
+
     if (isDefined(highlightedRange)) {
       return (
         <ReactDatePickerLibrary
@@ -216,11 +290,13 @@ export const DatePicker = ({
             loadingFallback ?? <Skeleton height={DATE_PICKER_LOADING_HEIGHT} />
           }
         >
-          <DatePickerViewedMonthEffect
-            calendarRef={calendarRef}
-            engineViewedMonthRef={engineViewedMonthRef}
-            viewedMonth={viewedMonth}
-          />
+          {calendar !== 'persian' && (
+            <DatePickerViewedMonthEffect
+              calendarRef={calendarRef}
+              engineViewedMonthRef={engineViewedMonthRef}
+              viewedMonth={viewedMonth}
+            />
+          )}
           {renderCalendar()}
         </Suspense>
       ),
