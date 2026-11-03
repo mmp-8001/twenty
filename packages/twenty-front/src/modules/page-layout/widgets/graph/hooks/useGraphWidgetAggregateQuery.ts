@@ -88,7 +88,8 @@ export const useGraphWidgetAggregateQuery = ({
     skip: !isRatioQuery,
   });
 
-  const { dateFormat, timeFormat, timeZone } = useContext(UserContext);
+  const { dateFormat, timeFormat, timeZone, calendar } =
+    useContext(UserContext);
   const dateLocale = useAtomStateValue(dateLocaleState);
   const { numberFormat } = useNumberFormat();
 
@@ -141,6 +142,7 @@ export const useGraphWidgetAggregateQuery = ({
       aggregateRawValue: aggregateRawValue,
       dateFormat,
       localeCatalog: dateLocale.localeCatalog,
+      calendar,
       timeFormat,
       timeZone,
       numberFormat,

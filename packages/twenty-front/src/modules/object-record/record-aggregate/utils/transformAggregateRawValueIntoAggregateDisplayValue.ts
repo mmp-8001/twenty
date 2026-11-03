@@ -13,6 +13,7 @@ import { formatToShortNumber, isDefined } from 'twenty-shared/utils';
 import {
   type AggregateOperations,
   ChartNumberFormat,
+  type WorkspaceMemberCalendarEnum,
 } from '~/generated-metadata/graphql';
 import { formatNumber } from '@/localization/utils/formatNumber';
 import { formatDateString } from '@/object-record/record-field/ui/utils/formatDateString';
@@ -28,6 +29,7 @@ export const transformAggregateRawValueIntoAggregateDisplayValue = ({
   localeCatalog,
   numberFormat,
   chartNumberFormat,
+  calendar,
 }: {
   aggregateFieldMetadataItem: Nullable<FieldMetadataItem>;
   aggregateOperation: ExtendedAggregateOperations;
@@ -38,6 +40,7 @@ export const transformAggregateRawValueIntoAggregateDisplayValue = ({
   localeCatalog: Locale;
   numberFormat?: NumberFormat;
   chartNumberFormat?: ChartNumberFormat;
+  calendar?: WorkspaceMemberCalendarEnum;
 }): string => {
   if (!isDefined(aggregateRawValue)) {
     return '-';
@@ -97,6 +100,7 @@ export const transformAggregateRawValueIntoAggregateDisplayValue = ({
           timeFormat,
           dateFieldSettings,
           localeCatalog,
+          calendar,
         });
       }
 
@@ -111,6 +115,7 @@ export const transformAggregateRawValueIntoAggregateDisplayValue = ({
           dateFormat,
           dateFieldSettings,
           localeCatalog,
+          calendar,
         });
       }
     }
