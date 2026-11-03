@@ -13,7 +13,10 @@ import {
   BillingPortalSessionDocument,
   PermissionFlagType,
 } from '~/generated-metadata/graphql';
-import { formatDate } from '~/utils/date-utils';
+import { useDateTimeFormat } from '@/localization/hooks/useDateTimeFormat';
+import { dateLocaleState } from '@/localization/states/dateLocaleState';
+import { formatDateString } from '@/object-record/record-field/ui/utils/formatDateString';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 
 type SettingsBillingTrialNoPaymentMethodBannerProps = {
   currentBillingSubscription: NonNullable<
@@ -25,6 +28,8 @@ export const SettingsBillingTrialNoPaymentMethodBanner = ({
   currentBillingSubscription,
 }: SettingsBillingTrialNoPaymentMethodBannerProps) => {
   const { redirect } = useRedirect();
+  const { timeZone, dateFormat, calendar } = useDateTimeFormat();
+  const { localeCatalog } = useAtomStateValue(dateLocaleState);
 
   const hasPermissionToManageBilling = useHasPermissionFlag(
     PermissionFlagType.BILLING,
@@ -53,7 +58,13 @@ export const SettingsBillingTrialNoPaymentMethodBanner = ({
     : t`current plan`;
 
   const trialEndDate = isDefined(currentBillingSubscription.currentPeriodEnd)
-    ? formatDate(currentBillingSubscription.currentPeriodEnd, 'MMM dd')
+    ? formatDateString({
+        value: currentBillingSubscription.currentPeriodEnd,
+        timeZone,
+        dateFormat,
+        localeCatalog,
+        calendar,
+      })
     : undefined;
 
   const message = isDefined(trialEndDate)
