@@ -1,5 +1,3 @@
-import { timingSafeEqual } from 'crypto';
-
 import { CoreApiClient } from 'twenty-client-sdk/core';
 import { defineLogicFunction, type RoutePayload } from 'twenty-sdk/define';
 
@@ -14,32 +12,19 @@ import {
   type ProopcoSyncItemResult,
   type ProopcoSyncResponse,
 } from 'src/logic-functions/types/proopco-sync.type';
+import { moveFollowupToRetry } from 'src/logic-functions/utils/move-followup-to-retry.util';
+import { readRetryWindowDays } from 'src/logic-functions/utils/read-app-settings.util';
+import { isValidJobToken } from 'src/logic-functions/utils/read-job-request.util';
 import { parseProopcoSyncRequest } from 'src/logic-functions/utils/parse-proopco-sync-request.util';
 import { processProopcoSyncItem } from 'src/logic-functions/utils/process-proopco-sync-item.util';
 
 // Referenced records first, so a batch can carry a Trader and its Payment.
 const TYPE_ORDER = { trader: 0, tradingAccount: 1, payment: 2 };
 
-const isValidToken = (received: unknown): boolean => {
-  const expected = process.env.PROOPCO_SYNC_TOKEN;
-
-  if (typeof received !== 'string' || !expected) {
-    return false;
-  }
-
-  const receivedBuffer = Buffer.from(received);
-  const expectedBuffer = Buffer.from(expected);
-
-  return (
-    receivedBuffer.length === expectedBuffer.length &&
-    timingSafeEqual(receivedBuffer, expectedBuffer)
-  );
-};
-
 export const proopcoSyncHandler = async (
   routePayload: RoutePayload<unknown>,
 ): Promise<ProopcoSyncResponse> => {
-  if (!isValidToken(routePayload.headers[PROOPCO_SYNC_TOKEN_HEADER])) {
+  if (!isValidJobToken(routePayload.headers[PROOPCO_SYNC_TOKEN_HEADER])) {
     return { success: false, error: 'Invalid sync token' };
   }
 
@@ -56,7 +41,33 @@ export const proopcoSyncHandler = async (
   );
 
   for (const item of processingOrder) {
-    resultByItem.set(item, await processProopcoSyncItem(client, item));
+    let result = await processProopcoSyncItem(client, item);
+
+    // Also on unchanged, so a resend repairs a hook that failed before.
+    if (
+      item.type === 'tradingAccount' &&
+      result.status !== 'error' &&
+      String(item.data.status).toLowerCase() === 'failed'
+    ) {
+      try {
+        await moveFollowupToRetry({
+          client,
+          tradingAccountProopcoId: item.proopcoId,
+          retryWindowDays: readRetryWindowDays(),
+          now: new Date(),
+        });
+      } catch (error) {
+        result = {
+          type: item.type,
+          proopcoId: item.proopcoId,
+          status: 'error',
+          reason: error instanceof Error ? error.message : String(error),
+          retryable: true,
+        };
+      }
+    }
+
+    resultByItem.set(item, result);
   }
 
   return {
