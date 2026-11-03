@@ -120,3 +120,49 @@
     color: var(--t-background-primary);
   }
 }
+
+.persianGrid {
+  display: grid;
+  grid-template-columns: repeat(7, var(--calendar-day-size));
+  gap: var(--t-spacing-1);
+  justify-content: center;
+  padding: var(--t-spacing-2);
+}
+
+.persianDayName {
+  align-items: center;
+  color: var(--t-font-color-secondary);
+  display: flex;
+  height: var(--t-spacing-10);
+  justify-content: center;
+}
+
+.persianDay {
+  background: transparent;
+  border: none;
+  border-radius: var(--t-border-radius-sm);
+  color: var(--t-font-color-primary);
+  cursor: pointer;
+  font: inherit;
+  height: var(--calendar-day-size);
+  padding: 0;
+
+  &:hover:not(:disabled) {
+    background: var(--t-background-transparent-light);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+}
+
+.persianDaySelected,
+.persianDaySelected:hover:not(:disabled) {
+  background: var(--t-color-blue);
+  color: var(--t-background-primary);
+}
+
+.calendar[data-hide-grid] .persianGrid {
+  display: none;
+}

@@ -1,5 +1,5 @@
 import { type Meta, type StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { Text } from '@ui/primitives/typography/Text/Text';
 import { ComponentDecorator, GroupedCatalog } from '@ui/testing';
@@ -98,4 +98,24 @@ export const Catalog: Story = {
 export const DisplayDark: Story = {
   ...Display,
   globals: { colorScheme: 'dark' },
+};
+
+// Jalali 20 Mehr 1405 is 2026-10-12, and the picker must emit the Gregorian date.
+export const Jalali: Story = {
+  render: ({ onValueChange }) => (
+    <DatePickerExample
+      calendar="persian"
+      initialViewedMonth="1405-07"
+      onValueChange={onValueChange}
+    />
+  ),
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await userEvent.click(
+      await canvas.findByRole('button', { name: '2026-10-12' }),
+    );
+
+    await expect(args.onValueChange).toHaveBeenCalledWith('2026-10-12');
+  },
 };
