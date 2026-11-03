@@ -5,6 +5,11 @@ import {
 
 import {
   APP_DISPLAY_NAME,
+  COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
+  COMMISSION_TIER_OBJECT_UNIVERSAL_IDENTIFIER,
+  FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
+  FOLLOWUP_TYPE_OBJECT_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
   DEFAULT_ROLE_UNIVERSAL_IDENTIFIER,
   PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
   TRADING_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
@@ -17,10 +22,24 @@ const readAndUpdate = {
   canDestroyObjectRecords: false,
 };
 
+const APP_OBJECT_UNIVERSAL_IDENTIFIERS = [
+  STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.person.universalIdentifier,
+  STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.workspaceMember.universalIdentifier,
+  STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.task.universalIdentifier,
+  STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.note.universalIdentifier,
+  TRADING_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
+  PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
+  FOLLOWUP_TYPE_OBJECT_UNIVERSAL_IDENTIFIER,
+  COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
+  COMMISSION_TIER_OBJECT_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
+];
+
 export default defineApplicationRole({
   universalIdentifier: DEFAULT_ROLE_UNIVERSAL_IDENTIFIER,
   label: `${APP_DISPLAY_NAME} default role`,
-  description: 'Writes the trading facts proopco syncs.',
+  description: 'Writes synced trading facts, Followups and Commissions.',
   canReadAllObjectRecords: false,
   canUpdateAllObjectRecords: false,
   canSoftDeleteAllObjectRecords: false,
@@ -29,21 +48,12 @@ export default defineApplicationRole({
   canBeAssignedToAgents: false,
   canBeAssignedToUsers: false,
   canBeAssignedToApiKeys: false,
-  objectPermissions: [
-    {
-      objectUniversalIdentifier:
-        STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.person.universalIdentifier,
+  objectPermissions: APP_OBJECT_UNIVERSAL_IDENTIFIERS.map(
+    (objectUniversalIdentifier) => ({
+      objectUniversalIdentifier,
       ...readAndUpdate,
-    },
-    {
-      objectUniversalIdentifier: TRADING_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
-      ...readAndUpdate,
-    },
-    {
-      objectUniversalIdentifier: PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
-      ...readAndUpdate,
-    },
-  ],
+    }),
+  ),
   fieldPermissions: [],
   permissionFlagUniversalIdentifiers: [],
 });
