@@ -11,6 +11,7 @@ import { type WorkspaceMemberDTO } from 'src/engine/core-modules/user/dtos/works
 import { type RoleEntity } from 'src/engine/metadata-modules/role/role.entity';
 import { fromRoleEntitiesToRoleDtos } from 'src/engine/metadata-modules/role/utils/fromRoleEntityToRoleDto.util';
 import {
+  type WorkspaceMemberCalendarEnum,
   type WorkspaceMemberDateFormatEnum,
   type WorkspaceMemberNumberFormatEnum,
   type WorkspaceMemberTimeFormatEnum,
@@ -77,6 +78,7 @@ export class WorkspaceMemberTranspiler {
       dateFormat,
       calendarStartDay,
       numberFormat,
+      calendar,
       userId,
     } = workspaceMemberEntity;
 
@@ -111,6 +113,7 @@ export class WorkspaceMemberTranspiler {
       roles,
       calendarStartDay,
       numberFormat: numberFormat as WorkspaceMemberNumberFormatEnum,
+      calendar: calendar as WorkspaceMemberCalendarEnum,
     } satisfies WorkspaceMemberDTO;
   }
 
