@@ -2,7 +2,7 @@ import { CoreApiClient } from 'twenty-client-sdk/core';
 import { MetadataApiClient } from 'twenty-client-sdk/metadata';
 import { describe, expect, it } from 'vitest';
 
-import { executeDeployedFunctionOrThrow } from './execute-deployed-function-or-throw';
+import { postSyncRoute } from './post-sync-route';
 import { readManifestLogicFunctionNamesOrThrow } from './read-manifest-logic-function-names-or-throw';
 import { TEST_SYNC_TOKEN } from './test-constants';
 
@@ -11,21 +11,14 @@ const id = (name: string) => `${name}-${runId}`;
 
 const sync = async (
   items: unknown[],
-  token: string | undefined = TEST_SYNC_TOKEN,
+  token: string | null = TEST_SYNC_TOKEN,
 ) => {
-  const execution = await executeDeployedFunctionOrThrow({
-    functionName: 'proopco-sync',
-    payload: {
-      headers: token === undefined ? {} : { 'x-proopco-sync-token': token },
-      queryStringParameters: {},
-      pathParameters: {},
-      body: { items },
-      isBase64Encoded: false,
-      requestContext: { http: { method: 'POST', path: '/proopco/sync' } },
-    },
+  const execution = await postSyncRoute({
+    headers: token === null ? {} : { 'x-proopco-sync-token': token },
+    body: { items },
   });
 
-  expect(execution.status).toBe('SUCCESS');
+  expect(execution.status).toBe(200);
 
   return execution.data as {
     success: boolean;
@@ -54,7 +47,7 @@ describe('twenty-proopco sync route', () => {
     }
   });
 
-  it.each([[undefined], ['wrong-token']])('rejects token %s', async (token) => {
+  it.each([[null], ['wrong-token']])('rejects token %s', async (token) => {
     const response = await sync([trader('rejected')], token);
 
     expect(response).toEqual({ success: false, error: 'Invalid sync token' });
@@ -118,10 +111,10 @@ describe('twenty-proopco sync route', () => {
       },
     });
 
-    expect(payments.edges[0].node.kind).toBe('purchase');
-    expect(payments.edges[0].node.amount.currencyCode).toBe('USD');
-    expect(Number(payments.edges[0].node.amount.amountMicros)).toBe(99_500_000);
-    expect(tradingAccounts.edges[0].node).toEqual({
+    expect(payments?.edges?.[0]?.node?.kind).toBe('PURCHASE');
+    expect(payments?.edges?.[0]?.node?.amount?.currencyCode).toBe('USD');
+    expect(Number(payments?.edges?.[0]?.node?.amount?.amountMicros)).toBe(99_500_000);
+    expect(tradingAccounts?.edges?.[0]?.node).toEqual({
       status: 'failed',
       failureReason: 'max_drawdown',
     });
