@@ -25,8 +25,11 @@
   },
   "devDependencies": {
     "@types/node": "^24.7.2",
+    "@types/react": "^19.2.0",
     "@typescript/native-preview": "^7.0.0-dev.20260116.1",
     "oxlint": "^0.16.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "twenty-client-sdk": "2.54.3",
     "twenty-sdk": "2.54.3",
     "typescript": "^5.9.3",
