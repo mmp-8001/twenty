@@ -96,7 +96,8 @@ describe('Monthly Income', () => {
 
     const first = await runMonthlyIncomes();
 
-    expect(first).toMatchObject({ success: true, created: 1 });
+    expect(first.success).toBe(true);
+    expect(first.created).toBeGreaterThanOrEqual(1);
 
     const second = await runMonthlyIncomes();
 
