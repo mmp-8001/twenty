@@ -235,6 +235,7 @@ export const DatePicker = ({
           readOnly={readOnly}
           disabled={disabled}
           onDayClick={handleDayClick}
+          onViewedMonthChange={goToMonth}
         />
       </>
     );

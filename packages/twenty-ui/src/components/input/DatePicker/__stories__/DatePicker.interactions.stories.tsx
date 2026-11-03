@@ -444,3 +444,28 @@ export const CssVariableSpacing: Story = {
     await expect(monthTrigger).toHaveTextContent('November');
   },
 };
+
+export const JalaliKeyboardNavigation: Story = {
+  render: ({ onValueChange, onValueSelect }) => (
+    <DatePickerExample
+      calendar="persian"
+      initialViewedMonth="1405-07"
+      initialValue="2026-10-12"
+      onValueChange={onValueChange}
+      onValueSelect={onValueSelect}
+    />
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    (await canvas.findByRole('button', { name: '2026-10-12' })).focus();
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(
+      canvas.getByRole('button', { name: '2026-10-19' }),
+    ).toHaveFocus();
+    await expect(args.onValueChange).not.toHaveBeenCalled();
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onValueChange).toHaveBeenLastCalledWith('2026-10-19');
+    await expect(args.onValueSelect).toHaveBeenLastCalledWith('2026-10-19');
+  },
+};
