@@ -3,10 +3,11 @@ import { t } from '@lingui/core/macro';
 
 import { Select } from '@/ui/input/components/Select';
 
+import { useDateTimeFormat } from '@/localization/hooks/useDateTimeFormat';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { DatePickerInput } from '@/ui/input/components/internal/date/components/DatePickerInput';
 import { getDatePickerDropdownIds } from '@/ui/input/components/internal/date/utils/getDatePickerDropdownIds';
-import { DATE_PICKER_YEAR_SELECT_OPTIONS } from '@/ui/input/components/internal/date/constants/DatePickerYearSelectOptions';
+import { getYearSelectOptions } from '@/ui/input/components/internal/date/utils/getYearSelectOptions';
 import { getMonthSelectOptions } from '@/ui/input/components/internal/date/utils/getMonthSelectOptions';
 import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 import { Temporal } from 'temporal-polyfill';
@@ -55,6 +56,7 @@ export const DatePickerHeader = ({
   hideInput = false,
 }: DatePickerHeaderProps) => {
   const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
+  const { calendar } = useDateTimeFormat();
   const userLocale = currentWorkspaceMember?.locale ?? SOURCE_LOCALE;
 
   const { monthSelectDropdownId, yearSelectDropdownId } =
@@ -71,7 +73,7 @@ export const DatePickerHeader = ({
       <StyledCustomDatePickerHeader>
         <Select
           dropdownId={monthSelectDropdownId}
-          options={getMonthSelectOptions(userLocale)}
+          options={getMonthSelectOptions(userLocale, calendar)}
           onChange={onChangeMonth}
           value={displayedMonth?.month}
           fullWidth
@@ -80,7 +82,7 @@ export const DatePickerHeader = ({
           dropdownId={yearSelectDropdownId}
           onChange={onChangeYear}
           value={displayedMonth?.year}
-          options={DATE_PICKER_YEAR_SELECT_OPTIONS}
+          options={getYearSelectOptions(calendar)}
           fullWidth
         />
         <LightIconButton
