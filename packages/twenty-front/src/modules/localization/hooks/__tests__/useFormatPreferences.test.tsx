@@ -1,3 +1,4 @@
+import { WorkspaceMemberCalendarEnum } from '~/generated-metadata/graphql';
 import { act, renderHook } from '@testing-library/react';
 import { type ReactNode } from 'react';
 import { Provider as JotaiProvider } from 'jotai';
@@ -73,6 +74,7 @@ const mockInitialPreferences = {
   timeFormat: TimeFormat.HOUR_24,
   numberFormat: NumberFormat.COMMAS_AND_DOT,
   calendarStartDay: CalendarStartDay.MONDAY,
+  calendar: WorkspaceMemberCalendarEnum.GREGORIAN,
 };
 
 const createWrapper =
