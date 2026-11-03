@@ -13,5 +13,6 @@ export const useDateTimeFormat = () => {
     dateFormat: resolveDateFormat(workspaceMemberFormatPreferences.dateFormat),
     timeFormat: resolveTimeFormat(workspaceMemberFormatPreferences.timeFormat),
     calendarStartDay: workspaceMemberFormatPreferences.calendarStartDay,
+    calendar: workspaceMemberFormatPreferences.calendar,
   };
 };

@@ -12,7 +12,7 @@ type DateDisplayProps = {
   dateFieldSettings?: FieldDateMetadataSettings;
 };
 export const DateDisplay = ({ value, dateFieldSettings }: DateDisplayProps) => {
-  const { dateFormat } = useContext(UserContext);
+  const { dateFormat, calendar } = useContext(UserContext);
   const dateLocale = useAtomStateValue(dateLocaleState);
 
   const formattedDate = formatDateString({
@@ -21,6 +21,7 @@ export const DateDisplay = ({ value, dateFieldSettings }: DateDisplayProps) => {
     dateFormat,
     dateFieldSettings,
     localeCatalog: dateLocale.localeCatalog,
+    calendar,
   });
 
   return <EllipsisDisplay>{formattedDate}</EllipsisDisplay>;

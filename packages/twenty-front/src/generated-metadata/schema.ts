@@ -9012,6 +9012,7 @@ export type WorkspaceInviteHashValid = {
 export type WorkspaceMember = {
   __typename?: 'WorkspaceMember';
   avatarUrl?: Maybe<Scalars['String']['output']>;
+  calendar?: Maybe<WorkspaceMemberCalendarEnum>;
   calendarStartDay?: Maybe<Scalars['Int']['output']>;
   colorScheme: Scalars['String']['output'];
   dateFormat?: Maybe<WorkspaceMemberDateFormatEnum>;
@@ -9035,6 +9036,12 @@ export type WorkspaceMemberApplicationVariables = {
   variables: Array<UserApplicationVariableValue>;
   workspaceMemberId: Scalars['UUID']['output'];
 };
+
+/** Calendar used to display and pick dates */
+export enum WorkspaceMemberCalendarEnum {
+  GREGORIAN = 'GREGORIAN',
+  JALALI = 'JALALI'
+}
 
 /** Date format as Month first, Day first, Year first or system as default */
 export enum WorkspaceMemberDateFormatEnum {
