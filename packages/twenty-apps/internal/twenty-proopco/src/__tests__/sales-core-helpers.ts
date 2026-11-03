@@ -278,3 +278,47 @@ export const waitFor = async <TValue>(
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 };
+
+export const setServerVariable = async (key: string, value: string) => {
+  await throttle();
+
+  const { findApplicationRegistrationByUniversalIdentifier: registration } =
+    await metadataRequest<{
+      findApplicationRegistrationByUniversalIdentifier: { id: string };
+    }>(
+      `query ($universalIdentifier: String!) {
+        findApplicationRegistrationByUniversalIdentifier(universalIdentifier: $universalIdentifier) { id }
+      }`,
+      { universalIdentifier: APPLICATION_UNIVERSAL_IDENTIFIER },
+    );
+  const { findApplicationRegistrationVariables: variables } =
+    await metadataRequest<{
+      findApplicationRegistrationVariables: { id: string; key: string }[];
+    }>(
+      `query ($id: String!) {
+        findApplicationRegistrationVariables(applicationRegistrationId: $id) { id key }
+      }`,
+      { id: registration.id },
+    );
+  const variable = variables.find((candidate) => candidate.key === key);
+
+  if (!variable) {
+    throw new Error(`${key} server variable does not exist`);
+  }
+
+  await metadataRequest(
+    `mutation ($input: UpdateApplicationRegistrationVariableInput!) {
+      updateApplicationRegistrationVariable(input: $input) { id }
+    }`,
+    { input: { id: variable.id, update: { value } } },
+  );
+};
+
+export const throttledMetadataRequest = async <TData>(
+  request: string,
+  variables: Record<string, unknown> = {},
+): Promise<TData> => {
+  await throttle();
+
+  return metadataRequest<TData>(request, variables);
+};

@@ -85,5 +85,23 @@ export default defineApplication({
       isSecret: true,
       isRequired: true,
     },
+    SMS_ENQUEUE_URL: {
+      description: 'Public URL of the twenty-sms enqueue route (.../s/sms/enqueue).',
+      isRequired: true,
+    },
+    SMS_ENQUEUE_TOKEN: {
+      description: "The twenty-sms app's ENQUEUE_TOKEN.",
+      isSecret: true,
+      isRequired: true,
+    },
+    PROOPCO_API_BASE_URL: {
+      description: 'Base URL of the proopco API used for gift discount codes.',
+      isRequired: true,
+    },
+    PROOPCO_API_KEY: {
+      description: 'Bearer key for the proopco API. The only write back to proopco.',
+      isSecret: true,
+      isRequired: true,
+    },
   },
 });
