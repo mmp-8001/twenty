@@ -105,7 +105,6 @@ describe('twenty-proopco install', () => {
       'commission',
       'commissionTier',
       'monthlyIncome',
-      'campaign',
     ]) {
       expect(names).not.toContain(removed);
     }

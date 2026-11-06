@@ -13,6 +13,7 @@ import {
 } from 'src/logic-functions/types/proopco-sync.type';
 import { isValidJobToken } from 'src/logic-functions/utils/read-job-request.util';
 import { parseProopcoSyncRequest } from 'src/logic-functions/utils/parse-proopco-sync-request.util';
+import { recomputeVisibility } from 'src/logic-functions/utils/recompute-visibility.util';
 import { processProopcoSyncItem } from 'src/logic-functions/utils/process-proopco-sync-item.util';
 
 // Referenced records first, so a batch can carry a User and its Payment.
@@ -43,8 +44,22 @@ export const proopcoSyncHandler = async (
     }
   });
 
+  const changedPersonIds: string[] = [];
+
   for (const { item, index } of processingOrder) {
-    results.set(index, await processProopcoSyncItem(client, item));
+    results.set(
+      index,
+      await processProopcoSyncItem(client, item, (personId) =>
+        changedPersonIds.push(personId),
+      ),
+    );
+  }
+
+  try {
+    await recomputeVisibility({ client, personIds: changedPersonIds });
+  } catch (error) {
+    // The sync result stays valid; the hourly recompute repairs the lists.
+    console.error(`Visibility recompute after sync failed: ${String(error)}`);
   }
 
   return {
