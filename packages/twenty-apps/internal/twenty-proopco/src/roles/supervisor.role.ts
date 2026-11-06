@@ -2,6 +2,7 @@ import { defineRole } from 'twenty-sdk/define';
 
 import { SUPERVISOR_ROLE_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import {
+  CAMPAIGN_MANAGEMENT_OBJECT_PERMISSIONS,
   SYNCED_DATA_OBJECT_PERMISSIONS,
   SYNCED_PERSON_FIELD_PERMISSIONS,
 } from 'src/utils/synced-data-permissions';
@@ -19,6 +20,9 @@ export default defineRole({
   canBeAssignedToUsers: true,
   canBeAssignedToAgents: false,
   canBeAssignedToApiKeys: false,
-  objectPermissions: SYNCED_DATA_OBJECT_PERMISSIONS,
+  objectPermissions: [
+    ...SYNCED_DATA_OBJECT_PERMISSIONS,
+    ...CAMPAIGN_MANAGEMENT_OBJECT_PERMISSIONS,
+  ],
   fieldPermissions: SYNCED_PERSON_FIELD_PERMISSIONS,
 });
