@@ -76,7 +76,7 @@ export default defineObject({
       universalIdentifier:
         USER_ON_CHALLENGE_ACCOUNT_FIELD_UNIVERSAL_IDENTIFIER,
       type: FieldType.RELATION,
-      name: 'user',
+      name: 'person',
       label: 'User',
       description: 'User who owns this account.',
       icon: 'IconUser',
@@ -88,7 +88,7 @@ export default defineObject({
       universalSettings: {
         relationType: RelationType.MANY_TO_ONE,
         onDelete: OnDeleteAction.SET_NULL,
-        joinColumnName: 'userId',
+        joinColumnName: 'personId',
       },
     },
   ],

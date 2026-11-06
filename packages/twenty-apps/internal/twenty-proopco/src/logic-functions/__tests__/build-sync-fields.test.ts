@@ -19,7 +19,7 @@ describe('buildSyncFields', () => {
       paidAt: '2026-01-02T03:04:05.000Z',
     });
     expect(references).toEqual({
-      userId: { collection: 'people', proopcoId: 'u1' },
+      personId: { collection: 'people', proopcoId: 'u1' },
       challengeAccountId: { collection: 'challengeAccounts', proopcoId: 'a1' },
     });
   });
