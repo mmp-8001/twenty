@@ -1,6 +1,7 @@
 import {
   defineApplicationRole,
   STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS,
+  SystemPermissionFlag,
 } from 'twenty-sdk/define';
 
 import {
@@ -38,6 +39,15 @@ const APP_OBJECT_UNIVERSAL_IDENTIFIERS = [
   CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
 ];
 
+const DESTROYABLE_OBJECT_UNIVERSAL_IDENTIFIERS = [
+  STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.person.universalIdentifier,
+  TRADING_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
+  PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
+  COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
+];
+
 export default defineApplicationRole({
   universalIdentifier: DEFAULT_ROLE_UNIVERSAL_IDENTIFIER,
   label: `${APP_DISPLAY_NAME} default role`,
@@ -58,12 +68,13 @@ export default defineApplicationRole({
       ...(objectUniversalIdentifier === COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER && {
         canSoftDeleteObjectRecords: true,
       }),
-      // The creation guard removes Followups made outside Track.
-      ...(objectUniversalIdentifier === FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER && {
-        canDestroyObjectRecords: true,
-      }),
+      // The creation guard removes Followups made outside Track; Remove demo data clears demo- records.
+      ...(DESTROYABLE_OBJECT_UNIVERSAL_IDENTIFIERS.includes(
+        objectUniversalIdentifier,
+      ) && { canDestroyObjectRecords: true }),
     }),
   ),
   fieldPermissions: [],
-  permissionFlagUniversalIdentifiers: [],
+  // The post-install hook deactivates Opportunity.
+  permissionFlagUniversalIdentifiers: [SystemPermissionFlag.DATA_MODEL],
 });
