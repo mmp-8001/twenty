@@ -1,6 +1,5 @@
-import { isArray, isBoolean, isNull, isNumber, isString } from '@sniptt/guards';
+import { isBoolean, isNull, isNumber, isString } from '@sniptt/guards';
 
-import { PAYMENT_KINDS } from 'src/constants/proopco-sync.constant';
 import { type ProopcoSyncItemType } from 'src/logic-functions/types/proopco-sync.type';
 import { SyncItemError } from 'src/logic-functions/utils/sync-item-error.util';
 
@@ -38,10 +37,13 @@ const readValue = <TValue>(
 
 const isFiniteNumber = (value: unknown): value is number =>
   isNumber(value) && Number.isFinite(value);
-const isStringArray = (value: unknown): value is string[] =>
-  isArray(value) && value.every(isString);
 const isDateTime = (value: unknown): value is string =>
   isString(value) && !Number.isNaN(new Date(value).getTime());
+
+const isDate = (value: unknown): value is string =>
+  isString(value) &&
+  /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+  !Number.isNaN(new Date(value).getTime());
 
 const readString = (data: SyncItemData, key: string) =>
   readValue(data, key, isString, 'a string');
@@ -52,6 +54,11 @@ const readDateTime = (data: SyncItemData, key: string) => {
 
   return isString(value) ? new Date(value).toISOString() : value;
 };
+
+const readBoolean = (data: SyncItemData, key: string) =>
+  readValue(data, key, isBoolean, 'a boolean');
+const readDate = (data: SyncItemData, key: string) =>
+  readValue(data, key, isDate, 'a YYYY-MM-DD date');
 
 const requireString = (data: SyncItemData, key: string): string => {
   const value = readString(data, key);
@@ -65,18 +72,19 @@ const setDefined = (fields: SyncItemData, key: string, value: unknown) => {
   }
 };
 
-const toMicros = (usd: number) => Math.round(usd * 1_000_000);
+const requireNumber = (data: SyncItemData, key: string): number => {
+  const value = readNumber(data, key);
 
-const buildTraderFields = (data: SyncItemData): BuiltSyncFields => {
+  return isNumber(value) ? value : fail(`${key} is required and must be a number`);
+};
+
+const buildUserFields = (data: SyncItemData): BuiltSyncFields => {
   const fields: SyncItemData = {};
-  const references: BuiltSyncFields['references'] = {};
   const firstName = readString(data, 'firstName');
   const lastName = readString(data, 'lastName');
   const email = readString(data, 'email');
   const phoneNumber = readString(data, 'phoneNumber');
   const phoneCallingCode = readString(data, 'phoneCallingCode');
-  const totalSpentUsd = readNumber(data, 'totalSpentUsd');
-  const referredByProopcoId = readString(data, 'referredByProopcoId');
 
   if (firstName !== undefined || lastName !== undefined) {
     fields.name = {
@@ -98,83 +106,72 @@ const buildTraderFields = (data: SyncItemData): BuiltSyncFields => {
     };
   }
 
-  setDefined(fields, 'purchaseCount', readNumber(data, 'purchaseCount'));
-  setDefined(fields, 'lastPurchaseAt', readDateTime(data, 'lastPurchaseAt'));
-  setDefined(fields, 'isVip', readValue(data, 'isVip', isBoolean, 'a boolean'));
-  setDefined(fields, 'source', readString(data, 'source'));
+  setDefined(fields, 'signedUpAt', readDateTime(data, 'signedUpAt'));
+  setDefined(fields, 'kycStatus', readString(data, 'kycStatus'));
+  setDefined(fields, 'lastLoginAt', readDateTime(data, 'lastLoginAt'));
+  setDefined(fields, 'birthday', readDate(data, 'birthday'));
+  setDefined(fields, 'isReferral', readBoolean(data, 'isReferral'));
   setDefined(
     fields,
-    'labels',
-    readValue(data, 'labels', isStringArray, 'an array of strings'),
+    'hasProfitWithdrawal',
+    readBoolean(data, 'hasProfitWithdrawal'),
   );
+  setDefined(fields, 'purchaseCount', readNumber(data, 'purchaseCount'));
+  setDefined(fields, 'totalPaidUsdt', readNumber(data, 'totalPaidUsdt'));
+  setDefined(fields, 'lastPurchaseAt', readDateTime(data, 'lastPurchaseAt'));
+  setDefined(
+    fields,
+    'activeAccountCount',
+    readNumber(data, 'activeAccountCount'),
+  );
+  setDefined(fields, 'currentStage', readString(data, 'currentStage'));
 
-  if (isFiniteNumber(totalSpentUsd)) {
-    fields.totalSpent = {
-      amountMicros: toMicros(totalSpentUsd),
-      currencyCode: 'USD',
-    };
-  }
-
-  if (isString(referredByProopcoId)) {
-    references.referredById = {
-      collection: 'people',
-      proopcoId: referredByProopcoId,
-    };
-  } else if (isNull(referredByProopcoId)) {
-    fields.referredById = null;
-  }
-
-  return { fields, references };
+  return { fields, references: {} };
 };
 
-const buildTradingAccountFields = (data: SyncItemData): BuiltSyncFields => {
+const buildAccountFields = (data: SyncItemData): BuiltSyncFields => {
   const fields: SyncItemData = {};
 
   setDefined(fields, 'status', readString(data, 'status'));
-  setDefined(fields, 'failureReason', readString(data, 'failureReason'));
   setDefined(fields, 'phase', readString(data, 'phase'));
+  setDefined(fields, 'failureReason', readString(data, 'failureReason'));
 
   return {
     fields,
     references: {
-      traderId: {
+      userId: {
         collection: 'people',
-        proopcoId: requireString(data, 'traderProopcoId'),
+        proopcoId: requireString(data, 'userProopcoId'),
       },
     },
   };
 };
 
 const buildPaymentFields = (data: SyncItemData): BuiltSyncFields => {
-  const amountUsd = readNumber(data, 'amountUsd');
-  const kind = readString(data, 'kind');
-  const tradingAccountProopcoId = readString(data, 'tradingAccountProopcoId');
-  const fields: SyncItemData = {};
+  const accountProopcoId = readString(data, 'accountProopcoId');
+  const paidAt = readDateTime(data, 'paidAt');
   const references: BuiltSyncFields['references'] = {
-    traderId: {
+    userId: {
       collection: 'people',
-      proopcoId: requireString(data, 'traderProopcoId'),
+      proopcoId: requireString(data, 'userProopcoId'),
     },
   };
+  // Proopco converts at settlement; the CRM never converts.
+  const fields: SyncItemData = {
+    amountToman: requireNumber(data, 'amountToman'),
+    amountUsdt: requireNumber(data, 'amountUsdt'),
+  };
 
-  if (!isFiniteNumber(amountUsd)) {
-    fail('amountUsd is required and must be a number');
+  if (!isString(paidAt)) {
+    fail('paidAt is required and must be an ISO date-time string');
   } else {
-    fields.amount = { amountMicros: toMicros(amountUsd), currencyCode: 'USD' };
+    fields.paidAt = paidAt;
   }
 
-  if (!PAYMENT_KINDS.some((allowedKind) => allowedKind === kind)) {
-    fail(`kind must be one of ${PAYMENT_KINDS.join(', ')}`);
-  }
-
-  // select option values are UPPER_SNAKE_CASE; the wire format stays lowercase
-  fields.kind = String(kind).toUpperCase();
-  setDefined(fields, 'paidAt', readDateTime(data, 'paidAt'));
-
-  if (isString(tradingAccountProopcoId)) {
-    references.tradingAccountId = {
-      collection: 'tradingAccounts',
-      proopcoId: tradingAccountProopcoId,
+  if (isString(accountProopcoId)) {
+    references.challengeAccountId = {
+      collection: 'challengeAccounts',
+      proopcoId: accountProopcoId,
     };
   }
 
@@ -186,10 +183,10 @@ export const buildSyncFields = (
   data: SyncItemData,
 ): BuiltSyncFields => {
   switch (type) {
-    case 'trader':
-      return buildTraderFields(data);
-    case 'tradingAccount':
-      return buildTradingAccountFields(data);
+    case 'user':
+      return buildUserFields(data);
+    case 'account':
+      return buildAccountFields(data);
     case 'payment':
       return buildPaymentFields(data);
   }

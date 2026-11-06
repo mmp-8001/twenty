@@ -1,14 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { CoreApiClient } from 'twenty-client-sdk/core';
-
 import { APPLICATION_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 
 import { metadataRequest } from './metadata-request';
-import { createFollowup, createTrader, getFollowup, mutate } from './sales-core-helpers';
 import { runDeployedPostInstall } from './seeded-sessions';
-
-type NamedNode = { id: string; nameSingular?: string; name?: string };
 
 const FIELD_PAGE_SIZE = 500;
 
@@ -99,69 +94,89 @@ describe('twenty-proopco install', () => {
     ).toEqual([]);
   });
 
-  it('creates the Person trading fields', async () => {
-    const { fieldNamesOf } = await loadMetadata();
+  it('leaves no #34 entities behind', async () => {
+    const { objects } = await loadMetadata();
+    const names = objects.map((object) => object.nameSingular);
 
-    expect(fieldNamesOf('person')).toEqual(
+    for (const removed of [
+      'tradingAccount',
+      'followup',
+      'followupType',
+      'commission',
+      'commissionTier',
+      'monthlyIncome',
+      'campaign',
+    ]) {
+      expect(names).not.toContain(removed);
+    }
+  });
+
+  it('creates the User fields on Person', async () => {
+    const { fieldNamesOf } = await loadMetadata();
+    const personFields = fieldNamesOf('person');
+
+    expect(personFields).toEqual(
       expect.arrayContaining([
         'proopcoId',
+        'signedUpAt',
+        'kycStatus',
+        'lastLoginAt',
+        'birthday',
+        'isReferral',
+        'hasProfitWithdrawal',
         'purchaseCount',
-        'totalSpent',
+        'totalPaidUsdt',
         'lastPurchaseAt',
-        'isVip',
-        'source',
-        'labels',
-        'referredBy',
-        'referrals',
-        'tradingAccounts',
+        'activeAccountCount',
+        'currentStage',
+        'challengeAccounts',
         'payments',
       ]),
     );
+    expect(personFields).not.toContain('isVip');
   });
 
-  it('creates the Trading Account object', async () => {
+  it('creates the Challenge Account and Payment objects', async () => {
     const { fieldNamesOf } = await loadMetadata();
 
-    expect(fieldNamesOf('tradingAccount')).toEqual(
-      expect.arrayContaining([
-        'proopcoId',
-        'status',
-        'failureReason',
-        'phase',
-        'trader',
-        'payments',
-      ]),
+    expect(fieldNamesOf('challengeAccount')).toEqual(
+      expect.arrayContaining(['proopcoId', 'status', 'phase', 'failureReason', 'user', 'payments']),
     );
-  });
-
-  it('creates the Payment object with exactly three kinds', async () => {
-    const { fields, fieldNamesOf } = await loadMetadata();
-    const kind = fields.find(
-      (field) => field.name === 'kind' && field.type === 'SELECT',
-    );
-
     expect(fieldNamesOf('payment')).toEqual(
       expect.arrayContaining([
         'proopcoId',
-        'amount',
-        'kind',
+        'amountToman',
+        'amountUsdt',
         'paidAt',
-        'trader',
-        'tradingAccount',
+        'user',
+        'challengeAccount',
       ]),
     );
-    expect(kind?.options?.map((option) => option.value)).toEqual([
-      'PURCHASE',
-      'INSTALLMENT_INITIAL',
-      'INSTALLMENT_REMAINING',
+    expect(fieldNamesOf('payment')).not.toContain('kind');
+  });
+
+  it('gives workspace members a CRM status and frozen since', async () => {
+    const { fields, fieldNamesOf } = await loadMetadata();
+    const crmStatus = fields.find(
+      (field) => field.name === 'crmStatus' && field.type === 'SELECT',
+    );
+
+    expect(fieldNamesOf('workspaceMember')).toEqual(
+      expect.arrayContaining(['crmStatus', 'frozenSince']),
+    );
+    expect(crmStatus?.options?.map((option) => option.value)).toEqual([
+      'ACTIVE',
+      'FROZEN',
+      'DEACTIVATED',
     ]);
   });
 
-  it('gives the Sales Agent read-only access to synced facts', async () => {
+  it('adds the three assignable roles and keeps synced data read-only for each', async () => {
     const { objects } = await loadMetadata();
     const { getRoles } = await metadataRequest<{
       getRoles: {
         label: string;
+        canBeAssignedToUsers: boolean;
         objectPermissions: {
           objectMetadataId: string;
           canReadObjectRecords: boolean;
@@ -172,242 +187,48 @@ describe('twenty-proopco install', () => {
       }[];
     }>(`{
       getRoles {
-        label
+        label canBeAssignedToUsers
         objectPermissions {
           objectMetadataId canReadObjectRecords canUpdateObjectRecords
           canSoftDeleteObjectRecords canDestroyObjectRecords
         }
       }
     }`);
-    const salesAgent = getRoles.find((role) => role.label === 'Sales Agent');
 
-    expect(salesAgent).toBeDefined();
+    for (const label of ['Sales Admin', 'Supervisor', 'Full Admin']) {
+      const role = getRoles.find((candidate) => candidate.label === label);
 
-    for (const nameSingular of ['tradingAccount', 'payment']) {
-      const objectId = objects.find(
-        (object: Pick<NamedNode, 'id' | 'nameSingular'>) =>
-          object.nameSingular === nameSingular,
-      )?.id;
-      const permission = salesAgent?.objectPermissions.find(
-        (objectPermission) => objectPermission.objectMetadataId === objectId,
-      );
+      expect(role?.canBeAssignedToUsers).toBe(true);
 
-      expect(permission).toMatchObject({
-        canReadObjectRecords: true,
-        canUpdateObjectRecords: false,
-        canSoftDeleteObjectRecords: false,
-        canDestroyObjectRecords: false,
-      });
+      for (const nameSingular of ['person', 'challengeAccount', 'payment']) {
+        const objectId = objects.find(
+          (object) => object.nameSingular === nameSingular,
+        )?.id;
+
+        expect(
+          role?.objectPermissions.find(
+            (permission) => permission.objectMetadataId === objectId,
+          ),
+        ).toMatchObject({
+          canReadObjectRecords: true,
+          canUpdateObjectRecords: false,
+          canSoftDeleteObjectRecords: false,
+          canDestroyObjectRecords: false,
+        });
+      }
     }
-  });
 
-  it('creates the sales objects', async () => {
-    const { fieldNamesOf } = await loadMetadata();
-
-    expect(fieldNamesOf('followup')).toEqual(
-      expect.arrayContaining([
-        'stage',
-        'expiresAt',
-        'retryExpiresAt',
-        'failureReason',
-        'followupType',
-        'trader',
-        'owner',
-        'commissions',
-      ]),
-    );
-    expect(fieldNamesOf('followupType')).toEqual(
-      expect.arrayContaining(['name', 'expiryDays', 'commissionable']),
-    );
-    expect(fieldNamesOf('commissionTier')).toEqual(
-      expect.arrayContaining(['name', 'minDay', 'maxDay', 'rate']),
-    );
-    expect(fieldNamesOf('commission')).toEqual(
-      expect.arrayContaining([
-        'payment',
-        'followup',
-        'owner',
-        'amount',
-        'rateApplied',
-        'tierName',
-        'basis',
-        'scope',
-        'monthlyIncome',
-      ]),
-    );
-    expect(fieldNamesOf('monthlyIncome')).toEqual(
-      expect.arrayContaining(['agent', 'month', 'total', 'payoutStatus', 'commissions']),
-    );
-  });
-
-  it('gives Followup the five stages and Task an activity type', async () => {
-    const { fields, fieldNamesOf } = await loadMetadata();
-    const stage = fields.find(
-      (field) => field.name === 'stage' && field.type === 'SELECT',
-    );
-    const activityType = fields.find((field) => field.name === 'activityType');
-
-    expect(stage?.options?.map((option) => option.value)).toEqual([
-      'PENDING',
-      'RETRY_PENDING',
-      'SUCCEEDED',
-      'FAILED',
-      'EXPIRED',
-    ]);
-    expect(activityType?.options?.map((option) => option.value)).toEqual([
-      'CALL',
-      'SMS',
-      'EMAIL',
-      'MEETING',
-      'OTHER',
-    ]);
-    expect(fieldNamesOf('task')).toContain('activityType');
-  });
-
-  it('builds the Followups kanban with one group per stage and the Activities board', async () => {
-    const { views } = await metadataRequest<{
-      views: { id: string; name: string; type: string }[];
-    }>('{ views: getViews { id name type } }');
-    const followups = views.find((view) => view.name === 'Followups');
-    const activities = views.find((view) => view.name === 'Activities');
-
-    expect(followups?.type).toBe('KANBAN');
-    expect(activities?.type).toBe('KANBAN');
-
-    for (const [view, expected] of [
-      [followups, 5],
-      [activities, 3],
-    ] as const) {
-      const { groups } = await metadataRequest<{ groups: { fieldValue: string }[] }>(
-        'query ($viewId: String) { groups: getViewGroups(viewId: $viewId) { fieldValue } }',
-        { viewId: view?.id },
-      );
-
-      expect(groups).toHaveLength(expected);
-    }
-  });
-
-  it('seeds default Followup Types and Commission Tiers', async () => {
-    const { followupTypes, commissionTiers } = await new CoreApiClient().query({
-      followupTypes: { totalCount: true },
-      commissionTiers: { totalCount: true },
-    });
-
-    expect(followupTypes?.totalCount).toBeGreaterThan(0);
-    expect(commissionTiers?.totalCount).toBeGreaterThan(0);
-  });
-
-  it('keeps a manager edit when the seed runs again', async () => {
-    const client = new CoreApiClient();
-    const { commissionTiers } = await client.query({
-      commissionTiers: {
-        __args: { first: 1 },
-        edges: { node: { id: true, name: true } },
-      },
-    });
-    const tier = commissionTiers?.edges?.[0]?.node;
-    const updateName = (name: string) =>
-      client.mutation({
-        updateCommissionTier: { __args: { id: tier!.id, data: { name } }, id: true },
-      });
-
-    await updateName('Edited by a manager');
-    await runDeployedPostInstall();
-
-    const { commissionTier } = await client.query({
-      commissionTier: { __args: { filter: { id: { eq: tier!.id } } }, name: true },
-    });
-
-    // Later suites read the seeded tier names.
-    await updateName(String(tier!.name));
-
-    expect(commissionTier?.name).toBe('Edited by a manager');
-  });
-
-  it('backfills the active-trader key of keyless active Followups and skips a conflict', async () => {
-    const firstTraderId = await createTrader('backfill-a');
-    const secondTraderId = await createTrader('backfill-b');
-    const pendingId = await createFollowup({ traderId: firstTraderId });
-    const retryId = await createFollowup({
-      traderId: secondTraderId,
-      stage: 'RETRY_PENDING',
-    });
-    const duplicateIds = [
-      await createFollowup({ traderId: secondTraderId }),
-      await createFollowup({ traderId: secondTraderId }),
-    ];
-    const succeededId = await createFollowup({
-      traderId: firstTraderId,
-      stage: 'SUCCEEDED',
-    });
-    const keyOf = async (id: string) =>
-      (await getFollowup(id, { activeTraderKey: true })).activeTraderKey;
-
-    expect(await keyOf(pendingId)).toBeFalsy();
-
-    await runDeployedPostInstall();
-
-    expect(await keyOf(pendingId)).toBe(firstTraderId);
-    expect(await keyOf(succeededId)).toBeFalsy();
-
-    const keys = await Promise.all([retryId, ...duplicateIds].map(keyOf));
-
-    expect(keys.filter((key) => key === secondTraderId)).toHaveLength(1);
-
-    for (const id of [pendingId, retryId, succeededId, ...duplicateIds]) {
-      await mutate({ destroyFollowup: { __args: { id }, id: true } });
-    }
+    expect(getRoles.map(({ label }) => label)).not.toContain('Sales Agent');
+    expect(getRoles.map(({ label }) => label)).not.toContain('Sales Manager');
   });
 
   it('deactivates Opportunity without deleting navigation items', async () => {
+    await runDeployedPostInstall();
+
     const { objects } = await loadMetadata();
 
     expect(
       objects.find((object) => object.nameSingular === 'opportunity')?.isActive,
     ).toBe(false);
-  });
-
-  it('configures the Sales Agent and Sales Manager roles', async () => {
-    const { objects } = await loadMetadata();
-    const { getRoles } = await metadataRequest<{
-      getRoles: {
-        label: string;
-        canReadAllObjectRecords: boolean;
-        canUpdateAllObjectRecords: boolean;
-        objectPermissions: {
-          objectMetadataId: string;
-          canReadObjectRecords: boolean;
-          canUpdateObjectRecords: boolean;
-        }[];
-      }[];
-    }>(`{
-      getRoles {
-        label canReadAllObjectRecords canUpdateAllObjectRecords
-        objectPermissions { objectMetadataId canReadObjectRecords canUpdateObjectRecords }
-      }
-    }`);
-    const agent = getRoles.find((role) => role.label === 'Sales Agent');
-    const manager = getRoles.find((role) => role.label === 'Sales Manager');
-    const idOf = (nameSingular: string) =>
-      objects.find((object) => object.nameSingular === nameSingular)?.id;
-    const permissionOn = (nameSingular: string) =>
-      agent?.objectPermissions.find(
-        (permission) => permission.objectMetadataId === idOf(nameSingular),
-      );
-
-    for (const nameSingular of ['followupType', 'commissionTier']) {
-      expect(permissionOn(nameSingular)).toMatchObject({
-        canReadObjectRecords: true,
-        canUpdateObjectRecords: false,
-      });
-    }
-
-    expect(permissionOn('followup')).toMatchObject({ canUpdateObjectRecords: true });
-    expect(permissionOn('commission')).toMatchObject({ canUpdateObjectRecords: true });
-
-    expect(manager).toMatchObject({
-      canReadAllObjectRecords: true,
-      canUpdateAllObjectRecords: true,
-    });
   });
 });

@@ -8,7 +8,7 @@ import {
 import {
   PAYMENTS_ON_PERSON_FIELD_UNIVERSAL_IDENTIFIER,
   PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
-  TRADER_ON_PAYMENT_FIELD_UNIVERSAL_IDENTIFIER,
+  USER_ON_PAYMENT_FIELD_UNIVERSAL_IDENTIFIER,
 } from 'src/constants/universal-identifiers';
 
 export default defineField({
@@ -18,15 +18,13 @@ export default defineField({
   type: FieldType.RELATION,
   name: 'payments',
   label: 'Payments',
-  description: 'Payments this Trader made.',
+  description: 'Payments this User made.',
   icon: 'IconCash',
   isNullable: true,
   isUIEditable: false,
   relationTargetObjectMetadataUniversalIdentifier:
     PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
   relationTargetFieldMetadataUniversalIdentifier:
-    TRADER_ON_PAYMENT_FIELD_UNIVERSAL_IDENTIFIER,
-  universalSettings: {
-    relationType: RelationType.ONE_TO_MANY,
-  },
+    USER_ON_PAYMENT_FIELD_UNIVERSAL_IDENTIFIER,
+  universalSettings: { relationType: RelationType.ONE_TO_MANY },
 });
