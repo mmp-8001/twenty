@@ -1,9 +1,15 @@
-import { CoreApiClient } from 'twenty-client-sdk/core';
 import { MetadataApiClient } from 'twenty-client-sdk/metadata';
 import { describe, expect, it } from 'vitest';
 
 import { postSyncRoute } from './post-sync-route';
 import { readManifestLogicFunctionNamesOrThrow } from './read-manifest-logic-function-names-or-throw';
+import {
+  assignSeededRoles,
+  SEEDED_AGENT_EMAIL,
+  signIn,
+  userRequest,
+} from './seeded-sessions';
+import { query } from './sales-core-helpers';
 import { TEST_SYNC_TOKEN } from './test-constants';
 
 const runId = Date.now().toString(36);
@@ -27,11 +33,14 @@ const sync = async (
   };
 };
 
-const trader = (suffix: string, data: Record<string, unknown> = {}) => ({
-  type: 'trader',
-  proopcoId: id(`trader-${suffix}`),
+const user = (suffix: string, data: Record<string, unknown> = {}) => ({
+  type: 'user',
+  proopcoId: id(`user-${suffix}`),
   data: { firstName: 'Ada', email: `${id(suffix)}@example.com`, ...data },
 });
+
+const statuses = (response: Awaited<ReturnType<typeof sync>>) =>
+  response.results?.map((result) => result.status);
 
 describe('twenty-proopco sync route', () => {
   it('deploys every logic function the manifest declares', async () => {
@@ -48,126 +57,160 @@ describe('twenty-proopco sync route', () => {
   });
 
   it.each([[null], ['wrong-token']])('rejects token %s', async (token) => {
-    const response = await sync([trader('rejected')], token);
+    const response = await sync([user('rejected')], token);
 
     expect(response).toEqual({ success: false, error: 'Invalid sync token' });
   });
 
-  it('creates, then reports unchanged, then updates a Trader', async () => {
-    const item = trader('upsert', { purchaseCount: 1, labels: ['vip'] });
+  it('creates, then reports unchanged, then updates a User', async () => {
+    const item = user('upsert', { purchaseCount: 1, birthday: '1990-05-17' });
 
-    expect((await sync([item])).results?.[0].status).toBe('created');
-    expect((await sync([item])).results?.[0].status).toBe('unchanged');
+    expect(statuses(await sync([item]))).toEqual(['created']);
+    expect(statuses(await sync([item]))).toEqual(['unchanged']);
 
     const changed = { ...item, data: { ...item.data, purchaseCount: 2 } };
 
-    expect((await sync([changed])).results?.[0].status).toBe('updated');
+    expect(statuses(await sync([changed]))).toEqual(['updated']);
   });
 
-  it('syncs a Trading Account and a Payment linked to their Trader', async () => {
-    const response = await sync([
+  it('creates users, accounts and payments, and a full resend changes nothing', async () => {
+    const batch = [
       {
         type: 'payment',
         proopcoId: id('payment-1'),
         data: {
-          traderProopcoId: id('trader-linked'),
-          tradingAccountProopcoId: id('account-1'),
-          amountUsd: 99.5,
-          kind: 'purchase',
+          userProopcoId: id('user-linked'),
+          accountProopcoId: id('account-1'),
+          amountToman: 8_500_000,
+          amountUsdt: 99.5,
           paidAt: '2026-01-02T03:04:05Z',
         },
       },
       {
-        type: 'tradingAccount',
+        type: 'account',
         proopcoId: id('account-1'),
         data: {
-          traderProopcoId: id('trader-linked'),
+          userProopcoId: id('user-linked'),
           status: 'failed',
           failureReason: 'max_drawdown',
         },
       },
-      trader('linked'),
+      user('linked', { totalPaidUsdt: 99.5, lastLoginAt: '2026-01-03T00:00:00Z' }),
+    ];
+
+    expect(statuses(await sync(batch))).toEqual(['created', 'created', 'created']);
+    expect(statuses(await sync(batch))).toEqual([
+      'unchanged',
+      'unchanged',
+      'unchanged',
     ]);
 
-    expect(response.results?.map((result) => result.status)).toEqual([
-      'created',
-      'created',
-      'created',
-    ]);
-
-    const { payments, tradingAccounts } = await new CoreApiClient().query({
+    const { payments, challengeAccounts } = await query({
       payments: {
         __args: { filter: { proopcoId: { eq: id('payment-1') } } },
-        edges: {
-          node: {
-            amount: { amountMicros: true, currencyCode: true },
-            kind: true,
-          },
-        },
+        edges: { node: { amountToman: true, amountUsdt: true } },
       },
-      tradingAccounts: {
+      challengeAccounts: {
         __args: { filter: { proopcoId: { eq: id('account-1') } } },
         edges: { node: { status: true, failureReason: true } },
       },
     });
 
-    expect(payments?.edges?.[0]?.node?.kind).toBe('PURCHASE');
-    expect(payments?.edges?.[0]?.node?.amount?.currencyCode).toBe('USD');
-    expect(Number(payments?.edges?.[0]?.node?.amount?.amountMicros)).toBe(99_500_000);
-    expect(tradingAccounts?.edges?.[0]?.node).toEqual({
+    expect(Number(payments?.edges?.[0]?.node?.amountToman)).toBe(8_500_000);
+    expect(Number(payments?.edges?.[0]?.node?.amountUsdt)).toBe(99.5);
+    expect(challengeAccounts?.edges?.[0]?.node).toEqual({
       status: 'failed',
       failureReason: 'max_drawdown',
     });
   });
 
-  it('returns a retryable error for a missing Trader and still applies the rest', async () => {
-    const response = await sync([
-      {
-        type: 'tradingAccount',
-        proopcoId: id('account-orphan'),
-        data: { traderProopcoId: id('trader-missing'), status: 'active' },
-      },
-      trader('beside-orphan'),
-    ]);
+  it('returns a retryable error for a missing User and still applies the rest', async () => {
+    const orphan = {
+      type: 'account',
+      proopcoId: id('account-orphan'),
+      data: { userProopcoId: id('user-missing'), status: 'active' },
+    };
+    const response = await sync([orphan, user('beside-orphan')]);
 
     expect(response.results?.[0]).toMatchObject({
       status: 'error',
       retryable: true,
     });
     expect(response.results?.[1].status).toBe('created');
-
-    const retried = await sync([
-      trader('missing'),
-      {
-        type: 'tradingAccount',
-        proopcoId: id('account-orphan'),
-        data: { traderProopcoId: id('trader-missing'), status: 'active' },
-      },
-    ]);
-
-    expect(retried.results?.map((result) => result.status)).toEqual([
+    expect(statuses(await sync([user('missing'), orphan]))).toEqual([
       'created',
       'created',
     ]);
   });
 
-  it('rejects an unknown payment kind without retry', async () => {
+  it('reports a malformed item as an error without failing the rest of the batch', async () => {
     const response = await sync([
-      trader('kind'),
+      { type: 'order', proopcoId: id('bad-type'), data: {} },
+      user('beside-malformed'),
       {
         type: 'payment',
-        proopcoId: id('payment-bad-kind'),
+        proopcoId: id('payment-bad-amount'),
         data: {
-          traderProopcoId: id('trader-kind'),
-          amountUsd: 1,
-          kind: 'refund',
+          userProopcoId: id('user-beside-malformed'),
+          amountToman: 'a lot',
+          amountUsdt: 1,
+          paidAt: '2026-01-02T03:04:05Z',
         },
       },
     ]);
 
-    expect(response.results?.[1]).toMatchObject({
+    expect(response.success).toBe(true);
+    expect(response.results?.[0]).toMatchObject({
+      status: 'error',
+      retryable: false,
+    });
+    expect(response.results?.[1].status).toBe('created');
+    expect(response.results?.[2]).toMatchObject({
       status: 'error',
       retryable: false,
     });
   });
+
+  it.each(['Sales Admin', 'Supervisor', 'Full Admin'])(
+    'refuses %s updates and deletes on synced records',
+    async (roleLabel) => {
+      await sync([user('read-only', { kycStatus: 'verified' })]);
+
+      const { people } = await query({
+        people: {
+          __args: { filter: { proopcoId: { eq: id('user-read-only') } } },
+          edges: { node: { id: true } },
+        },
+      });
+      const personId = people?.edges?.[0]?.node?.id;
+      const { restore } = await assignSeededRoles([
+        { email: SEEDED_AGENT_EMAIL, roleLabel },
+      ]);
+
+      try {
+        const token = await signIn(SEEDED_AGENT_EMAIL);
+        const update = await userRequest({
+          token,
+          query: `mutation ($id: UUID!) {
+            updatePerson(id: $id, data: { kycStatus: "tampered" }) { id }
+          }`,
+          variables: { id: personId },
+        });
+        const destroy = await userRequest({
+          token,
+          query: `mutation ($id: UUID!) { deletePerson(id: $id) { id } }`,
+          variables: { id: personId },
+        });
+
+        expect(update.errors?.length).toBeGreaterThan(0);
+        expect(destroy.errors?.length).toBeGreaterThan(0);
+      } finally {
+        await restore();
+      }
+
+      expect(statuses(await sync([user('read-only', { kycStatus: 'verified' })]))).toEqual([
+        'unchanged',
+      ]);
+    },
+  );
 });

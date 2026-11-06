@@ -13,7 +13,7 @@ export default defineField({
   type: FieldType.DATE_TIME,
   name: 'lastPurchaseAt',
   label: 'Last purchase date',
-  description: 'When the Trader last paid, synced from proopco.',
+  description: 'When the User last paid, synced from proopco.',
   icon: 'IconCalendarEvent',
   isNullable: true,
   isUIEditable: false,

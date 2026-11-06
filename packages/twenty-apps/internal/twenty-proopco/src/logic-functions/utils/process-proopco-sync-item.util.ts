@@ -19,14 +19,14 @@ const COLLECTION_BY_TYPE: Record<
   ProopcoSyncItemType,
   { plural: string; singular: string }
 > = {
-  trader: { plural: 'people', singular: 'Person' },
-  tradingAccount: { plural: 'tradingAccounts', singular: 'TradingAccount' },
+  user: { plural: 'people', singular: 'Person' },
+  account: { plural: 'challengeAccounts', singular: 'ChallengeAccount' },
   payment: { plural: 'payments', singular: 'Payment' },
 };
 
 const REFERENCE_LABEL: Record<string, string> = {
-  people: 'Trader',
-  tradingAccounts: 'Trading Account',
+  people: 'User',
+  challengeAccounts: 'Account',
 };
 
 const findByProopcoId = async (

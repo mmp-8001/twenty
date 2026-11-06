@@ -1,14 +1,45 @@
-import { isArray, isNonEmptyString, isString } from '@sniptt/guards';
+import { isArray, isNonEmptyString } from '@sniptt/guards';
 
 import { PROOPCO_SYNC_MAX_BATCH_SIZE } from 'src/constants/proopco-sync.constant';
-import { type ProopcoSyncItem } from 'src/logic-functions/types/proopco-sync.type';
+import {
+  PROOPCO_SYNC_ITEM_TYPES,
+  type ProopcoSyncItem,
+  type ProopcoSyncItemResult,
+  type ProopcoSyncItemType,
+} from 'src/logic-functions/types/proopco-sync.type';
 import { isPlainObject } from 'src/utils/is-plain-object';
 
-const ITEM_TYPES = ['trader', 'tradingAccount', 'payment'];
+export type ParsedSyncEntry =
+  | { item: ProopcoSyncItem }
+  | { result: ProopcoSyncItemResult };
+
+const isItemType = (value: unknown): value is ProopcoSyncItemType =>
+  PROOPCO_SYNC_ITEM_TYPES.some((itemType) => itemType === value);
+
+// A malformed item becomes its own error result, so it never fails the batch.
+const parseItem = (item: unknown): ParsedSyncEntry => {
+  const record = isPlainObject(item) ? item : {};
+  const type = isItemType(record.type) ? record.type : null;
+  const proopcoId = isNonEmptyString(record.proopcoId) ? record.proopcoId : null;
+
+  if (type === null || proopcoId === null || !isPlainObject(record.data)) {
+    return {
+      result: {
+        type,
+        proopcoId,
+        status: 'error',
+        reason: `An item needs type (${PROOPCO_SYNC_ITEM_TYPES.join(', ')}), a non-empty proopcoId and a data object`,
+        retryable: false,
+      },
+    };
+  }
+
+  return { item: { type, proopcoId, data: record.data } };
+};
 
 export const parseProopcoSyncRequest = (
   body: unknown,
-): { items: ProopcoSyncItem[] } | { error: string } => {
+): { entries: ParsedSyncEntry[] } | { error: string } => {
   const items = isPlainObject(body) ? body.items : undefined;
 
   if (!isArray(items)) {
@@ -21,23 +52,5 @@ export const parseProopcoSyncRequest = (
     };
   }
 
-  const parsedItems: ProopcoSyncItem[] = [];
-
-  for (const [index, item] of items.entries()) {
-    if (
-      !isPlainObject(item) ||
-      !isString(item.type) ||
-      !ITEM_TYPES.includes(item.type) ||
-      !isNonEmptyString(item.proopcoId) ||
-      !isPlainObject(item.data)
-    ) {
-      return {
-        error: `Item ${index} needs type (trader, tradingAccount or payment), a non-empty proopcoId and a data object`,
-      };
-    }
-
-    parsedItems.push(item as ProopcoSyncItem);
-  }
-
-  return { items: parsedItems };
+  return { entries: items.map(parseItem) };
 };

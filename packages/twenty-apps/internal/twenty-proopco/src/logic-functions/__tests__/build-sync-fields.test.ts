@@ -4,37 +4,41 @@ import { buildSyncFields } from 'src/logic-functions/utils/build-sync-fields.uti
 import { SyncItemError } from 'src/logic-functions/utils/sync-item-error.util';
 
 describe('buildSyncFields', () => {
-  it('stores payment amounts in USD micros', () => {
+  it('stores payment amounts as the toman and USDT proopco converted', () => {
     const { fields, references } = buildSyncFields('payment', {
-      traderProopcoId: 't1',
-      amountUsd: 149.99,
-      kind: 'installment_initial',
+      userProopcoId: 'u1',
+      accountProopcoId: 'a1',
+      amountToman: 8_500_000,
+      amountUsdt: 149.99,
       paidAt: '2026-01-02T03:04:05Z',
     });
 
     expect(fields).toEqual({
-      amount: { amountMicros: 149_990_000, currencyCode: 'USD' },
-      kind: 'INSTALLMENT_INITIAL',
+      amountToman: 8_500_000,
+      amountUsdt: 149.99,
       paidAt: '2026-01-02T03:04:05.000Z',
     });
     expect(references).toEqual({
-      traderId: { collection: 'people', proopcoId: 't1' },
+      userId: { collection: 'people', proopcoId: 'u1' },
+      challengeAccountId: { collection: 'challengeAccounts', proopcoId: 'a1' },
     });
   });
 
-  it('rejects an unknown payment kind without retry', () => {
+  it.each([
+    [{ amountUsdt: 1, paidAt: '2026-01-02T03:04:05Z' }],
+    [{ amountToman: 1, paidAt: '2026-01-02T03:04:05Z' }],
+    [{ amountToman: 1, amountUsdt: 1 }],
+    [{ amountToman: '1', amountUsdt: 1, paidAt: '2026-01-02T03:04:05Z' }],
+    [{ amountToman: 1, amountUsdt: 1, paidAt: 'yesterday' }],
+  ])('rejects the payment %j without retry', (data) => {
     expect(() =>
-      buildSyncFields('payment', {
-        traderProopcoId: 't1',
-        amountUsd: 1,
-        kind: 'refund',
-      }),
+      buildSyncFields('payment', { userProopcoId: 'u1', ...data }),
     ).toThrow(expect.objectContaining({ retryable: false }));
   });
 
-  it('mirrors trading account status and failure reason, clearing with null', () => {
-    const { fields } = buildSyncFields('tradingAccount', {
-      traderProopcoId: 't1',
+  it('mirrors account status and failure reason, clearing with null', () => {
+    const { fields } = buildSyncFields('account', {
+      userProopcoId: 'u1',
       status: 'failed',
       failureReason: null,
     });
@@ -42,25 +46,39 @@ describe('buildSyncFields', () => {
     expect(fields).toEqual({ status: 'failed', failureReason: null });
   });
 
-  it('only writes the trader fields it was given', () => {
-    const { fields, references } = buildSyncFields('trader', {
+  it('requires the user reference on an account', () => {
+    expect(() => buildSyncFields('account', {})).toThrow(SyncItemError);
+  });
+
+  it('only writes the user fields it was given', () => {
+    const { fields, references } = buildSyncFields('user', {
       firstName: 'Ada',
-      isVip: true,
-      totalSpentUsd: 10,
-      referredByProopcoId: 'p9',
+      phoneNumber: '9120000000',
+      phoneCallingCode: '+98',
+      birthday: '1990-05-17',
+      isReferral: true,
+      totalPaidUsdt: 10.5,
+      lastLoginAt: null,
     });
 
     expect(fields).toEqual({
       name: { firstName: 'Ada' },
-      isVip: true,
-      totalSpent: { amountMicros: 10_000_000, currencyCode: 'USD' },
+      phones: { primaryPhoneNumber: '9120000000', primaryPhoneCallingCode: '+98' },
+      birthday: '1990-05-17',
+      isReferral: true,
+      totalPaidUsdt: 10.5,
+      lastLoginAt: null,
     });
-    expect(references).toEqual({
-      referredById: { collection: 'people', proopcoId: 'p9' },
-    });
+    expect(references).toEqual({});
   });
 
-  it('requires the trader reference on a trading account', () => {
-    expect(() => buildSyncFields('tradingAccount', {})).toThrow(SyncItemError);
+  it.each([
+    [{ birthday: '17/05/1990' }],
+    [{ isReferral: 'yes' }],
+    [{ purchaseCount: Number.NaN }],
+  ])('rejects the user %j without retry', (data) => {
+    expect(() => buildSyncFields('user', data)).toThrow(
+      expect.objectContaining({ retryable: false }),
+    );
   });
 });
