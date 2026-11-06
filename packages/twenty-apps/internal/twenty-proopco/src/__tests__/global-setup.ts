@@ -130,6 +130,8 @@ export async function setup() {
   // The install runs the post-install hook, which seeds the defaults.
   await runTwentyOrThrow(['app', 'publish', '--private']);
   await installOrThrow();
+  // The tests' typed client must match the schema this install just created.
+  await runTwentyOrThrow(['app', 'generate-client']);
 
   await setSyncTokenOrThrow();
 }

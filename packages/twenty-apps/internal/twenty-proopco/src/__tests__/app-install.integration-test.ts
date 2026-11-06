@@ -140,7 +140,7 @@ describe('twenty-proopco install', () => {
     const { fieldNamesOf } = await loadMetadata();
 
     expect(fieldNamesOf('challengeAccount')).toEqual(
-      expect.arrayContaining(['proopcoId', 'status', 'phase', 'failureReason', 'user', 'payments']),
+      expect.arrayContaining(['proopcoId', 'status', 'phase', 'failureReason', 'person', 'payments']),
     );
     expect(fieldNamesOf('payment')).toEqual(
       expect.arrayContaining([
@@ -148,7 +148,7 @@ describe('twenty-proopco install', () => {
         'amountToman',
         'amountUsdt',
         'paidAt',
-        'user',
+        'person',
         'challengeAccount',
       ]),
     );
