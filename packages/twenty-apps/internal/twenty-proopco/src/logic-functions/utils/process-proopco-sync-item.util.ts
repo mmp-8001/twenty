@@ -51,6 +51,7 @@ const findByProopcoId = async (
 export const processProopcoSyncItem = async (
   client: SyncClient,
   item: ProopcoSyncItem,
+  onUserChanged?: (personId: string) => void,
 ): Promise<ProopcoSyncItemResult> => {
   const identity = { type: item.type, proopcoId: item.proopcoId };
 
@@ -84,7 +85,7 @@ export const processProopcoSyncItem = async (
     );
 
     if (!isDefined(existing)) {
-      await client.mutation({
+      const created = (await client.mutation({
         [`create${singular}`]: {
           __args: {
             data: { ...fields, proopcoId: item.proopcoId },
@@ -92,7 +93,11 @@ export const processProopcoSyncItem = async (
           },
           id: true,
         },
-      });
+      })) as unknown as Record<string, { id: string }>;
+
+      if (item.type === 'user') {
+        onUserChanged?.(created[`create${singular}`].id);
+      }
 
       return { ...identity, status: 'created' };
     }
@@ -107,6 +112,10 @@ export const processProopcoSyncItem = async (
         id: true,
       },
     });
+
+    if (item.type === 'user') {
+      onUserChanged?.(existing.id as string);
+    }
 
     return { ...identity, status: 'updated' };
   } catch (error) {

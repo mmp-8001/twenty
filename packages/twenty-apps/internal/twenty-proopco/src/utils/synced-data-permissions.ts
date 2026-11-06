@@ -1,6 +1,8 @@
 import { STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS } from 'twenty-sdk/define';
 
 import {
+  CAMPAIGN_ADMIN_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
   CHALLENGE_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
   CHALLENGE_ACCOUNTS_ON_PERSON_FIELD_UNIVERSAL_IDENTIFIER,
   PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
@@ -53,6 +55,25 @@ export const SYNCED_DATA_OBJECT_PERMISSIONS = [
   person.universalIdentifier,
   CHALLENGE_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
   PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
+].map((objectUniversalIdentifier) => ({
+  objectUniversalIdentifier,
+  ...readOnly,
+}));
+
+const readAndUpdate = { ...readOnly, canUpdateObjectRecords: true };
+
+// Campaigns and their Admins are ended or unassigned, never deleted.
+export const CAMPAIGN_MANAGEMENT_OBJECT_PERMISSIONS = [
+  CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_ADMIN_OBJECT_UNIVERSAL_IDENTIFIER,
+].map((objectUniversalIdentifier) => ({
+  objectUniversalIdentifier,
+  ...readAndUpdate,
+}));
+
+export const CAMPAIGN_READ_ONLY_OBJECT_PERMISSIONS = [
+  CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_ADMIN_OBJECT_UNIVERSAL_IDENTIFIER,
 ].map((objectUniversalIdentifier) => ({
   objectUniversalIdentifier,
   ...readOnly,
