@@ -57,7 +57,7 @@ export default defineObject({
     },
     {
       universalIdentifier: PAYMENT_AMOUNT_USDT_FIELD_UNIVERSAL_IDENTIFIER,
-      type: FieldType.NUMERIC,
+      type: FieldType.NUMBER,
       name: 'amountUsdt',
       label: 'Amount (USDT)',
       description: 'Amount settled, in USDT. Converted by proopco.',
@@ -76,7 +76,7 @@ export default defineObject({
     {
       universalIdentifier: USER_ON_PAYMENT_FIELD_UNIVERSAL_IDENTIFIER,
       type: FieldType.RELATION,
-      name: 'user',
+      name: 'person',
       label: 'User',
       description: 'User who paid.',
       icon: 'IconUser',
@@ -88,7 +88,7 @@ export default defineObject({
       universalSettings: {
         relationType: RelationType.MANY_TO_ONE,
         onDelete: OnDeleteAction.SET_NULL,
-        joinColumnName: 'userId',
+        joinColumnName: 'personId',
       },
     },
     {

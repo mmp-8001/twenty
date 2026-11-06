@@ -139,7 +139,7 @@ const buildAccountFields = (data: SyncItemData): BuiltSyncFields => {
   return {
     fields,
     references: {
-      userId: {
+      personId: {
         collection: 'people',
         proopcoId: requireString(data, 'userProopcoId'),
       },
@@ -151,7 +151,7 @@ const buildPaymentFields = (data: SyncItemData): BuiltSyncFields => {
   const accountProopcoId = readString(data, 'accountProopcoId');
   const paidAt = readDateTime(data, 'paidAt');
   const references: BuiltSyncFields['references'] = {
-    userId: {
+    personId: {
       collection: 'people',
       proopcoId: requireString(data, 'userProopcoId'),
     },

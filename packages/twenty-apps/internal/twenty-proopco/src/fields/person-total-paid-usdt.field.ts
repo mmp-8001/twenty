@@ -10,7 +10,7 @@ export default defineField({
   universalIdentifier: PERSON_TOTAL_PAID_USDT_FIELD_UNIVERSAL_IDENTIFIER,
   objectUniversalIdentifier:
     STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.person.universalIdentifier,
-  type: FieldType.NUMERIC,
+  type: FieldType.NUMBER,
   name: 'totalPaidUsdt',
   label: 'Total paid (USDT)',
   description: 'Total settled payments in USDT, synced from proopco.',
