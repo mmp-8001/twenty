@@ -1,4 +1,6 @@
-export type ProopcoSyncItemType = 'trader' | 'tradingAccount' | 'payment';
+export const PROOPCO_SYNC_ITEM_TYPES = ['user', 'account', 'payment'] as const;
+
+export type ProopcoSyncItemType = (typeof PROOPCO_SYNC_ITEM_TYPES)[number];
 
 export type ProopcoSyncItem = {
   type: ProopcoSyncItemType;
@@ -6,9 +8,10 @@ export type ProopcoSyncItem = {
   data: Record<string, unknown>;
 };
 
+// type and proopcoId are null only on a malformed item that did not carry them.
 export type ProopcoSyncItemResult = {
-  type: ProopcoSyncItemType;
-  proopcoId: string;
+  type: ProopcoSyncItemType | null;
+  proopcoId: string | null;
 } & (
   | { status: 'created' | 'updated' | 'unchanged' }
   | { status: 'error'; reason: string; retryable: boolean }
