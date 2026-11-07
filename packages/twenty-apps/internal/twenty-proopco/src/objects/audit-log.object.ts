@@ -19,7 +19,7 @@ import {
 } from 'src/constants/universal-identifiers';
 import { buildSelectOptions } from 'src/utils/build-select-options.util';
 
-// ROLE-03: append-only. No assignable role updates or deletes an entry; only the app writes it.
+// Append-only. No assignable role updates or deletes an entry; only the app writes it.
 export default defineObject({
   universalIdentifier: AUDIT_LOG_OBJECT_UNIVERSAL_IDENTIFIER,
   nameSingular: 'auditLog',

@@ -9,7 +9,7 @@ import {
   FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
 } from 'src/constants/universal-identifiers';
 
-// RB-03: the only action on the Rebuy list.
+// The only action on the Rebuy list.
 export default defineCommandMenuItem({
   universalIdentifier: ADD_REBUY_COMMAND_MENU_ITEM_UNIVERSAL_IDENTIFIER,
   availabilityObjectUniversalIdentifier: FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,

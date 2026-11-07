@@ -1,7 +1,7 @@
 import { type ProopcoSyncItem } from 'src/logic-functions/types/proopco-sync.type';
 import { DEMO_PROOPCO_ID_PREFIX } from 'src/constants/demo-data.constant';
 
-export type DemoOwnerSlot = 'A' | 'B' | 'FROZEN';
+export type DemoOwnerSlot = 'A' | 'B';
 
 export type DemoCase = {
   key: string;
@@ -21,7 +21,7 @@ export type DemoCase = {
   accountStatus?: string;
 };
 
-// Covers every case status and every Ownership state; the frozen case is skipped without a second member.
+// Covers every case status and every Ownership state.
 export const DEMO_CASES: DemoCase[] = [
   { key: 'pending', followupStatus: 'PENDING_FIRST_CALL', kind: 'CAMPAIGN', ownershipState: 'PENDING_FIRST_CALL', endReason: null, owner: 'A', firstAnsweredDaysAgo: null, deadlineInDays: 5 },
   { key: 'progress', followupStatus: 'IN_PROGRESS', kind: 'CAMPAIGN', ownershipState: 'IN_FOLLOWUP', endReason: null, owner: 'A', firstAnsweredDaysAgo: 3, deadlineInDays: 27 },
@@ -35,7 +35,6 @@ export const DEMO_CASES: DemoCase[] = [
   { key: 'released-72h', followupStatus: 'RELEASED_72H', kind: 'REBUY', ownershipState: 'REBUY_PENDING', endReason: 'RELEASED_72H', owner: 'B', firstAnsweredDaysAgo: null, deadlineInDays: null },
   { key: 'transferred', followupStatus: 'TRANSFERRED', kind: 'CAMPAIGN', ownershipState: 'IN_FOLLOWUP', endReason: 'TRANSFERRED', owner: 'A', firstAnsweredDaysAgo: 5, deadlineInDays: null },
   { key: 'released-by-manager', followupStatus: 'RELEASED_BY_MANAGER', kind: 'CAMPAIGN', ownershipState: 'IN_FOLLOWUP', endReason: 'RELEASED_BY_MANAGER', owner: 'B', firstAnsweredDaysAgo: 4, deadlineInDays: null },
-  { key: 'frozen', followupStatus: 'IN_PROGRESS', kind: 'CAMPAIGN', ownershipState: 'IN_FOLLOWUP', endReason: null, owner: 'FROZEN', firstAnsweredDaysAgo: 2, deadlineInDays: null },
 ];
 
 export const demoProopcoId = (key: string) => `${DEMO_PROOPCO_ID_PREFIX}${key}`;

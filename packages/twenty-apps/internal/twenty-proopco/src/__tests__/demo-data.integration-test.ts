@@ -92,7 +92,7 @@ describe('Demo data', () => {
     expect((await demoCounts()).people).toBe(0);
   });
 
-  it('seeds every case status, ownership state, a frozen admin, a rebuy user and paid and pending incomes', async () => {
+  it('seeds every case status, ownership state, a rebuy user and paid and pending incomes', async () => {
     const realBefore = await realState();
 
     expect(await route('full', SEED_DEMO_DATA_ROUTE_PATH)).toMatchObject({ success: true, seeded: true });
@@ -109,13 +109,9 @@ describe('Demo data', () => {
     expect(new Set(demoFollowups.map(({ status }) => status))).toEqual(new Set(FOLLOWUP_STATUSES));
     expect(new Set(ownerships.map(({ state }) => state))).toEqual(new Set(OWNERSHIP_STATES));
     expect(demoFollowups.some(({ status, kind, deadlineAt }) => status === 'REBUY_PENDING' && kind === 'REBUY' && deadlineAt)).toBe(true);
-    expect(demoFollowups.some(({ deadlineAt, frozenRemainingSeconds, status }) => status === 'IN_PROGRESS' && !deadlineAt && frozenRemainingSeconds > 0)).toBe(true);
 
-    const frozen = (await readAll('workspaceMembers', { crmStatus: { eq: 'FROZEN' } }, { frozenSince: true }));
-
-    expect(frozen).toHaveLength(1);
-    expect(frozen[0].frozenSince).toBeTruthy();
-    expect((await readAll('adminFreezes', { reason: DEMO, unfrozenAt: { is: 'NULL' } }))).toHaveLength(1);
+    // No real member is touched: nobody is frozen and the Full Admin owns no demo case.
+    expect(await readAll('workspaceMembers', { crmStatus: { eq: 'FROZEN' } })).toHaveLength(0);
 
     const incomes = await readAll('monthlyIncomes', { incomeKey: DEMO }, { status: true, totalUsdt: true });
 
@@ -133,7 +129,7 @@ describe('Demo data', () => {
     expect(await demoCounts()).toEqual(before);
   });
 
-  it('removes only demo records, restores the frozen member, and a second removal is a no-op', async () => {
+  it('removes only demo records and a second removal is a no-op', async () => {
     const realBefore = await realState();
 
     expect(await route('full', REMOVE_DEMO_DATA_ROUTE_PATH)).toMatchObject({ success: true });
@@ -146,7 +142,6 @@ describe('Demo data', () => {
       offers: 0,
       freezes: 0,
     });
-    expect(await readAll('workspaceMembers', { crmStatus: { eq: 'FROZEN' } })).toHaveLength(0);
     expect(await realState()).toEqual(realBefore);
     expect(await route('full', REMOVE_DEMO_DATA_ROUTE_PATH)).toEqual({ success: true, removed: 0 });
   });

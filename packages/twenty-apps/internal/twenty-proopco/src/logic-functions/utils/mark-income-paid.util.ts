@@ -4,7 +4,7 @@ import { type RecordsClient, updateRecordsWhere } from 'src/logic-functions/util
 import { writeAuditLog } from 'src/logic-functions/utils/write-audit-log.util';
 import { type AdminRoleKey } from 'src/utils/admin-permissions.util';
 
-// COM-04: only the Full Admin marks an income paid; the conditional update makes a second click a no-op.
+// Only the Full Admin marks an income paid; the conditional update makes a second click a no-op.
 export const markIncomePaid = async ({
   client,
   callerId,

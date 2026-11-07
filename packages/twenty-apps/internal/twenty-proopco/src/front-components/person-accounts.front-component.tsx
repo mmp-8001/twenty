@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { CoreApiClient } from 'twenty-client-sdk/core';
 import { defineFrontComponent } from 'twenty-sdk/define';
 import { useRecordId } from 'twenty-sdk/front-component';
 
+import { PERSON_DETAILS_ROUTE_PATH } from 'src/constants/ownership.constant';
 import { PERSON_ACCOUNTS_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
+import { postRoute } from 'src/utils/post-route.util';
 
 type AccountRow = { id: string; proopcoId: string | null; status: string | null; phase: string | null };
 
@@ -16,19 +17,8 @@ const PersonAccounts = () => {
       return;
     }
 
-    (new CoreApiClient().query({
-      challengeAccounts: {
-        __args: { filter: { personId: { eq: personId } }, first: 50 },
-        edges: { node: { id: true, proopcoId: true, status: true, phase: true } },
-      },
-    } as never) as Promise<unknown>)
-      .then((result) =>
-        setAccounts(
-          (result as { challengeAccounts: { edges: { node: AccountRow }[] } }).challengeAccounts.edges.map(
-            ({ node }) => node,
-          ),
-        ),
-      )
+    postRoute<{ success: boolean; accounts?: AccountRow[] }>(PERSON_DETAILS_ROUTE_PATH, { personId })
+      .then((result) => setAccounts(result.accounts ?? []))
       .catch(() => setAccounts([]));
   }, [personId]);
 

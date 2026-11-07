@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { RestApiClient } from 'twenty-client-sdk/rest';
 import { defineFrontComponent } from 'twenty-sdk/define';
 
 import {
@@ -13,12 +12,11 @@ import { REPORTS_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/univ
 import { type readMyReport } from 'src/logic-functions/utils/read-my-report.util';
 import { type readTeamReport } from 'src/logic-functions/utils/read-team-report.util';
 import { type Report } from 'src/utils/build-report.util';
+import { postRoute } from 'src/utils/post-route.util';
 
 type RouteError = { success: false; error?: string };
 type MyReport = Awaited<ReturnType<typeof readMyReport>>;
 type TeamReport = Awaited<ReturnType<typeof readTeamReport>>;
-
-const post = <TResponse,>(path: string, body: unknown) => new RestApiClient().post<TResponse>(`/s${path}`, body);
 
 const ReportTable = ({ report }: { report: Report }) => (
   <table>
@@ -45,8 +43,8 @@ const Reports = () => {
   const [message, setMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const own = await post<MyReport | RouteError>(MY_REPORT_ROUTE_PATH, { period });
-    const everyone = await post<TeamReport | RouteError>(TEAM_REPORT_ROUTE_PATH, { period });
+    const own = await postRoute<MyReport | RouteError>(MY_REPORT_ROUTE_PATH, { period });
+    const everyone = await postRoute<TeamReport | RouteError>(TEAM_REPORT_ROUTE_PATH, { period });
 
     setMine(own.success ? own : null);
     setTeam(everyone.success ? everyone : null);
@@ -58,7 +56,7 @@ const Reports = () => {
   }, [load]);
 
   const markPaid = async (incomeId: string) => {
-    const result = await post<{ success: boolean; error?: string }>(MARK_INCOME_PAID_ROUTE_PATH, { incomeId });
+    const result = await postRoute<{ success: boolean; error?: string }>(MARK_INCOME_PAID_ROUTE_PATH, { incomeId });
 
     setMessage(result.success ? null : (result.error ?? 'Failed'));
     await load();

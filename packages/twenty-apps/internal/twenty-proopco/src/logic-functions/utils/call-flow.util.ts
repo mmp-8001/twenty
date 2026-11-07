@@ -4,8 +4,7 @@ import {
   FOLLOWUP_DAYS,
   PENDING_FIRST_CALL_DAYS,
 } from 'src/constants/ownership.constant';
-
-const DAY_MS = 24 * 60 * 60 * 1000;
+import { DAY_MS } from 'src/constants/time.constant';
 
 // shortcut: fixed 24 h days, which equal Tehran calendar days only while Tehran has no DST; revisit if that changes.
 export const addDays = (from: Date, days: number): Date =>
@@ -155,7 +154,7 @@ export const planFirstAnsweredCall = ({
       }
     : null;
 
-// FUP-07: permanent failure. The Followup and Ownership close; the User never returns to a list.
+// Permanent failure. The Followup and Ownership close; the User never returns to a list.
 export const planMoveToFailed = ({
   failureReasonId,
   now,

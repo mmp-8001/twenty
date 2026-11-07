@@ -1,14 +1,14 @@
-const MICROS = 1_000_000;
+import { MICROS_PER_UNIT } from 'src/constants/micros.constant';
 
 export const buildIncomeKey = (adminId: string, year: number, month: number) =>
   `${adminId}:${year}-${month}`;
 
 export const toMicros = (usdt: number | null | undefined): number =>
-  Math.round((usdt ?? 0) * MICROS);
+  Math.round((usdt ?? 0) * MICROS_PER_UNIT);
 
-export const fromMicros = (micros: number): number => micros / MICROS;
+export const fromMicros = (micros: number): number => micros / MICROS_PER_UNIT;
 
-// COM-04: unlinked Commissions grouped per Admin, in integer micros so cents never drift.
+// Unlinked Commissions grouped per Admin, in integer micros so cents never drift.
 export const groupCommissionsByAdmin = (
   commissions: { id: string; adminId: string | null; commissionUsdt: number | null }[],
 ): Map<string, { ids: string[]; micros: number }> => {

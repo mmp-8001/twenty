@@ -7,6 +7,7 @@ import {
   listRecords,
   type RecordsClient,
   updateRecord,
+  updateRecordsWhere,
 } from 'src/logic-functions/utils/list-records.util';
 import { writeAuditLog } from 'src/logic-functions/utils/write-audit-log.util';
 import { type AdminRoleKey, canDeactivate } from 'src/utils/admin-permissions.util';
@@ -20,12 +21,14 @@ export const deactivateAdmin = async ({
   callerRole,
   targetId,
   reason,
+  now = new Date(),
 }: {
   client: RecordsClient;
   callerId: string;
   callerRole: AdminRoleKey | null;
   targetId: string;
   reason: string;
+  now?: Date;
 }): Promise<AdminActionResult> => {
   if (!reason.trim()) {
     return { success: false, error: REASON_REQUIRED_MESSAGE };
@@ -54,6 +57,11 @@ export const deactivateAdmin = async ({
   if (!member || member.crmStatus === 'DEACTIVATED') {
     return { success: false, error: 'This admin is already deactivated' };
   }
+
+  // A removed assignment drops the admin from the campaign's visibility through the recompute trigger.
+  await updateRecordsWhere(client, 'campaignAdmins', { adminId: { eq: targetId }, removedAt: { is: 'NULL' } }, {
+    removedAt: now.toISOString(),
+  });
 
   // Bulk updates on workspace members are refused to the app.
   await updateRecord(client, 'WorkspaceMember', targetId, { crmStatus: 'DEACTIVATED' });

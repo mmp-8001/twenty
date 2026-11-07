@@ -2,6 +2,7 @@ import {
   resolveRelativeDateRange,
   toTehranPlainDate,
 } from 'src/logic-functions/utils/resolve-relative-date-range.util';
+import { MICROS_PER_UNIT } from 'src/constants/micros.constant';
 
 export type SegmentFilter = {
   id: string;
@@ -25,8 +26,6 @@ export type SegmentField = { name: string; type: string };
 type RecordFilter = Record<string, unknown>;
 
 export class UnsupportedSegmentFilterError extends Error {}
-
-const MICROS_PER_UNIT = 1_000_000;
 
 const parseSelectValues = (value: unknown): string[] => {
   if (Array.isArray(value)) {

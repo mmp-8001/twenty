@@ -15,7 +15,7 @@ const ROLE_KEY_BY_UNIVERSAL_IDENTIFIER: Record<string, AdminRoleKey> = {
 export const roleKeyOf = (roleUniversalIdentifier: string | null | undefined): AdminRoleKey | null =>
   ROLE_KEY_BY_UNIVERSAL_IDENTIFIER[roleUniversalIdentifier ?? ''] ?? null;
 
-// FRZ-01 and ROLE-02: a Supervisor or the Full Admin freezes a Sales Admin; only the Full Admin freezes a
+// A Supervisor or the Full Admin freezes a Sales Admin; only the Full Admin freezes a
 // Supervisor; nobody freezes themself or the Full Admin.
 export const canFreeze = ({
   callerId,
@@ -39,7 +39,7 @@ export const canFreeze = ({
   return targetRole === 'SUPERVISOR' && callerRole === 'FULL_ADMIN';
 };
 
-// TRF-01: moving or releasing Users is for Supervisors and the Full Admin.
+// Moving or releasing Users is for Supervisors and the Full Admin.
 export const canManageOwnership = (callerRole: AdminRoleKey | null): boolean =>
   callerRole === 'SUPERVISOR' || callerRole === 'FULL_ADMIN';
 

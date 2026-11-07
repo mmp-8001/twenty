@@ -9,7 +9,7 @@ import {
 import { writeAuditLog } from 'src/logic-functions/utils/write-audit-log.util';
 import { type AdminRoleKey } from 'src/utils/admin-permissions.util';
 
-// CODE-09: voids the Offer for every User at once; no cancellation SMS. Used activations keep their history.
+// Voids the Offer for every User at once; no cancellation SMS. Used activations keep their history.
 export const deactivateOffer = async ({
   client,
   callerId,

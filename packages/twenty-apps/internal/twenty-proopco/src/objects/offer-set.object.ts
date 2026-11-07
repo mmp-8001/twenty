@@ -15,7 +15,7 @@ import {
 } from 'src/constants/universal-identifiers';
 import { buildSelectOptions } from 'src/utils/build-select-options.util';
 
-// Global sets only the Full Admin edits (CODE-05): the Offers shown on rebuy cases and retention calls.
+// Global sets only the Full Admin edits: the Offers shown on rebuy cases and retention calls.
 export default defineObject({
   universalIdentifier: OFFER_SET_OBJECT_UNIVERSAL_IDENTIFIER,
   nameSingular: 'offerSet',

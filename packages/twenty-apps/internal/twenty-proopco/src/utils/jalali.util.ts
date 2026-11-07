@@ -1,8 +1,7 @@
 import { startOfTehranDay } from 'src/utils/call-windows.util';
+import { DAY_MS, TEHRAN_OFFSET_MS } from 'src/constants/time.constant';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 // Same fixed +03:30 as call-windows.util, so Jalali days and Tehran days always agree.
-const TEHRAN_OFFSET_MS = 3.5 * 60 * 60 * 1000;
 
 const jalaliFormat = new Intl.DateTimeFormat('en-u-ca-persian-nu-latn', {
   timeZone: 'UTC',
@@ -49,5 +48,5 @@ export const previousJalaliMonth = (at: Date): { year: number; month: number } =
   return month === 1 ? { year: year - 1, month: 12 } : { year, month: month - 1 };
 };
 
-// COM-04: the rollup runs once Tehran has reached the first day of a Jalali month.
+// The rollup runs once Tehran has reached the first day of a Jalali month.
 export const isFirstJalaliDay = (at: Date): boolean => jalaliPartsOf(at).day === 1;

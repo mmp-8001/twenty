@@ -77,7 +77,6 @@ describe('Offers and SMS', () => {
       capability: 'RESET',
       discountParams: { percent: 50 },
       expiresAt: new Date(Date.now() + 30 * DAY_MS).toISOString(),
-      status: 'ACTIVE',
       ...data,
     });
 
@@ -510,7 +509,7 @@ describe('Offers and SMS', () => {
       userRequest<Record<string, { id: string }>>({ token: tokens[who], query: mutation, variables });
     const expiresAt = new Date(Date.now() + DAY_MS).toISOString();
     const createOfferMutation = `mutation ($data: OfferCreateInput!) { createOffer(data: $data) { id } }`;
-    const offerData = { title: `${tag}-as1`, capability: 'DISCOUNT', expiresAt, status: 'ACTIVE' };
+    const offerData = { title: `${tag}-as1`, capability: 'DISCOUNT', expiresAt };
 
     for (const who of ['supervisor', 'agent']) {
       expect((await graphql(who, createOfferMutation, { data: offerData })).errors?.length).toBeGreaterThan(0);
@@ -520,6 +519,17 @@ describe('Offers and SMS', () => {
 
     expect(full.errors).toBeUndefined();
     created.push({ singular: 'Offer', id: full.data!.createOffer.id });
+
+    // The status changes only through the deactivate route, which audits it.
+    expect(
+      (
+        await graphql(
+          'full',
+          `mutation ($id: UUID!) { updateOffer(id: $id, data: { status: DEACTIVATED }) { id } }`,
+          { id: full.data!.createOffer.id },
+        )
+      ).errors?.length,
+    ).toBeGreaterThan(0);
 
     const offerId = full.data!.createOffer.id;
     const link = await graphql(

@@ -2,8 +2,7 @@ import { isString } from '@sniptt/guards';
 
 import { listRecords, type RecordsClient } from 'src/logic-functions/utils/list-records.util';
 import { findTouchNoAt, startOfTehranDay } from 'src/utils/call-windows.util';
-
-const DAY_MS = 24 * 60 * 60 * 1000;
+import { DAY_MS } from 'src/constants/time.constant';
 
 export type MyFollowupRow = {
   personId: string;
@@ -39,7 +38,7 @@ type CallNode = {
 
 type TouchNode = { followupId: string | null; touchNo: number; windowStartAt: string; windowEndAt: string };
 
-// LOGIC Q-05 and Q-08: the caller's open cases plus their successful Users with a call time, one row per User.
+// The caller's open cases plus their successful Users with a call time, one row per User.
 export const readMyFollowups = async ({
   client,
   memberId,

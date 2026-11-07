@@ -3,7 +3,7 @@ import { type CoreApiClient } from 'twenty-client-sdk/core';
 import { DEMO_PROOPCO_ID_PREFIX } from 'src/constants/demo-data.constant';
 import {
   createRecord,
-  listRecords,
+  readIds,
   type RecordsClient,
   updateRecord,
 } from 'src/logic-functions/utils/list-records.util';
@@ -15,16 +15,11 @@ import { computeCommissionUsdt } from 'src/utils/commission.util';
 import { buildDemoSyncItems, DEMO_CASES, demoProopcoId, type DemoCase } from 'src/utils/demo-data.util';
 import { jalaliMonthBounds, previousJalaliMonth } from 'src/utils/jalali.util';
 import { buildIncomeKey, fromMicros, toMicros } from 'src/utils/monthly-income.util';
+import { DAY_MS } from 'src/constants/time.constant';
 
-const DAY_MS = 86_400_000;
-const FROZEN_REMAINING_SECONDS = 20 * 86_400;
-
-type Members = { ownerA: string; ownerB: string; frozen: string | null };
+type Members = { ownerA: string; ownerB: string };
 
 const daysFrom = (now: Date, days: number) => new Date(now.getTime() + days * DAY_MS).toISOString();
-
-const readIds = async (client: RecordsClient, collection: string, filter: Record<string, unknown>) =>
-  (await listRecords<{ id: string }>(client, collection, filter, {})).map(({ id }) => id);
 
 const seedCase = async ({
   client,
@@ -47,7 +42,7 @@ const seedCase = async ({
   incomeIdByAdmin: Map<string, string>;
   purchasedAt: Date;
 }) => {
-  const adminId = demoCase.owner === 'A' ? members.ownerA : demoCase.owner === 'B' ? members.ownerB : (members.frozen as string);
+  const adminId = demoCase.owner === 'A' ? members.ownerA : members.ownerB;
   const isOpen = demoCase.endReason === null;
   const answeredAt =
     demoCase.firstAnsweredDaysAgo === null ? null : new Date(now.getTime() - demoCase.firstAnsweredDaysAgo * DAY_MS);
@@ -71,8 +66,8 @@ const seedCase = async ({
     addedAt: new Date(now.getTime() - ((demoCase.firstAnsweredDaysAgo ?? 1) + 1) * DAY_MS).toISOString(),
     firstAnsweredCallAt: answeredAt?.toISOString() ?? null,
     deadlineAt: demoCase.deadlineInDays === null ? null : daysFrom(now, demoCase.deadlineInDays),
-    frozenRemainingSeconds: demoCase.owner === 'FROZEN' ? FROZEN_REMAINING_SECONDS : null,
-    closedAt: isCaseOpen || demoCase.owner === 'FROZEN' ? null : now.toISOString(),
+    frozenRemainingSeconds: null,
+    closedAt: isCaseOpen ? null : now.toISOString(),
     openKey: isCaseOpen ? personId : null,
     ...(demoCase.followupStatus === 'TRANSFERRED' ? { transferredFrom: members.ownerB } : {}),
   });
@@ -158,7 +153,7 @@ export const seedDemoData = async ({
     await removeDemoData({ client });
   }
 
-  const cases = DEMO_CASES.filter(({ owner }) => owner !== 'FROZEN' || members.frozen !== null);
+  const cases = DEMO_CASES;
   const { year, month } = previousJalaliMonth(now);
   const purchasedAt = new Date(jalaliMonthBounds(year, month).start.getTime() + 5 * DAY_MS);
   const syncClient = client as unknown as Pick<CoreApiClient, 'query' | 'mutation'>;
@@ -252,19 +247,6 @@ export const seedDemoData = async ({
 
   for (const [incomeId, micros] of totalMicrosByIncome) {
     await updateRecord(client, 'MonthlyIncome', incomeId, { totalUsdt: fromMicros(micros) });
-  }
-
-  if (members.frozen) {
-    await updateRecord(client, 'WorkspaceMember', members.frozen, {
-      crmStatus: 'FROZEN',
-      frozenSince: new Date(now.getTime() - 2 * DAY_MS).toISOString(),
-    });
-    await createRecord(client, 'AdminFreeze', {
-      adminId: members.frozen,
-      reason: `${DEMO_PROOPCO_ID_PREFIX}freeze`,
-      frozenAt: new Date(now.getTime() - 2 * DAY_MS).toISOString(),
-      frozenById: callerId,
-    });
   }
 
   return { seeded: true };

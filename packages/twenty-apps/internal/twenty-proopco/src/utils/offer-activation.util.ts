@@ -1,12 +1,12 @@
 import { type OFFER_CAPABILITIES } from 'src/constants/offer.constant';
 
-// CODE-06: one activation per offer and user; the unique index on this key enforces it.
+// One activation per offer and user; the unique index on this key enforces it.
 export const buildActivationKey = (offerId: string, personId: string) => `${offerId}:${personId}`;
 
 // The SMS app dedups on this, so resending the same activation never texts twice.
 export const buildSmsSourceRef = (activationId: string) => `offer-activation:${activationId}`;
 
-// CODE-03: a fixed instant, hidden from the form once passed and never recomputed per user.
+// A fixed instant, hidden from the form once passed and never recomputed per user.
 export const isOfferExpired = (expiresAt: string | null, now: Date) =>
   expiresAt !== null && new Date(expiresAt).getTime() <= now.getTime();
 
@@ -61,14 +61,14 @@ export type ActivationView = {
   deactivatedAt: string | null;
 };
 
-// What User details and the form show for an activation, and which button it offers (CODE-06, -08, -09).
+// What User details and the form show for an activation, and which button it offers.
 export const describeActivation = ({
   status,
   smsStatus,
   expiresAt,
   deactivatedAt,
 }: ActivationView): { label: string; action: 'RETRY' | 'RESEND_SMS' | null } => {
-  const until = expiresAt ? ` — until ${expiresAt.slice(0, 16).replace('T', ' ')} UTC` : '';
+  const until = expiresAt ? ` until ${expiresAt.slice(0, 16).replace('T', ' ')} UTC` : '';
 
   switch (status) {
     case 'ACTIVATION_FAILED':
@@ -79,7 +79,7 @@ export const describeActivation = ({
       return { label: 'Code used', action: null };
     case 'DEACTIVATED':
       return {
-        label: `Deactivated by Full Admin${deactivatedAt ? ` — ${deactivatedAt.slice(0, 10)}` : ''}`,
+        label: `Deactivated by Full Admin${deactivatedAt ? `, ${deactivatedAt.slice(0, 10)}` : ''}`,
         action: null,
       };
     default:

@@ -3,7 +3,7 @@ import { isOfferExpired } from 'src/utils/offer-activation.util';
 
 type CallNode = { personId: string | null; adminId: string | null; kind: string | null; followupId: string | null };
 
-// CODE-05: a campaign case gets its Campaign's offers, a rebuy case the rebuy set, a retention call the retention set.
+// A campaign case gets its Campaign's offers, a rebuy case the rebuy set, a retention call the retention set.
 export const readCaseOfferIds = async (client: RecordsClient, callId: string): Promise<string[]> => {
   const [call] = await listRecords<CallNode>(client, 'calls', { id: { eq: callId } }, {
     personId: true,
@@ -58,7 +58,7 @@ export type OfferOption = {
 };
 
 // The form's code section: deactivated offers and unactivated expired ones are hidden; an offer already
-// activated for the user stays visible and disabled (CODE-06). Empty means the section is hidden.
+// activated for the user stays visible and disabled. Empty means the section is hidden.
 export const readOfferOptions = async ({
   client,
   memberId,

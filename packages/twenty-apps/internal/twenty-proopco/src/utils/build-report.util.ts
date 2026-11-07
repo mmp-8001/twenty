@@ -2,13 +2,11 @@ import { type ReportPeriod } from 'src/constants/income-report.constant';
 import { startOfTehranDay } from 'src/utils/call-windows.util';
 import { jalaliMonthBounds, jalaliPartsOf } from 'src/utils/jalali.util';
 import { fromMicros, toMicros } from 'src/utils/monthly-income.util';
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-const TEHRAN_OFFSET_MS = 3.5 * 60 * 60 * 1000;
+import { DAY_MS, TEHRAN_OFFSET_MS } from 'src/constants/time.constant';
 
 export type ReportRange = { start: Date | null; end: Date };
 
-// RPT-06: daily, weekly (the Persian week starts on Saturday), the current Jalali month, or everything.
+// Daily, weekly (the Persian week starts on Saturday), the current Jalali month, or everything.
 export const reportRangeOf = (period: ReportPeriod, now: Date): ReportRange => {
   const dayStart = startOfTehranDay(now);
 
@@ -75,7 +73,7 @@ const callCounts = (calls: { isAnswered: boolean | null }[]): CallCounts => {
   return { total: calls.length, answered, notAnswered: calls.length - answered, answerRate: rate(answered, calls.length) };
 };
 
-// Every event counts on its own date (RPT-03). adminId null means the whole team.
+// Every event counts on its own date. adminId null means the whole team.
 export const buildReport = ({
   data,
   adminId,
@@ -108,7 +106,7 @@ export const buildReport = ({
     }
   }
 
-  // RPT-04: a purchase before any call is in neither side of the conversion rate.
+  // A purchase before any call is in neither side of the conversion rate.
   const countedClosed = closed.filter(({ status }) => status !== 'PURCHASE_BEFORE_CALL');
   const commissions = mine(data.commissions).filter(({ purchasedAt }) => inRange(purchasedAt));
   const activations = mine(data.activations);
@@ -125,7 +123,7 @@ export const buildReport = ({
     }
   }
 
-  // RPT-05/06: freeze time leaves the working days. Only a bounded period for one Admin has them.
+  // Freeze time leaves the working days. Only a bounded period for one Admin has them.
   let workingDays: number | null = null;
   let frozenDays: number | null = null;
 

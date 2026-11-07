@@ -62,8 +62,10 @@ export const MY_FOLLOWUPS_ROUTE_PATH = '/proopco/my-followups';
 
 export const COMMISSION_KINDS = ['CAMPAIGN_SUCCESS', 'REBUY_SUCCESS', 'RETENTION'] as const;
 
-// DECISION: proopco must send the account status "active" (and "breached"); compared case-insensitively.
+// Proopco must send the account status "active" (and "breached"); compared case-insensitively.
 export const ACTIVE_ACCOUNT_STATUS = 'active';
 
 export const ADD_REBUY_ROUTE_PATH = '/proopco/add-rebuy';
 export const REBUY_NOT_AVAILABLE_MESSAGE = 'This rebuy user is no longer available';
+
+export const PERSON_DETAILS_ROUTE_PATH = '/proopco/person-details';

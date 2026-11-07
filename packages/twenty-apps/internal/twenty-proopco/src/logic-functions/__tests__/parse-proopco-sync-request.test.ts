@@ -12,6 +12,12 @@ describe('parseProopcoSyncRequest', () => {
     });
   });
 
+  it('rejects a real item whose proopcoId uses the reserved demo prefix', () => {
+    const parsed = parseProopcoSyncRequest({ items: [{ type: 'user', proopcoId: 'demo-1', data: {} }] });
+
+    expect(parsed).toMatchObject({ entries: [{ result: { status: 'error', retryable: false } }] });
+  });
+
   it.each([[undefined], [{}], [{ items: 'nope' }]])(
     'rejects the body %j',
     (body) => {

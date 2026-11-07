@@ -44,7 +44,7 @@ const REFUSAL_MESSAGES: Record<ActivationRefusal, string> = {
 
 export const PHONE_SELECTION = { phones: { primaryPhoneNumber: true, primaryPhoneCallingCode: true } };
 
-// CODE-07: queued with the SMS app; a failure only marks the SMS, the code stays active (CODE-08).
+// Queued with the SMS app; a failure only marks the SMS, the code stays active.
 export const sendActivationSms = async ({
   client,
   activationId,
@@ -79,7 +79,7 @@ export const sendActivationSms = async ({
   return smsStatus;
 };
 
-// Activates, or retries a failed activation of, one Offer for one User (CODE-04, CODE-06, CODE-08).
+// Activates, or retries a failed activation of, one Offer for one User.
 export const activateOffer = async ({
   client,
   memberId,

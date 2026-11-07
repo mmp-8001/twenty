@@ -1,13 +1,11 @@
-const HOUR_MS = 60 * 60 * 1000;
-const DAY_MS = 24 * HOUR_MS;
+import { DAY_MS, HOUR_MS, TEHRAN_OFFSET_MS } from 'src/constants/time.constant';
 
 // shortcut: fixed +03:30, correct for Tehran since 2022; revisit if Iran reintroduces DST.
-const TEHRAN_OFFSET_MS = 3.5 * HOUR_MS;
 
 const FOLLOWUP_DAYS = 30;
 const DEFAULT_CALL_HOUR_OFFSET_MS = 10 * HOUR_MS;
 
-// LOGIC Q-01: day ranges counted in Tehran calendar days from the first answered call.
+// Day ranges counted in Tehran calendar days from the first answered call.
 const TOUCH_DAY_RANGES = [
   [0, 0],
   [1, 3],
@@ -43,7 +41,7 @@ export const findTouchNoAt = (windows: TouchWindow[], at: Date): number | null =
     ({ windowStartAt, windowEndAt }) => windowStartAt <= at && at < windowEndAt,
   )?.touchNo ?? null;
 
-// Q-02: an answered call moves on to the next window, an unanswered one stays in the same window.
+// An answered call moves on to the next window, an unanswered one stays in the same window.
 export const suggestTouchNo = ({
   windows,
   now,
@@ -107,7 +105,7 @@ export const defaultNextCallAt = ({
 
 export type TouchState = TouchWindow & { status: string };
 
-// Q-02 and Q-03: an answered call completes the window it falls in; a user-requested jump past windows defers them.
+// An answered call completes the window it falls in; a user-requested jump past windows defers them.
 // An admin-decided jump changes nothing here, the sweep marks those windows missed when they end.
 export const planTouchChanges = ({
   touches,

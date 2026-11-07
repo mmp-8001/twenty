@@ -6,7 +6,7 @@ export type PurchaseDecision =
   | { type: 'SUCCESS'; commissionKind: CommissionKind }
   | { type: 'RETENTION'; commissionKind: 'RETENTION' };
 
-// FUP-04, FUP-08, RB-06: what a purchase does, by the User's open Ownership state.
+// What a purchase does, by the User's open Ownership state.
 export const decidePurchase = ({
   ownershipState,
   followupKind,

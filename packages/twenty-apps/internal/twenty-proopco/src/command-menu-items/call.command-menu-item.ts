@@ -11,7 +11,7 @@ import {
   CALL_FORM_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER,
 } from 'src/constants/universal-identifiers';
 
-// CALL-01: only an owned User has the button; the route refuses anyone but the owner.
+// Only an owned User has the button; the route refuses anyone but the owner.
 export default defineCommandMenuItem({
   universalIdentifier: CALL_COMMAND_MENU_ITEM_UNIVERSAL_IDENTIFIER,
   availabilityObjectUniversalIdentifier:

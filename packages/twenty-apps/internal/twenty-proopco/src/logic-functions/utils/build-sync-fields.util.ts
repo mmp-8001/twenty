@@ -11,7 +11,7 @@ export type BuiltSyncFields = {
   references: Record<string, { collection: string; proopcoId: string }>;
 };
 
-const fail = (message: string): never => {
+const throwSyncError = (message: string): never => {
   throw new SyncItemError(message, false);
 };
 
@@ -32,7 +32,7 @@ const readValue = <TValue>(
     return null;
   }
 
-  return isValid(value) ? value : fail(`${key} must be ${expected}`);
+  return isValid(value) ? value : throwSyncError(`${key} must be ${expected}`);
 };
 
 const isFiniteNumber = (value: unknown): value is number =>
@@ -47,7 +47,7 @@ const isDate = (value: unknown): value is string =>
 
 const readString = (data: SyncItemData, key: string) =>
   readValue(data, key, isString, 'a string');
-const readNumber = (data: SyncItemData, key: string) =>
+const readSyncNumber = (data: SyncItemData, key: string) =>
   readValue(data, key, isFiniteNumber, 'a number');
 const readDateTime = (data: SyncItemData, key: string) => {
   const value = readValue(data, key, isDateTime, 'an ISO date-time string');
@@ -63,7 +63,7 @@ const readDate = (data: SyncItemData, key: string) =>
 const requireString = (data: SyncItemData, key: string): string => {
   const value = readString(data, key);
 
-  return isString(value) ? value : fail(`${key} is required`);
+  return isString(value) ? value : throwSyncError(`${key} is required`);
 };
 
 const setDefined = (fields: SyncItemData, key: string, value: unknown) => {
@@ -73,9 +73,9 @@ const setDefined = (fields: SyncItemData, key: string, value: unknown) => {
 };
 
 const requireNumber = (data: SyncItemData, key: string): number => {
-  const value = readNumber(data, key);
+  const value = readSyncNumber(data, key);
 
-  return isNumber(value) ? value : fail(`${key} is required and must be a number`);
+  return isNumber(value) ? value : throwSyncError(`${key} is required and must be a number`);
 };
 
 const buildUserFields = (data: SyncItemData): BuiltSyncFields => {
@@ -116,13 +116,13 @@ const buildUserFields = (data: SyncItemData): BuiltSyncFields => {
     'hasProfitWithdrawal',
     readBoolean(data, 'hasProfitWithdrawal'),
   );
-  setDefined(fields, 'purchaseCount', readNumber(data, 'purchaseCount'));
-  setDefined(fields, 'totalPaidUsdt', readNumber(data, 'totalPaidUsdt'));
+  setDefined(fields, 'purchaseCount', readSyncNumber(data, 'purchaseCount'));
+  setDefined(fields, 'totalPaidUsdt', readSyncNumber(data, 'totalPaidUsdt'));
   setDefined(fields, 'lastPurchaseAt', readDateTime(data, 'lastPurchaseAt'));
   setDefined(
     fields,
     'activeAccountCount',
-    readNumber(data, 'activeAccountCount'),
+    readSyncNumber(data, 'activeAccountCount'),
   );
   setDefined(fields, 'currentStage', readString(data, 'currentStage'));
 
@@ -165,7 +165,7 @@ const buildPaymentFields = (data: SyncItemData): BuiltSyncFields => {
   setDefined(fields, 'offerCode', readString(data, 'offerCode'));
 
   if (!isString(paidAt)) {
-    fail('paidAt is required and must be an ISO date-time string');
+    throwSyncError('paidAt is required and must be an ISO date-time string');
   } else {
     fields.paidAt = paidAt;
   }
