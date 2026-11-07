@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react';
 import { defineFrontComponent } from 'twenty-sdk/define';
 import { enqueueSnackbar, msg, Trans, useRecordId, useTranslate } from 'twenty-sdk/front-component';
 
+import { IconCheckbox } from 'twenty-ui/icon';
+import { Tag } from 'twenty-ui/primitives/data-display';
+import { Button } from 'twenty-ui/primitives/input';
+
+import { Item, ItemList, MutedText, Page, Row } from 'src/front-components/components/layout';
+import { EmptyState, ErrorCallout, LoadingState } from 'src/front-components/components/state-views';
+
 import { ACTIVATE_OFFER_ROUTE_PATH, RESEND_OFFER_SMS_ROUTE_PATH } from 'src/constants/offer.constant';
 import { PERSON_DETAILS_ROUTE_PATH } from 'src/constants/ownership.constant';
 import { PERSON_OFFERS_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
@@ -39,10 +46,18 @@ const ACTIVATION_MESSAGES = {
   smsNotSent: msg('SMS not sent'),
 };
 
+const ACTIVATION_COLORS: Record<string, 'red' | 'yellow' | 'gray' | 'green'> = {
+  ACTIVATION_FAILED: 'red',
+  ACTIVATING: 'yellow',
+  USED: 'gray',
+  DEACTIVATED: 'gray',
+};
+
 const PersonOffers = () => {
   const personId = useRecordId();
   const { t } = useTranslate();
-  const [rows, setRows] = useState<ActivationRow[]>([]);
+  const [rows, setRows] = useState<ActivationRow[] | null>(null);
+  const [hasError, setHasError] = useState(false);
   const [reloadCount, setReloadCount] = useState(0);
 
   useEffect(() => {
@@ -52,7 +67,7 @@ const PersonOffers = () => {
 
     postRoute<{ success: boolean; activations?: ActivationRow[] }>(PERSON_DETAILS_ROUTE_PATH, { personId })
       .then((result) => setRows(result.activations ?? []))
-      .catch(() => setRows([]));
+      .catch(() => setHasError(true));
   }, [personId, reloadCount]);
 
   const run = async (path: string, body: Record<string, unknown>) => {
@@ -66,41 +81,70 @@ const PersonOffers = () => {
     setReloadCount((count) => count + 1);
   };
 
+  if (hasError) {
+    return <ErrorCallout title={t('Could not load the offers')} />;
+  }
+
+  if (rows === null) {
+    return <LoadingState />;
+  }
+
   if (rows.length === 0) {
-    return <p style={{ padding: 16 }}>
+    return (
+      <EmptyState icon={IconCheckbox}>
         <Trans>No offers activated.</Trans>
-      </p>;
+      </EmptyState>
+    );
   }
 
   return (
-    <ul style={{ padding: 16 }}>
-      {rows.map((row) => {
-        const view = {
-          status: row.status ?? '',
-          smsStatus: row.smsStatus ?? '',
-          expiresAt: row.offer?.expiresAt ?? null,
-          deactivatedAt: row.offer?.deactivatedAt ?? null,
-        };
-        const { action } = describeActivation(view);
+    <Page>
+      <ItemList>
+        {rows.map((row) => {
+          const view = {
+            status: row.status ?? '',
+            smsStatus: row.smsStatus ?? '',
+            expiresAt: row.offer?.expiresAt ?? null,
+            deactivatedAt: row.offer?.deactivatedAt ?? null,
+          };
+          const { action } = describeActivation(view);
 
-        return (
-          <li key={row.id}>
-            {row.offer?.title}: {activationLabel(view, ACTIVATION_MESSAGES, t)}
-            {row.status === 'ACTIVATION_FAILED' && row.errorMessage ? ` (${row.errorMessage})` : ''}
-            {action === 'RETRY' && (
-              <button type="button" onClick={() => run(ACTIVATE_OFFER_ROUTE_PATH, { personId, offerId: row.offerId })}>
-                <Trans>Retry</Trans>
-              </button>
-            )}
-            {action === 'RESEND_SMS' && (
-              <button type="button" onClick={() => run(RESEND_OFFER_SMS_ROUTE_PATH, { activationId: row.id })}>
-                <Trans>Resend SMS</Trans>
-              </button>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+          return (
+            <Item key={row.id}>
+              <Row>
+                <strong>{row.offer?.title}</strong>
+                <Tag color={ACTIVATION_COLORS[row.status ?? ''] ?? 'green'}>
+                  {activationLabel(view, ACTIVATION_MESSAGES, t)}
+                </Tag>
+              </Row>
+              {row.status === 'ACTIVATION_FAILED' && row.errorMessage && <MutedText>{row.errorMessage}</MutedText>}
+              {action === 'RETRY' && (
+                <div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => run(ACTIVATE_OFFER_ROUTE_PATH, { personId, offerId: row.offerId })}
+                  >
+                    <Trans>Retry</Trans>
+                  </Button>
+                </div>
+              )}
+              {action === 'RESEND_SMS' && (
+                <div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => run(RESEND_OFFER_SMS_ROUTE_PATH, { activationId: row.id })}
+                  >
+                    <Trans>Resend SMS</Trans>
+                  </Button>
+                </div>
+              )}
+            </Item>
+          );
+        })}
+      </ItemList>
+    </Page>
   );
 };
 

@@ -3,6 +3,12 @@ import { CoreApiClient } from 'twenty-client-sdk/core';
 import { defineFrontComponent } from 'twenty-sdk/define';
 import { msg, Trans, useRecordId, useTranslate } from 'twenty-sdk/front-component';
 
+import { IconCheckbox } from 'twenty-ui/icon';
+import { Tag } from 'twenty-ui/primitives/data-display';
+
+import { Item, ItemList, MutedText, NumericValue, Page, Row } from 'src/front-components/components/layout';
+import { EmptyState, ErrorCallout, LoadingState } from 'src/front-components/components/state-views';
+
 import { PERSON_CALL_HISTORY_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { translateValue } from 'src/utils/front-labels.util';
 import { formatTehranTime } from 'src/utils/format-tehran-time.util';
@@ -21,7 +27,8 @@ const CALL_STATUS_LABELS = {
 const PersonCallHistory = () => {
   const personId = useRecordId();
   const { t } = useTranslate();
-  const [calls, setCalls] = useState<CallRow[]>([]);
+  const [calls, setCalls] = useState<CallRow[] | null>(null);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     if (!personId) {
@@ -37,24 +44,46 @@ const PersonCallHistory = () => {
       .then((result) =>
         setCalls((result as { calls: { edges: { node: CallRow }[] } }).calls.edges.map(({ node }) => node)),
       )
-      .catch(() => setCalls([]));
+      .catch(() => setHasError(true));
   }, [personId]);
 
+  if (hasError) {
+    return <ErrorCallout title={t('Could not load the calls')} />;
+  }
+
+  if (calls === null) {
+    return <LoadingState />;
+  }
+
   if (calls.length === 0) {
-    return <p style={{ padding: 16 }}>
+    return (
+      <EmptyState icon={IconCheckbox}>
         <Trans>No calls yet.</Trans>
-      </p>;
+      </EmptyState>
+    );
   }
 
   return (
-    <ul style={{ padding: 16 }}>
-      {calls.map((call) => (
-        <li key={call.id}>
-          {call.startedAt ? formatTehranTime(call.startedAt) : ''} · {translateValue(CALL_STATUS_LABELS, call.technicalStatus, t)}
-          {call.kind === 'RETENTION' ? ` · ${t('retention')}` : ''} · {call.note}
-        </li>
-      ))}
-    </ul>
+    <Page>
+      <ItemList>
+        {calls.map((call) => (
+          <Item key={call.id}>
+            <Row>
+              <Tag color={call.technicalStatus === 'ANSWERED' ? 'green' : 'gray'}>
+                {translateValue(CALL_STATUS_LABELS, call.technicalStatus, t)}
+              </Tag>
+              {call.kind === 'RETENTION' && (
+                <Tag color="blue" variant="outline">
+                  {t('retention')}
+                </Tag>
+              )}
+              {call.startedAt && <NumericValue>{formatTehranTime(call.startedAt)}</NumericValue>}
+            </Row>
+            {call.note && <MutedText>{call.note}</MutedText>}
+          </Item>
+        ))}
+      </ItemList>
+    </Page>
   );
 };
 

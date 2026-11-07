@@ -1,7 +1,7 @@
 {
   "name": "twenty-proopco",
   "description": "Private proopco sales CRM app for Twenty: proopco sync, roles and the sales process.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "license": "MIT",
   "engines": {
@@ -38,6 +38,9 @@
     "zod": "^4.6.7"
   },
   "dependencies": {
-    "@sniptt/guards": "^0.2.0"
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@sniptt/guards": "^0.2.0",
+    "twenty-ui": "^2.50.0"
   }
 }
