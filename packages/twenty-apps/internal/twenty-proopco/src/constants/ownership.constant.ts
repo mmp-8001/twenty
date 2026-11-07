@@ -54,3 +54,7 @@ export const USER_NOT_AVAILABLE_MESSAGE = 'This user is not available';
 export const ADD_TO_FOLLOWUP_ROUTE_PATH = '/proopco/add-to-followup';
 export const RECORD_CALL_ROUTE_PATH = '/proopco/record-call';
 export const EDIT_CALL_NOTE_ROUTE_PATH = '/proopco/edit-call-note';
+
+export const TOUCH_STATUSES = ['OPEN', 'DONE', 'MISSED', 'DEFERRED_BY_USER'] as const;
+
+export const MY_FOLLOWUPS_ROUTE_PATH = '/proopco/my-followups';

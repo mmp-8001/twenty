@@ -15,6 +15,13 @@ import {
   updateRecord,
 } from 'src/logic-functions/utils/list-records.util';
 import { recomputeVisibility } from 'src/logic-functions/utils/recompute-visibility.util';
+import {
+  buildTouchWindows,
+  isOutsideSuggestedWindow,
+  planTouchChanges,
+  suggestTouchNo,
+  type TouchState,
+} from 'src/utils/call-windows.util';
 
 export type RecordCallResult =
   | { success: true; callId: string }
@@ -25,6 +32,21 @@ type FollowupNode = {
   status: string | null;
   deadlineAt: string | null;
 };
+
+type TouchNode = {
+  id: string;
+  touchNo: number;
+  windowStartAt: string;
+  windowEndAt: string;
+  status: string;
+};
+
+const toTouchState = ({ touchNo, windowStartAt, windowEndAt, status }: TouchNode): TouchState => ({
+  touchNo,
+  windowStartAt: new Date(windowStartAt),
+  windowEndAt: new Date(windowEndAt),
+  status,
+});
 
 type OwnershipNode = { id: string; state: string | null; adminId: string | null };
 
@@ -90,6 +112,15 @@ export const recordCall = async ({
     { openKey: { eq: personId } },
     { status: true, deadlineAt: true },
   );
+  const touches =
+    followup?.status === 'IN_PROGRESS'
+      ? await listRecords<TouchNode>(client, 'touches', { followupId: { eq: followup.id } }, {
+          touchNo: true,
+          windowStartAt: true,
+          windowEndAt: true,
+          status: true,
+        })
+      : [];
 
   if (!ownership || ownership.adminId !== memberId) {
     return fail('You can only call users in your follow-up list');
@@ -144,6 +175,30 @@ export const recordCall = async ({
   }
 
   const isFailing = Boolean(input.failureReasonId);
+  const firstAnswer = planFirstAnsweredCall({
+    followupStatus: followup?.status ?? null,
+    isAnswered,
+    now,
+  });
+  // The first answered call creates the windows, so its own suggestion comes from windows not yet stored.
+  const windows: TouchState[] = firstAnswer
+    ? buildTouchWindows(now).map((window) => ({
+        ...window,
+        status: window.touchNo === 1 ? 'DONE' : 'OPEN',
+      }))
+    : touches.map(toTouchState);
+  const suggestedTouchNo = windows.length > 0 ? suggestTouchNo({ windows, now, isAnswered }) : null;
+  const nextCallAt = input.nextCallAt ? new Date(input.nextCallAt) : null;
+  const isOffSchedule =
+    !isFailing &&
+    nextCallAt !== null &&
+    isOutsideSuggestedWindow({ windows, suggestedTouchNo, nextCallAt });
+
+  // Q-03: server side as well as in the form.
+  if (isOffSchedule && !input.offScheduleReason) {
+    return fail('Choose why the next call is outside the suggested window');
+  }
+
   const callId = await createRecord(client, 'Call', {
     personId,
     adminId: memberId,
@@ -156,7 +211,7 @@ export const recordCall = async ({
     note: input.note,
     feedbackOtherText: input.feedbackOtherText,
     nextCallAt: isFailing ? null : input.nextCallAt,
-    offScheduleReason: isFailing ? null : input.offScheduleReason,
+    offScheduleReason: isOffSchedule ? input.offScheduleReason : null,
     source: 'MANUAL',
   });
 
@@ -164,15 +219,48 @@ export const recordCall = async ({
     await createRecord(client, 'CallFeedbackReason', { callId, feedbackReasonId });
   }
 
-  const firstAnswer = planFirstAnsweredCall({
-    followupStatus: followup?.status ?? null,
-    isAnswered,
-    now,
-  });
-
   if (firstAnswer && followup) {
     await updateRecord(client, 'Followup', followup.id, firstAnswer.followup);
     await updateRecord(client, 'Ownership', ownership.id, { state: firstAnswer.ownershipState });
+  }
+
+  if (followup && !isFailing) {
+    const changes = planTouchChanges({
+      touches: windows,
+      now,
+      isAnswered,
+      suggestedTouchNo,
+      offScheduleReason: isOffSchedule ? (input.offScheduleReason ?? null) : null,
+      nextCallAt,
+    });
+    const statusByTouchNo = new Map(changes.map(({ touchNo, status }) => [touchNo, status]));
+
+    if (firstAnswer) {
+      for (const { touchNo, windowStartAt, windowEndAt, status: initialStatus } of windows) {
+        const status = statusByTouchNo.get(touchNo) ?? initialStatus;
+
+        await createRecord(client, 'Touch', {
+          followupId: followup.id,
+          adminId: memberId,
+          touchNo,
+          windowStartAt: windowStartAt.toISOString(),
+          windowEndAt: windowEndAt.toISOString(),
+          status,
+          completedCallId: status === 'DONE' ? callId : null,
+        });
+      }
+    } else {
+      for (const { id, touchNo } of touches) {
+        const status = statusByTouchNo.get(touchNo);
+
+        if (status) {
+          await updateRecord(client, 'Touch', id, {
+            status,
+            ...(status === 'DONE' ? { completedCallId: callId } : {}),
+          });
+        }
+      }
+    }
   }
 
   if (isFailing && input.failureReasonId) {
