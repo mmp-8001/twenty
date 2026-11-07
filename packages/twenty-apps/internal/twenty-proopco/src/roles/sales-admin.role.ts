@@ -1,7 +1,19 @@
 import { defineRole, STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS } from 'twenty-sdk/define';
 
 import {
+  CALL_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+  CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+  CALL_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  CALL_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_ADMIN_OBJECT_UNIVERSAL_IDENTIFIER,
+  FOLLOWUP_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+  FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
+  FOLLOWUP_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  FOLLOWUP_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
+  OWNERSHIP_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+  OWNERSHIP_OBJECT_UNIVERSAL_IDENTIFIER,
+  OWNERSHIP_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  OWNERSHIP_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_ADMIN_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_ADMIN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
   ADMIN_ON_CAMPAIGN_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
@@ -49,6 +61,21 @@ export default defineRole({
       objectUniversalIdentifier: CAMPAIGN_ADMIN_OBJECT_UNIVERSAL_IDENTIFIER,
       logicalOperator: 'OR',
     },
+    {
+      universalIdentifier: OWNERSHIP_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: OWNERSHIP_OBJECT_UNIVERSAL_IDENTIFIER,
+      logicalOperator: 'OR',
+    },
+    {
+      universalIdentifier: FOLLOWUP_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
+      logicalOperator: 'OR',
+    },
+    {
+      universalIdentifier: CALL_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+      logicalOperator: 'OR',
+    },
   ],
   rowLevelPermissionPredicates: [
     {
@@ -74,6 +101,30 @@ export default defineRole({
       operand: 'IS',
       workspaceMemberFieldUniversalIdentifier: workspaceMember.fields.id.universalIdentifier,
       predicateGroupUniversalIdentifier: CAMPAIGN_ADMIN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+    },
+    {
+      universalIdentifier: OWNERSHIP_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: OWNERSHIP_OBJECT_UNIVERSAL_IDENTIFIER,
+      fieldUniversalIdentifier: OWNERSHIP_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: 'IS',
+      workspaceMemberFieldUniversalIdentifier: workspaceMember.fields.id.universalIdentifier,
+      predicateGroupUniversalIdentifier: OWNERSHIP_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+    },
+    {
+      universalIdentifier: FOLLOWUP_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
+      fieldUniversalIdentifier: FOLLOWUP_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: 'IS',
+      workspaceMemberFieldUniversalIdentifier: workspaceMember.fields.id.universalIdentifier,
+      predicateGroupUniversalIdentifier: FOLLOWUP_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+    },
+    {
+      universalIdentifier: CALL_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+      fieldUniversalIdentifier: CALL_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: 'IS',
+      workspaceMemberFieldUniversalIdentifier: workspaceMember.fields.id.universalIdentifier,
+      predicateGroupUniversalIdentifier: CALL_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
     },
   ],
   fieldPermissions: SYNCED_PERSON_FIELD_PERMISSIONS,
