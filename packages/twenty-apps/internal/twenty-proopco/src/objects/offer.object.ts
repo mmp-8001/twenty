@@ -13,7 +13,7 @@ import {
 } from 'src/constants/universal-identifiers';
 import { buildSelectOptions } from 'src/utils/build-select-options.util';
 
-// CODE-09: an Offer is deactivated, never deleted. Only the Full Admin creates one (CODE-03).
+// An Offer is deactivated, never deleted. Only the Full Admin creates one.
 export default defineObject({
   universalIdentifier: OFFER_OBJECT_UNIVERSAL_IDENTIFIER,
   nameSingular: 'offer',

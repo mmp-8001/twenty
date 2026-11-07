@@ -7,7 +7,9 @@ import {
   CALL_OBJECT_UNIVERSAL_IDENTIFIER,
   CALL_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
   CALL_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
+  CALL_FEEDBACK_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_ADMIN_OBJECT_UNIVERSAL_IDENTIFIER,
+  CHALLENGE_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
   COMMISSION_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
   COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
   COMMISSION_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
@@ -27,6 +29,8 @@ import {
   CAMPAIGN_ADMIN_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_ADMIN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
   ADMIN_ON_CAMPAIGN_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+  OFFER_ACTIVATION_OBJECT_UNIVERSAL_IDENTIFIER,
+  PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
   PERSON_CURRENT_OWNER_FIELD_UNIVERSAL_IDENTIFIER,
   PERSON_CURRENT_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER,
   PERSON_VISIBILITY_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
@@ -60,10 +64,21 @@ export default defineRole({
   canBeAssignedToAgents: false,
   canBeAssignedToApiKeys: false,
   objectPermissions: [
-    ...SYNCED_DATA_OBJECT_PERMISSIONS,
+    ...SYNCED_DATA_OBJECT_PERMISSIONS.filter(
+      ({ objectUniversalIdentifier }) =>
+        ![CHALLENGE_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER, PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER].includes(objectUniversalIdentifier),
+    ),
     ...CAMPAIGN_READ_ONLY_OBJECT_PERMISSIONS,
-    // Only Supervisors and the Full Admin read the audit trail and the freezes.
-    ...[AUDIT_LOG_OBJECT_UNIVERSAL_IDENTIFIER, ADMIN_FREEZE_OBJECT_UNIVERSAL_IDENTIFIER].map((objectUniversalIdentifier) => ({
+    // No row rule can scope these to a Sales Admin's Users: the audit trail and freezes are for Supervisors and
+    // the Full Admin, and accounts, activations and call reasons reach a Sales Admin only through routes.
+    ...[
+      AUDIT_LOG_OBJECT_UNIVERSAL_IDENTIFIER,
+      ADMIN_FREEZE_OBJECT_UNIVERSAL_IDENTIFIER,
+      CHALLENGE_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
+      PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
+      OFFER_ACTIVATION_OBJECT_UNIVERSAL_IDENTIFIER,
+      CALL_FEEDBACK_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
+    ].map((objectUniversalIdentifier) => ({
       objectUniversalIdentifier,
       canReadObjectRecords: false,
       canUpdateObjectRecords: false,
@@ -71,7 +86,7 @@ export default defineRole({
       canDestroyObjectRecords: false,
     })),
   ],
-  // OWN-08: a User outside the list and not owned does not exist for this role.
+  // A User outside the list and not owned does not exist for this role.
   rowLevelPermissionPredicateGroups: [
     {
       universalIdentifier: PERSON_VISIBILITY_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,

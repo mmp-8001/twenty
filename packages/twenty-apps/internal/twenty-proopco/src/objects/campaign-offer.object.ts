@@ -21,7 +21,7 @@ const manyToOne = (joinColumnName: string) => ({
   joinColumnName,
 });
 
-// Links an existing Offer to a Campaign: the Supervisor's only write on offers (AS1).
+// Links an existing Offer to a Campaign: the Supervisor's only write on offers.
 export default defineObject({
   universalIdentifier: CAMPAIGN_OFFER_OBJECT_UNIVERSAL_IDENTIFIER,
   nameSingular: 'campaignOffer',

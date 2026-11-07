@@ -1,5 +1,6 @@
 import { isString } from '@sniptt/guards';
 
+import { INACTIVE_ADMIN_MESSAGE, isActiveMember } from 'src/logic-functions/utils/is-active-member.util';
 import {
   deadlineAfterCall,
   isAnsweredStatus,
@@ -89,6 +90,10 @@ export const recordCall = async ({
   input: CallFormInput;
   now?: Date;
 }): Promise<RecordCallResult> => {
+  if (!(await isActiveMember(client, memberId))) {
+    return fail(INACTIVE_ADMIN_MESSAGE);
+  }
+
   const [person] = await listRecords<{ currentOwnerId: string | null }>(
     client,
     'people',
@@ -96,7 +101,7 @@ export const recordCall = async ({
     { currentOwnerId: true },
   );
 
-  // CALL-01: only the owner calls, and the message does not say who owns the User otherwise.
+  // Only the owner calls, and the message does not say who owns the User otherwise.
   if (!person || person.currentOwnerId !== memberId) {
     return fail('You can only call users in your follow-up list');
   }
@@ -195,7 +200,7 @@ export const recordCall = async ({
     nextCallAt !== null &&
     isOutsideSuggestedWindow({ windows, suggestedTouchNo, nextCallAt });
 
-  // Q-03: server side as well as in the form.
+  // Server side as well as in the form.
   if (isOffSchedule && !input.offScheduleReason) {
     return fail('Choose why the next call is outside the suggested window');
   }

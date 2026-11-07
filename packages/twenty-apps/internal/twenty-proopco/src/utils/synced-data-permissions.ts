@@ -7,6 +7,9 @@ import {
   OFFER_OBJECT_UNIVERSAL_IDENTIFIER,
   OFFER_SET_OBJECT_UNIVERSAL_IDENTIFIER,
   FAILURE_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
+  OFFER_DEACTIVATED_AT_FIELD_UNIVERSAL_IDENTIFIER,
+  OFFER_DEACTIVATED_BY_ID_FIELD_UNIVERSAL_IDENTIFIER,
+  OFFER_STATUS_FIELD_UNIVERSAL_IDENTIFIER,
   FEEDBACK_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
   CHALLENGE_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
   COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
@@ -89,7 +92,7 @@ export const REASON_MANAGEMENT_OBJECT_PERMISSIONS = [
   ...readAndUpdate,
 }));
 
-// AS1: only the Full Admin creates Offers and edits the global sets; a Supervisor only links existing
+// Only the Full Admin creates Offers and edits the global sets; a Supervisor only links existing
 // Offers to a Campaign. Every other role reads them, which the role-wide read-all already grants.
 export const OFFER_MANAGEMENT_OBJECT_PERMISSIONS = [
   OFFER_OBJECT_UNIVERSAL_IDENTIFIER,
@@ -122,3 +125,15 @@ export const SYNCED_PERSON_FIELD_PERMISSIONS =
     canReadFieldValue: true,
     canUpdateFieldValue: false,
   }));
+
+// An Offer is voided only through the deactivate route, which audits it; no role edits these directly.
+export const OFFER_LIFECYCLE_FIELD_PERMISSIONS = [
+  OFFER_STATUS_FIELD_UNIVERSAL_IDENTIFIER,
+  OFFER_DEACTIVATED_AT_FIELD_UNIVERSAL_IDENTIFIER,
+  OFFER_DEACTIVATED_BY_ID_FIELD_UNIVERSAL_IDENTIFIER,
+].map((fieldUniversalIdentifier) => ({
+  objectUniversalIdentifier: OFFER_OBJECT_UNIVERSAL_IDENTIFIER,
+  fieldUniversalIdentifier,
+  canReadFieldValue: true,
+  canUpdateFieldValue: false,
+}));

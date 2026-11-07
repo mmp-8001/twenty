@@ -32,7 +32,7 @@ type Actor = {
 
 const fail = (error: string): AdminActionResult => ({ success: false, error });
 
-// FRZ-01 and FRZ-02: every open case keeps its remaining time and loses its deadline.
+// Every open case keeps its remaining time and loses its deadline.
 export const freezeAdmin = async ({
   client,
   callerId,
@@ -106,7 +106,7 @@ export const freezeAdmin = async ({
   return { success: true };
 };
 
-// FRZ-02 and FRZ-03: deadlines restart from what was left, open call windows move by the frozen time.
+// Deadlines restart from what was left, open call windows move by the frozen time.
 export const unfreezeAdmin = async ({
   client,
   callerId,
@@ -128,17 +128,6 @@ export const unfreezeAdmin = async ({
   );
 
   if (!freeze) {
-    return fail('This admin is not frozen');
-  }
-
-  const closed = await updateRecordsWhere(
-    client,
-    'adminFreezes',
-    { id: { eq: freeze.id }, unfrozenAt: { is: 'NULL' } },
-    { unfrozenAt: now.toISOString(), unfrozenById: callerId },
-  );
-
-  if (closed.length === 0) {
     return fail('This admin is not frozen');
   }
 
@@ -186,7 +175,14 @@ export const unfreezeAdmin = async ({
     }
   }
 
-  // Last, so the sweep keeps skipping this admin's windows until they are shifted.
+  // The freeze closes and the member reactivates last: a failure above leaves the freeze open, so a retry
+  // resumes the restore, and the sweep keeps skipping this admin's windows until they are shifted.
+  await updateRecordsWhere(
+    client,
+    'adminFreezes',
+    { id: { eq: freeze.id }, unfrozenAt: { is: 'NULL' } },
+    { unfrozenAt: now.toISOString(), unfrozenById: callerId },
+  );
   await updateRecord(client, 'WorkspaceMember', targetId, { crmStatus: 'ACTIVE', frozenSince: null });
   await writeAuditLog({
     client,

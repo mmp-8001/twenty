@@ -19,7 +19,7 @@ export const isCampaignActive = (
   new Date(startsAt) <= now &&
   (endsAt === null || new Date(endsAt) > now);
 
-// Unowned, not permanently failed and not cooling down (OWN-06, DATA_MODEL 6).
+// Unowned, not permanently failed and not cooling down (DATA_MODEL 6).
 export const isUserAvailable = (person: AudiencePerson, now: Date): boolean =>
   person.currentOwnerId === null &&
   person.permanentlyFailedAt === null &&

@@ -143,3 +143,13 @@ Each item costs two to four internal API calls, and the application is limited t
 - `/proopco/my-report` is always the caller's own numbers (the body names a period, never an Admin). `/proopco/team-report` (Supervisor, Full Admin) returns team totals, every Admin ranked by name, long freezes and pending incomes. Periods: daily, weekly (Saturday start), the current Jalali month, all-time. Events count on their own date (RPT-03); freeze days are subtracted from working days for a bounded period. Both are computed live from the event tables; add a daily aggregate table if they get slow.
 - The Reports page shows both; the Monthly incomes, Commissions and History (closed cases) views are role-scoped lists. No role has the CSV export flag.
 - Not done: History does not show each user's current state; the management dashboard is a page, not a Twenty dashboard.
+
+## Known limits
+
+- A Sales Admin cannot read Challenge Accounts, Payments, Offer Activations or Call Feedback Reasons directly (no row rule can scope them to a User); User details read accounts and offers through `/proopco/person-details`, which answers only for Users the caller's own token can see.
+- Search never explains an owned User: once a User is owned it leaves every non-owner's visibility list (S3, OWN-07). The Add to follow-up route still answers OWN-07 for an owned User id, which a Sales Admin cannot learn from the UI. Showing OWN-07 for an in-scope owned User needs a stored match list that survives ownership.
+- Freeze is a read then an update on the member, so two simultaneous freezes of one Admin can write two AdminFreeze rows; unfreeze closes the newest open one first and a retry closes the rest.
+- The Call button shows for non-owners (the route refuses them), and queue rows have no inline Call button.
+- Relative-date segment weeks start on Monday; the Iranian week starts on Saturday (reports use Saturday).
+- The job routes (recompute visibility, sweep, monthly incomes, long freezes) take a `referenceDate`; they require the sync token, and tests need the date to drive them.
+- The demo seed never freezes a real member, so the frozen-admin case is not seeded; use Freeze on a demo-owning Admin.

@@ -1,5 +1,5 @@
-// Tehran has no daylight saving time since 2022, so a fixed offset is exact (GEN-01).
-const TEHRAN_OFFSET_MS = 3.5 * 60 * 60 * 1000;
+import { TEHRAN_OFFSET_MS } from 'src/constants/time.constant';
+// Tehran has no daylight saving time since 2022, so a fixed offset is exact.
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 
 const RELATIVE_VALUE = /^(THIS|PAST|NEXT)_(\d*)_(DAY|WEEK|MONTH|YEAR)/;

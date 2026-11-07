@@ -5,10 +5,9 @@ import {
   updateRecordsWhere,
 } from 'src/logic-functions/utils/list-records.util';
 import { writeAuditLog } from 'src/logic-functions/utils/write-audit-log.util';
+import { DAY_MS } from 'src/constants/time.constant';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-// FRZ-05: a freeze open for LONG_FREEZE_DAYS is flagged once, in its warnedAt and the audit log.
+// A freeze open for LONG_FREEZE_DAYS is flagged once, in its warnedAt and the audit log.
 export const flagLongFreezes = async ({
   client,
   now = new Date(),

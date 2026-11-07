@@ -3,7 +3,7 @@ import { readReportData } from 'src/logic-functions/utils/read-report.util';
 import { buildReport, reportRangeOf } from 'src/utils/build-report.util';
 import { type ReportPeriod } from 'src/constants/income-report.constant';
 
-// COM-05 and RPT-07: the caller's own numbers, their Commissions and their monthly incomes with payment status.
+// The caller's own numbers, their Commissions and their monthly incomes with payment status.
 export const readMyReport = async ({
   client,
   memberId,

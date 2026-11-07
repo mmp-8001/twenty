@@ -41,7 +41,7 @@ const readMember = async (client: RecordsClient, id: string): Promise<MemberNode
     })
   )[0] ?? null;
 
-// TRF-01 and TRF-02: the old case and Ownership close, the target gets new ones with the remaining time.
+// The old case and Ownership close, the target gets new ones with the remaining time.
 const reassignOne = async ({
   client,
   personId,
@@ -49,7 +49,6 @@ const reassignOne = async ({
   callerId,
   reason,
   now,
-  target,
 }: {
   client: RecordsClient;
   personId: string;
@@ -57,7 +56,6 @@ const reassignOne = async ({
   callerId: string;
   reason: string;
   now: Date;
-  target: MemberNode | null;
 }): Promise<ReassignUserResult> => {
   const [ownership] = await listRecords<{ id: string; state: string; adminId: string | null }>(
     client,
@@ -122,7 +120,6 @@ const reassignOne = async ({
     }
 
     if (mode.type === 'TRANSFER') {
-      const isTargetFrozen = target?.crmStatus === 'FROZEN';
       const newOwnershipId = await createRecord(client, 'Ownership', {
         personId,
         adminId: mode.toAdminId,
@@ -143,15 +140,11 @@ const reassignOne = async ({
           firstAnsweredCallAt: followup.firstAnsweredCallAt,
           transferredFrom: followup.id,
           openKey: personId,
-          ...(remainingSeconds === null
-            ? {}
-            : isTargetFrozen
-              ? { deadlineAt: null, frozenRemainingSeconds: remainingSeconds }
-              : { deadlineAt: deadlineAfterRemaining(remainingSeconds, now).toISOString() }),
+          ...(remainingSeconds === null ? {} : { deadlineAt: deadlineAfterRemaining(remainingSeconds, now).toISOString() }),
         });
-        // Windows the old admin's freeze had stopped are shifted now, unless the target is frozen too.
+        // Windows the old admin's freeze had stopped are shifted now.
         const shiftMs =
-          fromAdmin?.crmStatus === 'FROZEN' && fromAdmin.frozenSince && !isTargetFrozen
+          fromAdmin?.crmStatus === 'FROZEN' && fromAdmin.frozenSince
             ? now.getTime() - new Date(fromAdmin.frozenSince).getTime()
             : 0;
 
@@ -173,7 +166,7 @@ const reassignOne = async ({
         }
       }
 
-      // TRF-02: the new owner reads every earlier call and note.
+      // The new owner reads every earlier call and note.
       const calls = await listRecords<{ id: string; visibleToMemberIds: string[] | null }>(
         client,
         'calls',
@@ -255,10 +248,15 @@ export const reassignUsers = async ({
   }
 
   const target = mode.type === 'TRANSFER' ? await readMember(client, mode.toAdminId) : null;
+
+  if (mode.type === 'TRANSFER' && (target?.crmStatus ?? 'ACTIVE') !== 'ACTIVE') {
+    return { success: false, error: 'Users can only be transferred to an active admin' };
+  }
+
   const results: ReassignUserResult[] = [];
 
   for (const personId of ids) {
-    results.push(await reassignOne({ client, personId, mode, callerId, reason, now, target }));
+    results.push(await reassignOne({ client, personId, mode, callerId, reason, now }));
   }
 
   await recomputeVisibility({

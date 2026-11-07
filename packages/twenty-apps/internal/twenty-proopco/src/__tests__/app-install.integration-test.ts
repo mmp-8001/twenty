@@ -102,7 +102,6 @@ describe('twenty-proopco install', () => {
       'tradingAccount',
       'followupType',
       'commissionTier',
-      'monthlyIncome',
     ]) {
       expect(names).not.toContain(removed);
     }
@@ -207,7 +206,8 @@ describe('twenty-proopco install', () => {
             (permission) => permission.objectMetadataId === objectId,
           ),
         ).toMatchObject({
-          canReadObjectRecords: true,
+          // A Sales Admin reads accounts and payments only through routes that check the User's scope.
+          canReadObjectRecords: !(label === 'Sales Admin' && nameSingular !== 'person'),
           canUpdateObjectRecords: false,
           canSoftDeleteObjectRecords: false,
           canDestroyObjectRecords: false,
