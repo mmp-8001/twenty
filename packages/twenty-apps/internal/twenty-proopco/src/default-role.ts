@@ -35,6 +35,22 @@ const readAndUpdate = {
   canDestroyObjectRecords: false,
 };
 
+// Demo removal destroys these; the code limits it to demo-keyed records (see remove-demo-data.util.ts).
+const DESTROYABLE_OBJECT_UNIVERSAL_IDENTIFIERS = new Set([
+  STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.person.universalIdentifier,
+  CHALLENGE_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
+  PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  OWNERSHIP_OBJECT_UNIVERSAL_IDENTIFIER,
+  FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
+  CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+  TOUCH_OBJECT_UNIVERSAL_IDENTIFIER,
+  COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
+  ADMIN_FREEZE_OBJECT_UNIVERSAL_IDENTIFIER,
+  OFFER_OBJECT_UNIVERSAL_IDENTIFIER,
+  OFFER_ACTIVATION_OBJECT_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
+]);
+
 const APP_OBJECT_UNIVERSAL_IDENTIFIERS = [
   STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.person.universalIdentifier,
   STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.workspaceMember.universalIdentifier,
@@ -75,6 +91,7 @@ export default defineApplicationRole({
     (objectUniversalIdentifier) => ({
       objectUniversalIdentifier,
       ...readAndUpdate,
+      canDestroyObjectRecords: DESTROYABLE_OBJECT_UNIVERSAL_IDENTIFIERS.has(objectUniversalIdentifier),
     }),
   ),
   fieldPermissions: [],
