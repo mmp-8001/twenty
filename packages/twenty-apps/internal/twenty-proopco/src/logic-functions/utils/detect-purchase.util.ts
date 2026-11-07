@@ -6,11 +6,13 @@ import {
   type RecordsClient,
   updateRecord,
 } from 'src/logic-functions/utils/list-records.util';
+import { markOfferCodeUsed } from 'src/logic-functions/utils/mark-offer-code-used.util';
 import { recomputeVisibility } from 'src/logic-functions/utils/recompute-visibility.util';
 
 type PaymentNode = {
   amountUsdt: number | null;
   paidAt: string | null;
+  offerCode: string | null;
   personId: string | null;
   challengeAccountId: string | null;
 };
@@ -31,7 +33,7 @@ export const detectPurchase = async ({
     client,
     'payments',
     { proopcoId: { eq: paymentProopcoId } },
-    { amountUsdt: true, paidAt: true, personId: true, challengeAccountId: true },
+    { amountUsdt: true, paidAt: true, offerCode: true, personId: true, challengeAccountId: true },
   );
 
   if (!payment?.personId || !payment.challengeAccountId) {
@@ -39,6 +41,14 @@ export const detectPurchase = async ({
   }
 
   const personId = payment.personId;
+
+  await markOfferCodeUsed({
+    client,
+    personId,
+    offerCode: payment.offerCode,
+    accountId: payment.challengeAccountId,
+    usedAt: payment.paidAt ?? now.toISOString(),
+  });
   const [ownership] = await listRecords<{
     id: string;
     state: string | null;

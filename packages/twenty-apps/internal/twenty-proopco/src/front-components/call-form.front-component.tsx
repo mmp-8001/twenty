@@ -9,6 +9,7 @@ import {
   useSelectedRecordIds,
 } from 'twenty-sdk/front-component';
 
+import { ACTIVATE_OFFER_ROUTE_PATH, OFFER_OPTIONS_ROUTE_PATH } from 'src/constants/offer.constant';
 import {
   CALL_OFF_SCHEDULE_REASONS,
   CALL_TECHNICAL_STATUSES,
@@ -22,9 +23,17 @@ import {
   suggestTouchNo,
   type TouchWindow,
 } from 'src/utils/call-windows.util';
+import { describeActivation } from 'src/utils/offer-activation.util';
 
 type Reason = { id: string; title: string };
-type SaveResponse = { success: boolean; error?: string };
+type SaveResponse = { success: boolean; error?: string; callId?: string };
+type OfferOptionView = {
+  id: string;
+  title: string;
+  capability: string;
+  expiresAt: string | null;
+  activation: { status: string; smsStatus: string } | null;
+};
 
 const loadReasons = async (): Promise<{ feedback: Reason[]; failure: Reason[] }> => {
   const result = (await new CoreApiClient().query({
@@ -82,6 +91,14 @@ const loadFollowupWindows = async (personId: string): Promise<FollowupWindows | 
 const toLocalInputValue = (date: Date) =>
   new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 
+const loadOfferOptions = async (callId: string): Promise<OfferOptionView[]> => {
+  const result = await new RestApiClient()
+    .post<{ success: boolean; options?: OfferOptionView[] }>(`/s${OFFER_OPTIONS_ROUTE_PATH}`, { callId })
+    .catch(() => null);
+
+  return result?.success ? (result.options ?? []) : [];
+};
+
 const CallForm = () => {
   const [personId] = useSelectedRecordIds();
   const [reasons, setReasons] = useState<{ feedback: Reason[]; failure: Reason[] }>({
@@ -98,6 +115,7 @@ const CallForm = () => {
   const [failureReasonId, setFailureReasonId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [followupWindows, setFollowupWindows] = useState<FollowupWindows | null>(null);
+  const [savedCall, setSavedCall] = useState<{ callId: string; options: OfferOptionView[] } | null>(null);
 
   useEffect(() => {
     loadReasons().then(setReasons, () =>
@@ -172,7 +190,15 @@ const CallForm = () => {
           : { message: result.error ?? 'Could not save the call', variant: 'error' },
       );
 
-      if (result.success) {
+      // CODE-04: the code section follows an answered call, so the form stays open when there is one.
+      const options =
+        result.success && result.callId && isAnswered && !isMovingToFailed
+          ? await loadOfferOptions(result.callId)
+          : [];
+
+      if (result.success && options.length > 0 && result.callId) {
+        setSavedCall({ callId: result.callId, options });
+      } else if (result.success) {
         unmountFrontComponent();
         closeSidePanel();
       }
@@ -182,6 +208,65 @@ const CallForm = () => {
       setIsSubmitting(false);
     }
   };
+
+  const activateOffer = async (offerId: string) => {
+    if (!savedCall) {
+      return;
+    }
+
+    const result = await new RestApiClient().post<SaveResponse>(`/s${ACTIVATE_OFFER_ROUTE_PATH}`, {
+      personId,
+      offerId,
+      callId: savedCall.callId,
+    });
+
+    await enqueueSnackbar(
+      result.success
+        ? { message: 'Offer activated', variant: 'success' }
+        : { message: result.error ?? 'Could not activate the offer', variant: 'error' },
+    );
+    setSavedCall({ callId: savedCall.callId, options: await loadOfferOptions(savedCall.callId) });
+  };
+
+  if (savedCall) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
+        <h3>Offer codes</h3>
+        {savedCall.options.map((option) => {
+          const { label } = option.activation
+            ? describeActivation({
+                status: option.activation.status,
+                smsStatus: option.activation.smsStatus,
+                expiresAt: option.expiresAt,
+                deactivatedAt: null,
+              })
+            : { label: null };
+
+          return (
+            <div key={option.id}>
+              <button
+                type="button"
+                disabled={option.activation !== null && option.activation.status !== 'ACTIVATION_FAILED'}
+                onClick={() => activateOffer(option.id)}
+              >
+                {option.title} ({option.capability.toLowerCase()})
+              </button>
+              {label && <span> {label}</span>}
+            </div>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => {
+            unmountFrontComponent();
+            closeSidePanel();
+          }}
+        >
+          Done
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
