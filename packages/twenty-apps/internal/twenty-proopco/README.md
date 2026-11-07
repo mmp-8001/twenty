@@ -37,6 +37,10 @@ The app's own role (`Proopco CRM default role`) writes synced records. It is not
 | `account` | `userProopcoId` (required), `status`, `phase`, `failureReason` |
 | `payment` | `userProopcoId` (required), `accountProopcoId`, `amountToman` (required), `amountUsdt` (required), `paidAt` (required) |
 
+Account `status` must be `active` for a live account and `breached` once lost (case-insensitive). When a successful User's last `active` account stops being active, the User goes to their admin's Rebuy list.
+
+Each payment must carry `accountProopcoId` to earn a commission: one Commission per account, 2% of `amountUsdt`. A payment settled before the User's current Ownership began is not attributed to it.
+
 `userProopcoId` and `accountProopcoId` name records already synced; one that is missing is a retryable error.
 
 ### Request

@@ -1,9 +1,12 @@
-import { defineApplication } from 'twenty-sdk/define';
+import { defineApplication, FieldType } from 'twenty-sdk/define';
 
 import {
   APP_DESCRIPTION,
   APP_DISPLAY_NAME,
   APPLICATION_UNIVERSAL_IDENTIFIER,
+  REBUY_COOLDOWN_DAYS_VARIABLE_UNIVERSAL_IDENTIFIER,
+  REBUY_FOLLOWUP_DAYS_VARIABLE_UNIVERSAL_IDENTIFIER,
+  REBUY_START_HOURS_VARIABLE_UNIVERSAL_IDENTIFIER,
 } from 'src/constants/universal-identifiers';
 
 export default defineApplication({
@@ -11,6 +14,35 @@ export default defineApplication({
   displayName: APP_DISPLAY_NAME,
   description: APP_DESCRIPTION,
   author: 'Proopco',
+  applicationVariables: {
+    REBUY_START_HOURS: {
+      universalIdentifier: REBUY_START_HOURS_VARIABLE_UNIVERSAL_IDENTIFIER,
+      label: 'Rebuy start (hours)',
+      description: 'Hours a rebuy user waits for "Add to follow-up" before being released.',
+      type: FieldType.NUMBER,
+      isSecret: false,
+      isRequired: true,
+      value: 72,
+    },
+    REBUY_FOLLOWUP_DAYS: {
+      universalIdentifier: REBUY_FOLLOWUP_DAYS_VARIABLE_UNIVERSAL_IDENTIFIER,
+      label: 'Rebuy follow-up (days)',
+      description: 'Days a rebuy case runs after "Add to follow-up".',
+      type: FieldType.NUMBER,
+      isSecret: false,
+      isRequired: true,
+      value: 30,
+    },
+    REBUY_COOLDOWN_DAYS: {
+      universalIdentifier: REBUY_COOLDOWN_DAYS_VARIABLE_UNIVERSAL_IDENTIFIER,
+      label: 'Rebuy cooldown (days)',
+      description: 'Cooldown after a rebuy case expires.',
+      type: FieldType.NUMBER,
+      isSecret: false,
+      isRequired: true,
+      value: 30,
+    },
+  },
   serverVariables: {
     PROOPCO_SYNC_TOKEN: {
       description:
