@@ -5,6 +5,7 @@ import {
   listRecords,
   type RecordsClient,
   updateRecord,
+  updateRecordsWhere,
 } from 'src/logic-functions/utils/list-records.util';
 import { readRebuySettings } from 'src/logic-functions/utils/rebuy-settings.util';
 import { recomputeVisibility } from 'src/logic-functions/utils/recompute-visibility.util';
@@ -101,15 +102,20 @@ export const sweepFollowups = async ({
     }
   }
 
-  const missedTouches = (await client.mutation({
-    updateTouches: {
-      __args: {
-        filter: { status: { eq: 'OPEN' }, windowEndAt: { lte: now.toISOString() } },
-        data: { status: 'MISSED' },
-      },
-      id: true,
+  // A frozen Admin's windows wait: unfreeze shifts them, so they must not be missed meanwhile.
+  const frozenAdminIds = (
+    await listRecords<{ id: string }>(client, 'workspaceMembers', { crmStatus: { eq: 'FROZEN' } }, {})
+  ).map(({ id }) => id);
+  const missedTouchIds = await updateRecordsWhere(
+    client,
+    'touches',
+    {
+      status: { eq: 'OPEN' },
+      windowEndAt: { lte: now.toISOString() },
+      ...(frozenAdminIds.length > 0 ? { not: { adminId: { in: frozenAdminIds } } } : {}),
     },
-  } as never)) as unknown as { updateTouches?: { id: string }[] };
+    { status: 'MISSED' },
+  );
 
   const cooledDown = await listRecords<{ id: string }>(
     client,
@@ -132,7 +138,7 @@ export const sweepFollowups = async ({
 
   return {
     closedFollowups,
-    missedTouches: missedTouches.updateTouches?.length ?? 0,
+    missedTouches: missedTouchIds.length,
     refreshedPeople: cooledDown.length,
   };
 };

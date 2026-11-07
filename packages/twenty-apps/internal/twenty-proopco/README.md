@@ -14,6 +14,17 @@ Exactly one Full Admin is a rule the role configuration cannot enforce; keep it 
 
 The app's own role (`Proopco CRM default role`) writes synced records. It is not assignable to users.
 
+## Admin management
+
+Routes (POST, signed-in caller; identity and role come from the caller's token, never the body): `/s/proopco/freeze-admin`, `unfreeze-admin`, `transfer-users`, `release-users`, `deactivate-admin`, `admins`. Every one writes an Audit Log entry with actor and reason. Freeze, transfer, release and deactivation require a reason.
+
+- Freeze: a Supervisor or the Full Admin freezes a Sales Admin; only the Full Admin freezes a Supervisor; nobody freezes themself or the Full Admin. Each open case stores `frozenRemainingSeconds` and loses its `deadlineAt`; the sweep skips a frozen Admin's call windows. Unfreeze restores the deadline from the remaining time and shifts open windows by the frozen time. A rebuy case created while its Admin is frozen holds its full start time until unfreeze. Purchases during a freeze still count.
+- Long freeze: a daily job (and `/s/proopco/flag-long-freezes` with the sync token) sets `warnedAt` on a freeze open for 7 days and writes a `LONG_FREEZE_WARNING` audit entry. The Admins page shows days frozen.
+- Transfer and release (Supervisor or Full Admin; the target of a transfer must be a Sales Admin): the old Ownership ends `TRANSFERRED` or `RELEASED_BY_MANAGER`, the old Followup closes (`TRANSFERRED` or `RELEASED_BY_MANAGER`) and keeps its Admin. A transfer opens a new Ownership and Followup for the target with the remaining time, open call windows, and `transferredFrom` pointing at the old case. Previous calls stay visible to the new owner through `visibleToMemberIds` on Call. Reruns skip Users already with the target; a User whose steps fail after the old Ownership closed is reported as `ERROR` and needs a manual look.
+- Deactivation: Full Admin only, refused while the Admin owns Users. It sets the CRM status only; it does not remove the login or the platform role.
+- Audit Log is append-only: no assignable role can update or delete an entry, and Sales Admins cannot read it. The app role writes it, so the rule for the app's own role is enforced in code.
+- The routes read member roles through the metadata API, so the app role carries the `ROLES` and `WORKSPACE_MEMBERS` permission flags.
+
 ## Sync route
 
 `POST /s/proopco/sync` with header `x-proopco-sync-token` (the `PROOPCO_SYNC_TOKEN` server variable). A wrong or missing token returns `{ "success": false, "error": "Invalid sync token" }`.

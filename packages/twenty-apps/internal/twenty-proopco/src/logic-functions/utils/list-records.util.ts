@@ -48,9 +48,11 @@ export const updateRecord = async (
   id: string,
   data: Record<string, unknown>,
 ): Promise<void> => {
-  await client.mutation({
-    [`update${singular}`]: { __args: { id, data }, id: true },
-  });
+  await client
+    .mutation({ [`update${singular}`]: { __args: { id, data }, id: true } })
+    .catch((error: unknown) => {
+      throw new Error(`update${singular} failed: ${String(error)}`);
+    });
 };
 
 export const createRecord = async (
@@ -58,9 +60,27 @@ export const createRecord = async (
   singular: string,
   data: Record<string, unknown>,
 ): Promise<string> => {
-  const result = (await client.mutation({
-    [`create${singular}`]: { __args: { data }, id: true },
-  })) as unknown as Record<string, { id: string }>;
+  const result = (await client
+    .mutation({ [`create${singular}`]: { __args: { data }, id: true } })
+    .catch((error: unknown) => {
+      throw new Error(`create${singular} failed: ${String(error)}`);
+    })) as unknown as Record<string, { id: string }>;
 
   return result[`create${singular}`].id;
+};
+
+// A conditional bulk update: the ids returned are the records whose filter still matched, so concurrent
+// callers never both win the same record.
+export const updateRecordsWhere = async (
+  client: RecordsClient,
+  plural: string,
+  filter: Record<string, unknown>,
+  data: Record<string, unknown>,
+): Promise<string[]> => {
+  const mutationName = `update${plural[0].toUpperCase()}${plural.slice(1)}`;
+  const result = (await client.mutation({
+    [mutationName]: { __args: { filter, data }, id: true },
+  } as never)) as unknown as Record<string, { id: string }[] | undefined>;
+
+  return (result[mutationName] ?? []).map(({ id }) => id);
 };

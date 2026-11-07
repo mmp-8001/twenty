@@ -65,6 +65,17 @@ export const detectLostLastAccount = async ({
   );
 
   if (!openFollowup) {
+    // FRZ-03: a frozen Admin's rebuy case holds its full 72h until unfreeze.
+    const [admin] = ownership.adminId
+      ? await listRecords<{ crmStatus: string | null }>(
+          client,
+          'workspaceMembers',
+          { id: { eq: ownership.adminId } },
+          { crmStatus: true },
+        )
+      : [];
+    const startSeconds = (readRebuySettings().startHours * HOUR_MS) / 1000;
+
     try {
       await createRecord(client, 'Followup', {
         personId,
@@ -74,7 +85,9 @@ export const detectLostLastAccount = async ({
         kind: 'REBUY',
         status: 'REBUY_PENDING',
         addedAt: now.toISOString(),
-        deadlineAt: new Date(now.getTime() + readRebuySettings().startHours * HOUR_MS).toISOString(),
+        ...(admin?.crmStatus === 'FROZEN'
+          ? { deadlineAt: null, frozenRemainingSeconds: startSeconds }
+          : { deadlineAt: new Date(now.getTime() + startSeconds * 1000).toISOString() }),
         openKey: personId,
       });
     } catch (error) {
