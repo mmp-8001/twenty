@@ -30,6 +30,7 @@ export const FOLLOWUP_STATUSES = [
   'PURCHASE_BEFORE_CALL',
   'RELEASED_72H',
   'TRANSFERRED',
+  'RELEASED_BY_MANAGER',
 ] as const;
 
 export const CALL_KINDS = ['FOLLOWUP', 'RETENTION'] as const;

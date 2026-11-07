@@ -1,7 +1,9 @@
 import { defineRole, STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS } from 'twenty-sdk/define';
 
 import {
-  CALL_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+  ADMIN_FREEZE_OBJECT_UNIVERSAL_IDENTIFIER,
+  AUDIT_LOG_OBJECT_UNIVERSAL_IDENTIFIER,
+  CALL_VISIBLE_TO_MEMBER_IDS_FIELD_UNIVERSAL_IDENTIFIER,
   CALL_OBJECT_UNIVERSAL_IDENTIFIER,
   CALL_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
   CALL_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
@@ -56,6 +58,14 @@ export default defineRole({
   objectPermissions: [
     ...SYNCED_DATA_OBJECT_PERMISSIONS,
     ...CAMPAIGN_READ_ONLY_OBJECT_PERMISSIONS,
+    // Only Supervisors and the Full Admin read the audit trail and the freezes.
+    ...[AUDIT_LOG_OBJECT_UNIVERSAL_IDENTIFIER, ADMIN_FREEZE_OBJECT_UNIVERSAL_IDENTIFIER].map((objectUniversalIdentifier) => ({
+      objectUniversalIdentifier,
+      canReadObjectRecords: false,
+      canUpdateObjectRecords: false,
+      canSoftDeleteObjectRecords: false,
+      canDestroyObjectRecords: false,
+    })),
   ],
   // OWN-08: a User outside the list and not owned does not exist for this role.
   rowLevelPermissionPredicateGroups: [
@@ -139,8 +149,8 @@ export default defineRole({
     {
       universalIdentifier: CALL_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
       objectUniversalIdentifier: CALL_OBJECT_UNIVERSAL_IDENTIFIER,
-      fieldUniversalIdentifier: CALL_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
-      operand: 'IS',
+      fieldUniversalIdentifier: CALL_VISIBLE_TO_MEMBER_IDS_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: 'CONTAINS',
       workspaceMemberFieldUniversalIdentifier: workspaceMember.fields.id.universalIdentifier,
       predicateGroupUniversalIdentifier: CALL_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
     },

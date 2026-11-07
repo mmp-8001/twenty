@@ -8,6 +8,8 @@ import {
   APP_DISPLAY_NAME,
   CAMPAIGN_ADMIN_OBJECT_UNIVERSAL_IDENTIFIER,
   CALL_FEEDBACK_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
+  ADMIN_FREEZE_OBJECT_UNIVERSAL_IDENTIFIER,
+  AUDIT_LOG_OBJECT_UNIVERSAL_IDENTIFIER,
   CALL_OBJECT_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
   CHALLENGE_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
@@ -43,6 +45,8 @@ const APP_OBJECT_UNIVERSAL_IDENTIFIERS = [
   FEEDBACK_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
   TOUCH_OBJECT_UNIVERSAL_IDENTIFIER,
   COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
+  ADMIN_FREEZE_OBJECT_UNIVERSAL_IDENTIFIER,
+  AUDIT_LOG_OBJECT_UNIVERSAL_IDENTIFIER,
 ];
 
 export default defineApplicationRole({
@@ -64,6 +68,11 @@ export default defineApplicationRole({
     }),
   ),
   fieldPermissions: [],
-  // The post-install hook deactivates Opportunity.
-  permissionFlagUniversalIdentifiers: [SystemPermissionFlag.DATA_MODEL],
+  // DATA_MODEL: the post-install hook deactivates Opportunity. ROLES: admin routes read each member's role.
+  // WORKSPACE_MEMBERS: they write the CRM status.
+  permissionFlagUniversalIdentifiers: [
+    SystemPermissionFlag.DATA_MODEL,
+    SystemPermissionFlag.ROLES,
+    SystemPermissionFlag.WORKSPACE_MEMBERS,
+  ],
 });
