@@ -59,6 +59,10 @@ export default defineApplication({
       isSecret: true,
       isRequired: false,
     },
+    CODE_SERVICE_PROVIDER: {
+      description: 'How Offers are activated: "http" calls proopco, "fake" invents codes (demo). Unset refuses.',
+      isRequired: false,
+    },
     PROOPCO_API_BASE_URL: {
       description: 'Base URL of the proopco API used for discount codes.',
       isRequired: false,

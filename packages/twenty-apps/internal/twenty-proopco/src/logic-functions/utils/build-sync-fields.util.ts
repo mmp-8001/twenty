@@ -162,6 +162,8 @@ const buildPaymentFields = (data: SyncItemData): BuiltSyncFields => {
     amountUsdt: requireNumber(data, 'amountUsdt'),
   };
 
+  setDefined(fields, 'offerCode', readString(data, 'offerCode'));
+
   if (!isString(paidAt)) {
     fail('paidAt is required and must be an ISO date-time string');
   } else {

@@ -3,6 +3,9 @@ import { STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS } from 'twenty-sdk/define';
 import {
   CAMPAIGN_ADMIN_OBJECT_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_OFFER_OBJECT_UNIVERSAL_IDENTIFIER,
+  OFFER_OBJECT_UNIVERSAL_IDENTIFIER,
+  OFFER_SET_OBJECT_UNIVERSAL_IDENTIFIER,
   FAILURE_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
   FEEDBACK_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
   CHALLENGE_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER,
@@ -83,6 +86,24 @@ export const REASON_MANAGEMENT_OBJECT_PERMISSIONS = [
   objectUniversalIdentifier,
   ...readAndUpdate,
 }));
+
+// AS1: only the Full Admin creates Offers and edits the global sets; a Supervisor only links existing
+// Offers to a Campaign. Every other role reads them, which the role-wide read-all already grants.
+export const OFFER_MANAGEMENT_OBJECT_PERMISSIONS = [
+  OFFER_OBJECT_UNIVERSAL_IDENTIFIER,
+  OFFER_SET_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_OFFER_OBJECT_UNIVERSAL_IDENTIFIER,
+].map((objectUniversalIdentifier) => ({
+  objectUniversalIdentifier,
+  ...readAndUpdate,
+}));
+
+export const CAMPAIGN_OFFER_LINK_OBJECT_PERMISSIONS = [CAMPAIGN_OFFER_OBJECT_UNIVERSAL_IDENTIFIER].map(
+  (objectUniversalIdentifier) => ({
+    objectUniversalIdentifier,
+    ...readAndUpdate,
+  }),
+);
 
 export const CAMPAIGN_READ_ONLY_OBJECT_PERMISSIONS = [
   CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,

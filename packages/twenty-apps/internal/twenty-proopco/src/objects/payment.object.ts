@@ -12,6 +12,7 @@ import {
   PAYMENT_AMOUNT_TOMAN_FIELD_UNIVERSAL_IDENTIFIER,
   PAYMENT_AMOUNT_USDT_FIELD_UNIVERSAL_IDENTIFIER,
   PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  PAYMENT_OFFER_CODE_FIELD_UNIVERSAL_IDENTIFIER,
   PAYMENT_PAID_AT_FIELD_UNIVERSAL_IDENTIFIER,
   PAYMENT_PROOPCO_ID_FIELD_UNIVERSAL_IDENTIFIER,
   PAYMENTS_ON_CHALLENGE_ACCOUNT_FIELD_UNIVERSAL_IDENTIFIER,
@@ -71,6 +72,15 @@ export default defineObject({
       label: 'Paid at',
       description: 'When proopco received the cash.',
       icon: 'IconCalendarEvent',
+      isNullable: true,
+    },
+    {
+      universalIdentifier: PAYMENT_OFFER_CODE_FIELD_UNIVERSAL_IDENTIFIER,
+      type: FieldType.TEXT,
+      name: 'offerCode',
+      label: 'Offer code used',
+      description: 'The CRM-activated code this purchase used, as proopco reports it.',
+      icon: 'IconTicket',
       isNullable: true,
     },
     {
