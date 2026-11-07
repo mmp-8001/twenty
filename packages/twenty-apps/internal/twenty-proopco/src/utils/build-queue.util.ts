@@ -1,8 +1,7 @@
 import { endOfTehranDay, startOfTehranDay } from 'src/utils/call-windows.util';
+import { HOUR_MS } from 'src/constants/time.constant';
 
-const HOUR_MS = 60 * 60 * 1000;
-
-// LOGIC Q-07: yellow lasts from the set time until this long after it.
+// Yellow lasts from the set time until this long after it.
 export const QUEUE_YELLOW_DURATION_MS = 2 * HOUR_MS;
 
 export type QueueColour = 'GREEN' | 'YELLOW' | 'RED';

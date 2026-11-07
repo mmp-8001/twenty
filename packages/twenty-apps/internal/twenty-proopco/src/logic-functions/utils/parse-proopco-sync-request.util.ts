@@ -7,6 +7,7 @@ import {
   type ProopcoSyncItemResult,
   type ProopcoSyncItemType,
 } from 'src/logic-functions/types/proopco-sync.type';
+import { isDemoKey } from 'src/utils/demo-data.util';
 import { isPlainObject } from 'src/utils/is-plain-object';
 
 export type ParsedSyncEntry =
@@ -31,6 +32,13 @@ const parseItem = (item: unknown): ParsedSyncEntry => {
         reason: `An item needs type (${PROOPCO_SYNC_ITEM_TYPES.join(', ')}), a non-empty proopcoId and a data object`,
         retryable: false,
       },
+    };
+  }
+
+  // The prefix marks what demo removal destroys, so a real item must never carry it.
+  if (isDemoKey(proopcoId)) {
+    return {
+      result: { type, proopcoId, status: 'error', reason: 'The demo- proopcoId prefix is reserved', retryable: false },
     };
   }
 

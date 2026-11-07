@@ -1,4 +1,5 @@
 import { OWN_07_MESSAGE, USER_NOT_AVAILABLE_MESSAGE } from 'src/constants/ownership.constant';
+import { INACTIVE_ADMIN_MESSAGE, isActiveMember } from 'src/logic-functions/utils/is-active-member.util';
 import { pendingFirstCallDeadline } from 'src/logic-functions/utils/call-flow.util';
 import {
   createRecord,
@@ -69,6 +70,10 @@ export const addToFollowup = async ({
   personId: string;
   now?: Date;
 }): Promise<AddToFollowupResult> => {
+  if (!(await isActiveMember(client, memberId))) {
+    return { success: false, error: INACTIVE_ADMIN_MESSAGE };
+  }
+
   const [person] = await listRecords<PersonNode>(
     client,
     'people',

@@ -7,12 +7,11 @@ import {
 } from 'src/logic-functions/utils/list-records.util';
 import { readRebuySettings } from 'src/logic-functions/utils/rebuy-settings.util';
 import { buildTouchWindows } from 'src/utils/call-windows.util';
-
-const DAY_MS = 24 * 60 * 60 * 1000;
+import { DAY_MS } from 'src/constants/time.constant';
 
 export type AddRebuyResult = { success: true } | { success: false; error: string };
 
-// RB-03: the case goes straight to in progress; its deadline and call windows start at this click.
+// The case goes straight to in progress; its deadline and call windows start at this click.
 export const addRebuyToFollowup = async ({
   client,
   memberId,

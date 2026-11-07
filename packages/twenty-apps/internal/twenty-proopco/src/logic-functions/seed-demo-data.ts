@@ -6,24 +6,24 @@ import { listRecords } from 'src/logic-functions/utils/list-records.util';
 import { runAdminRoute } from 'src/logic-functions/utils/run-admin-route.util';
 import { seedDemoData } from 'src/logic-functions/utils/seed-demo-data.util';
 
-// Owners are existing members: the caller and one other; a second other member becomes the frozen admin.
+// The Full Admin does no operational work, so demo cases belong to active Sales Admins or Supervisors.
+// A real member is never frozen or otherwise changed.
 export const seedDemoDataHandler = (routePayload: RoutePayload<unknown>) =>
   runAdminRoute(
     routePayload,
     async ({ client, callerId, roleKeys }) => {
-      const members = (
+      const [ownerA, ownerB = ownerA] = (
         await listRecords<{ id: string; crmStatus: string | null }>(client, 'workspaceMembers', {}, { crmStatus: true })
-      ).filter(({ id, crmStatus }) => id !== callerId && (crmStatus ?? 'ACTIVE') === 'ACTIVE');
-      const [others, fullAdmins] = [
-        members.filter(({ id }) => roleKeys.get(id) !== 'FULL_ADMIN'),
-        members.filter(({ id }) => roleKeys.get(id) === 'FULL_ADMIN'),
-      ];
-      const [ownerB = callerId, frozen = null] = [...others, ...fullAdmins].map(({ id }) => id);
+      )
+        .filter(({ id, crmStatus }) => roleKeys.get(id) !== 'FULL_ADMIN' && (crmStatus ?? 'ACTIVE') === 'ACTIVE')
+        .sort((left, right) => Number(roleKeys.get(right.id) === 'SALES_ADMIN') - Number(roleKeys.get(left.id) === 'SALES_ADMIN'))
+        .map(({ id }) => id);
 
-      return {
-        success: true,
-        ...(await seedDemoData({ client, callerId, members: { ownerA: callerId, ownerB, frozen } })),
-      };
+      if (!ownerA) {
+        return { success: false, error: 'Demo data needs at least one active Sales Admin or Supervisor' };
+      }
+
+      return { success: true, ...(await seedDemoData({ client, callerId, members: { ownerA, ownerB } })) };
     },
     { isAllowed: (callerRole) => callerRole === 'FULL_ADMIN' },
   );

@@ -6,13 +6,12 @@ import {
   updateRecord,
 } from 'src/logic-functions/utils/list-records.util';
 import { readRebuySettings } from 'src/logic-functions/utils/rebuy-settings.util';
-
-const HOUR_MS = 60 * 60 * 1000;
+import { HOUR_MS } from 'src/constants/time.constant';
 
 export const isActiveAccountStatus = (status: string | null | undefined) =>
   status?.trim().toLowerCase() === ACTIVE_ACCOUNT_STATUS;
 
-// RB-01: a successful User whose active accounts drop to zero goes to their admin's Rebuy list.
+// A successful User whose active accounts drop to zero goes to their admin's Rebuy list.
 // Runs after every Account sync item; once the Ownership leaves SUCCESSFUL it does nothing.
 export const detectLostLastAccount = async ({
   client,
@@ -65,7 +64,7 @@ export const detectLostLastAccount = async ({
   );
 
   if (!openFollowup) {
-    // FRZ-03: a frozen Admin's rebuy case holds its full 72h until unfreeze.
+    // A frozen Admin's rebuy case holds its full 72h until unfreeze.
     const [admin] = ownership.adminId
       ? await listRecords<{ crmStatus: string | null }>(
           client,

@@ -9,8 +9,7 @@ import {
 } from 'src/logic-functions/utils/list-records.util';
 import { readRebuySettings } from 'src/logic-functions/utils/rebuy-settings.util';
 import { recomputeVisibility } from 'src/logic-functions/utils/recompute-visibility.util';
-
-const HOUR_MS = 60 * 60 * 1000;
+import { HOUR_MS } from 'src/constants/time.constant';
 
 type DueFollowup = {
   id: string;
@@ -74,7 +73,7 @@ export const sweepFollowups = async ({
     const plan = planFollowupSweep({
       status: followup.status,
       deadlineAt: followup.deadlineAt,
-      // RB-04: a rebuy case has no Campaign, so it cools down with the global value.
+      // A rebuy case has no Campaign, so it cools down with the global value.
       cooldownDays:
         followup.kind === 'REBUY'
           ? readRebuySettings().cooldownDays

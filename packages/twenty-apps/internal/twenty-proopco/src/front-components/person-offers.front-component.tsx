@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { CoreApiClient } from 'twenty-client-sdk/core';
-import { RestApiClient } from 'twenty-client-sdk/rest';
 import { defineFrontComponent } from 'twenty-sdk/define';
 import { enqueueSnackbar, useRecordId } from 'twenty-sdk/front-component';
 
 import { ACTIVATE_OFFER_ROUTE_PATH, RESEND_OFFER_SMS_ROUTE_PATH } from 'src/constants/offer.constant';
+import { PERSON_DETAILS_ROUTE_PATH } from 'src/constants/ownership.constant';
 import { PERSON_OFFERS_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { describeActivation } from 'src/utils/offer-activation.util';
+import { postRoute } from 'src/utils/post-route.util';
 
 type ActivationRow = {
   id: string;
@@ -27,33 +27,13 @@ const PersonOffers = () => {
       return;
     }
 
-    (new CoreApiClient().query({
-      offerActivations: {
-        __args: { filter: { personId: { eq: personId } }, first: 50 },
-        edges: {
-          node: {
-            id: true,
-            status: true,
-            smsStatus: true,
-            errorMessage: true,
-            offerId: true,
-            offer: { title: true, expiresAt: true, deactivatedAt: true },
-          },
-        },
-      },
-    } as never) as Promise<unknown>)
-      .then((result) =>
-        setRows(
-          (result as { offerActivations: { edges: { node: ActivationRow }[] } }).offerActivations.edges.map(
-            ({ node }) => node,
-          ),
-        ),
-      )
+    postRoute<{ success: boolean; activations?: ActivationRow[] }>(PERSON_DETAILS_ROUTE_PATH, { personId })
+      .then((result) => setRows(result.activations ?? []))
       .catch(() => setRows([]));
   }, [personId, reloadCount]);
 
   const run = async (path: string, body: Record<string, unknown>) => {
-    const result = await new RestApiClient().post<{ success: boolean; error?: string }>(`/s${path}`, body);
+    const result = await postRoute<{ success: boolean; error?: string }>(path, body);
 
     await enqueueSnackbar(
       result.success

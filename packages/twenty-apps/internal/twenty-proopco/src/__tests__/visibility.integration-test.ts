@@ -194,6 +194,20 @@ describe('Sales Admin visibility and campaigns', () => {
     }
   });
 
+  describe('objects no row rule can scope', () => {
+    it.each(['challengeAccounts', 'payments', 'offerActivations', 'callFeedbackReasons'])(
+      'denies a Sales Admin any %s row',
+      async (collection) => {
+        const { data, errors } = await userRequest<Record<string, Connection>>({
+          token: agentToken,
+          query: `{ ${collection}(first: 1) { totalCount edges { node { id } } } }`,
+        });
+
+        expect(errors !== undefined || data?.[collection]?.edges.length === 0).toBe(true);
+      },
+    );
+  });
+
   describe('row-level predicate', () => {
     let listedId: string;
     let ownedId: string;

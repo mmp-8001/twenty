@@ -1,8 +1,8 @@
-const DAY_MS = 24 * 60 * 60 * 1000;
+import { DAY_MS } from 'src/constants/time.constant';
 
 type OpenCaseStatus = 'PENDING_FIRST_CALL' | 'IN_PROGRESS' | 'REBUY_PENDING';
 
-// FUP-03, FUP-05 and RB-04: what a case past its deadline turns into. Null when it is not due.
+// What a case past its deadline turns into. Null when it is not due.
 export const planFollowupSweep = ({
   status,
   deadlineAt,

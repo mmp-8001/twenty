@@ -36,7 +36,7 @@ const manyToOne = (joinColumnName: string) => ({
   joinColumnName,
 });
 
-// Written by the app only (COM-03): no role updates or deletes a Commission.
+// Written by the app only: no role updates or deletes a Commission.
 export default defineObject({
   universalIdentifier: COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
   nameSingular: 'commission',

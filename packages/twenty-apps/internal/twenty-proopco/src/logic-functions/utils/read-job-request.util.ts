@@ -3,6 +3,7 @@ import { timingSafeEqual } from 'crypto';
 import { type RoutePayload } from 'twenty-sdk/define';
 
 import { PROOPCO_SYNC_TOKEN_HEADER } from 'src/constants/proopco-sync.constant';
+import { isPlainObject } from 'src/utils/is-plain-object';
 
 export const isValidJobToken = (received: unknown): boolean => {
   const expected = process.env.PROOPCO_SYNC_TOKEN;
@@ -21,7 +22,7 @@ export const isValidJobToken = (received: unknown): boolean => {
 };
 
 const isRoutePayload = (payload: unknown): payload is RoutePayload<unknown> =>
-  typeof payload === 'object' && payload !== null && 'requestContext' in payload;
+  isPlainObject(payload) && 'requestContext' in payload;
 
 // Workflow steps and cron pass the input directly; routes carry a body and
 // the shared token, which is the only way tests can drive these jobs.

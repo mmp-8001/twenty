@@ -11,7 +11,7 @@ import {
   ADD_TO_FOLLOWUP_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER,
 } from 'src/constants/universal-identifiers';
 
-// OWN-02: one User at a time, and only while nobody owns it.
+// One User at a time, and only while nobody owns it.
 export default defineCommandMenuItem({
   universalIdentifier: ADD_TO_FOLLOWUP_COMMAND_MENU_ITEM_UNIVERSAL_IDENTIFIER,
   availabilityObjectUniversalIdentifier:

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { RestApiClient } from 'twenty-client-sdk/rest';
 import { defineFrontComponent } from 'twenty-sdk/define';
 
 import {
@@ -12,10 +11,9 @@ import {
 } from 'src/constants/admin-management.constant';
 import { ADMINS_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { type AdminRow } from 'src/logic-functions/utils/read-admins.util';
+import { postRoute } from 'src/utils/post-route.util';
 
 type RouteResponse = { success: boolean; error?: string; callerRole?: string; admins?: AdminRow[] };
-
-const post = (path: string, body: unknown) => new RestApiClient().post<RouteResponse>(`/s${path}`, body);
 
 const Admins = () => {
   const [admins, setAdmins] = useState<AdminRow[]>([]);
@@ -23,7 +21,7 @@ const Admins = () => {
   const [message, setMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const result = await post(ADMINS_ROUTE_PATH, {});
+    const result = await postRoute<RouteResponse>(ADMINS_ROUTE_PATH, {});
 
     if (result.success) {
       setAdmins(result.admins ?? []);
@@ -44,7 +42,7 @@ const Admins = () => {
       return;
     }
 
-    const result = await post(path, { ...body, reason });
+    const result = await postRoute<RouteResponse>(path, { ...body, reason });
 
     setMessage(result.success ? null : (result.error ?? 'Failed'));
     await load();

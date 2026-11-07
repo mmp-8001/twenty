@@ -42,6 +42,9 @@ export const listRecords = async <TNode>(
   }
 };
 
+export const readIds = async (client: RecordsClient, collection: string, filter: Record<string, unknown>) =>
+  (await listRecords<{ id: string }>(client, collection, filter, {})).map(({ id }) => id);
+
 export const updateRecord = async (
   client: RecordsClient,
   singular: string,

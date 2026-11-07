@@ -190,7 +190,7 @@ const CallForm = () => {
           : { message: result.error ?? 'Could not save the call', variant: 'error' },
       );
 
-      // CODE-04: the code section follows an answered call, so the form stays open when there is one.
+      // The code section follows an answered call, so the form stays open when there is one.
       const options =
         result.success && result.callId && isAnswered && !isMovingToFailed
           ? await loadOfferOptions(result.callId)

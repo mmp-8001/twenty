@@ -102,7 +102,7 @@ export const detectPurchase = async ({
     { paymentId: true },
   );
 
-  // Another payment already paid this account (COM-03).
+  // Another payment already earned this account's one commission.
   if (existing && existing.paymentId !== payment.id) {
     return;
   }

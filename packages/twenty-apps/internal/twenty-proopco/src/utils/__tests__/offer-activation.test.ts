@@ -58,13 +58,13 @@ describe('offer activation rules', () => {
     const base = { status: 'ACTIVE', smsStatus: 'SENT', expiresAt: '2026-12-01T00:00:00Z', deactivatedAt: null };
 
     expect(describeActivation(base)).toEqual({
-      label: 'Active for this user — until 2026-12-01 00:00 UTC',
+      label: 'Active for this user until 2026-12-01 00:00 UTC',
       action: null,
     });
     expect(describeActivation({ ...base, smsStatus: 'FAILED' }).action).toBe('RESEND_SMS');
     expect(describeActivation({ ...base, status: 'ACTIVATION_FAILED' }).action).toBe('RETRY');
     expect(describeActivation({ ...base, status: 'DEACTIVATED', deactivatedAt: '2026-11-07T01:00:00Z' }).label).toBe(
-      'Deactivated by Full Admin — 2026-11-07',
+      'Deactivated by Full Admin, 2026-11-07',
     );
   });
 

@@ -17,9 +17,9 @@ export const transferUsersHandler = (routePayload: RoutePayload<unknown>) =>
         return { success: false, error: 'toAdminId is required' };
       }
 
-      // ROLE-04: users go to Sales Admins; the Full Admin does no operational work.
-      if (roleKeys.get(toAdminId) !== 'SALES_ADMIN') {
-        return { success: false, error: 'Users can only be transferred to a Sales Admin' };
+      // The Full Admin does no operational work, so users go to a Sales Admin or a Supervisor.
+      if (!['SALES_ADMIN', 'SUPERVISOR'].includes(roleKeys.get(toAdminId) ?? '')) {
+        return { success: false, error: 'Users can only be transferred to a Sales Admin or a Supervisor' };
       }
 
       return reassignUsers({

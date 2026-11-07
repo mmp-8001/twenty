@@ -1,6 +1,6 @@
 const SECOND_MS = 1000;
 
-// FRZ-02: what is left of a deadline when the Admin is frozen, never negative.
+// What is left of a deadline when the Admin is frozen, never negative.
 export const remainingSecondsUntil = (deadlineAt: Date, now: Date): number =>
   Math.max(0, Math.floor((deadlineAt.getTime() - now.getTime()) / SECOND_MS));
 
