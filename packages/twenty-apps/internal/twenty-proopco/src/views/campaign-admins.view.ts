@@ -10,7 +10,7 @@ import {
 
 export default defineView({
   universalIdentifier: CAMPAIGN_ADMINS_VIEW_UNIVERSAL_IDENTIFIER,
-  name: 'Campaign Admins',
+  name: 'Campaign Agents',
   objectUniversalIdentifier: CAMPAIGN_ADMIN_OBJECT_UNIVERSAL_IDENTIFIER,
   type: ViewType.TABLE,
   icon: 'IconUserPlus',

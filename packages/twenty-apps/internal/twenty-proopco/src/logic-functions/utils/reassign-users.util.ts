@@ -142,7 +142,7 @@ const reassignOne = async ({
           openKey: personId,
           ...(remainingSeconds === null ? {} : { deadlineAt: deadlineAfterRemaining(remainingSeconds, now).toISOString() }),
         });
-        // Windows the old admin's freeze had stopped are shifted now.
+        // Windows the old agent's freeze had stopped are shifted now.
         const shiftMs =
           fromAdmin?.crmStatus === 'FROZEN' && fromAdmin.frozenSince
             ? now.getTime() - new Date(fromAdmin.frozenSince).getTime()
@@ -250,7 +250,7 @@ export const reassignUsers = async ({
   const target = mode.type === 'TRANSFER' ? await readMember(client, mode.toAdminId) : null;
 
   if (mode.type === 'TRANSFER' && (target?.crmStatus ?? 'ACTIVE') !== 'ACTIVE') {
-    return { success: false, error: 'Users can only be transferred to an active admin' };
+    return { success: false, error: 'Users can only be transferred to an active agent' };
   }
 
   const results: ReassignUserResult[] = [];

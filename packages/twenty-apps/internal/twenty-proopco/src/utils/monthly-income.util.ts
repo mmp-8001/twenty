@@ -8,7 +8,7 @@ export const toMicros = (usdt: number | null | undefined): number =>
 
 export const fromMicros = (micros: number): number => micros / MICROS_PER_UNIT;
 
-// Unlinked Commissions grouped per Admin, in integer micros so cents never drift.
+// Unlinked Commissions grouped per Agent, in integer micros so cents never drift.
 export const groupCommissionsByAdmin = (
   commissions: { id: string; adminId: string | null; commissionUsdt: number | null }[],
 ): Map<string, { ids: string[]; micros: number }> => {

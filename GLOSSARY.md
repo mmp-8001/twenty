@@ -8,18 +8,18 @@ Twenty, used as the sales and retention CRM for proopco, a prop trading firm. Pr
 A proopco platform user, stored in Twenty as a Person. The business is B2C, so Companies are not used.
 _Avoid_: trader, customer, lead (and don't confuse with a Twenty login, which is a workspace member)
 
-**Admin**:
-A workspace member working in the CRM, with one of three roles. An Admin is active, frozen or deactivated.
-_Avoid_: agent, salesperson, CRM user
+**Agent**:
+A workspace member working in the CRM, with one of three roles. An Agent is active, frozen or deactivated. The Sales Team page lists them. API names (`admin`, `adminId`, `campaignAdmin`, `SALES_ADMIN`) keep "admin" for stability; only labels use "Agent".
+_Avoid_: admin (except in "Full Admin"), salesperson, CRM user
 
-**Sales Admin**:
-The Admin role that calls Users and works Followups, only within their own scope.
+**Sales Agent**:
+The Agent role that calls Users and works Followups, only within their own scope.
 
 **Supervisor**:
-The Admin role that runs daily operations: segments, campaigns, freezes, transfers. Can also work Followups when a campaign is assigned to them.
+The Agent role that runs daily operations: segments, campaigns, freezes, transfers. Can also work Followups when a campaign is assigned to them.
 
 **Full Admin**:
-The single top Admin role. Owns Offers, global settings, reason lists, deactivation and income payout. Does no operational work.
+The single top role. Owns Offers, global settings, reason lists, deactivation and income payout. Does no operational work.
 
 ## Audiences
 
@@ -28,28 +28,28 @@ A rule-based set of Users, stored as a saved Twenty View over Person. Membership
 _Avoid_: list, audience
 
 **Campaign**:
-A Segment assigned to one or more Admins, with its own cooldown and allowed Offers. Its unowned Users appear in every assigned Admin's User list.
+A Segment assigned to one or more Agents, with its own cooldown and allowed Offers. Its unowned Users appear in every assigned Agent's User list.
 _Avoid_: SMS campaign, blast
 
 **User list**:
-The unowned Users of the Campaigns assigned to an Admin. It is the shared pool; there is no separate pool concept.
+The unowned Users of the Campaigns assigned to an Agent. It is the shared pool; there is no separate pool concept.
 _Avoid_: pool, queue
 
 **Scope**:
-The Users an Admin may see: their Campaigns' Users plus the Users they own. A Sales Admin never learns that anyone outside their Scope exists.
+The Users an Agent may see: their Campaigns' Users plus the Users they own. A Sales Agent never learns that anyone outside their Scope exists.
 
 ## Follow-up process
 
 **Ownership**:
-Which Admin a User belongs to right now. A User has at most one open Ownership. It is temporary and kept separate from history.
+Which Agent a User belongs to right now. A User has at most one open Ownership. It is temporary and kept separate from history.
 _Avoid_: assignment, claim
 
 **Add to follow-up**:
-An Admin taking an unowned User from the User list or the Rebuy list. The first click wins.
+An Agent taking an unowned User from the User list or the Rebuy list. The first click wins.
 _Avoid_: track, assign, claim
 
 **Followup**:
-A case: one permanent record of a follow-up period by one Admin, with its kind (campaign or rebuy), status, deadlines and calls. Never deleted or moved to another Admin. One Ownership can have several Followups.
+A case: one permanent record of a follow-up period by one Agent, with its kind (campaign or rebuy), status, deadlines and calls. Never deleted or moved to another Agent. One Ownership can have several Followups.
 _Avoid_: opportunity, deal, ticket
 
 **Waiting for first call**:
@@ -59,7 +59,7 @@ A Followup's first phase, from Add to follow-up until the first answered Call, a
 The 30 days counted from the first answered Call (or, for a rebuy Followup, from Add to follow-up).
 
 **Successful**:
-A Followup that ended in a purchase. The User stays with the same Admin for retention.
+A Followup that ended in a purchase. The User stays with the same Agent for retention.
 
 **Expired**:
 A Followup whose 30 days ended without a purchase. The User goes into cooldown.
@@ -75,16 +75,16 @@ A purchase while waiting for the first call. Not a success, earns nothing, and f
 The period an expired User is hidden from every list before returning automatically.
 
 **Rebuy list**:
-A separate page of an Admin's successful Users who lost their last active Challenge Account, each with 72 hours for Add to follow-up before being released.
+A separate page of an Agent's successful Users who lost their last active Challenge Account, each with 72 hours for Add to follow-up before being released.
 
 **Retention call**:
 A Call with a successful User.
 
 **Freeze**:
-Stopping every deadline of one Admin (leave, illness). Users stay theirs and hidden from others.
+Stopping every deadline of one Agent (leave, illness). Users stay theirs and hidden from others.
 
 **Transfer**:
-A Supervisor or Full Admin moving Users to another Admin. The old Followup closes as transferred and a new one opens with the remaining time.
+A Supervisor or Full Admin moving Users to another Agent. The old Followup closes as transferred and a new one opens with the remaining time.
 
 ## Calls
 
@@ -129,10 +129,10 @@ An Offer turned on for one User at the end of an answered Call, followed by an S
 The global rebuy codes or retention codes offered on those Calls.
 
 **Commission**:
-2% of one Payment attributed to the Admin who owned the User at purchase time. One per Challenge Account.
+2% of one Payment attributed to the Agent who owned the User at purchase time. One per Challenge Account.
 
 **Monthly Income**:
-An Admin's Commissions for one Jalali month, pending until the Full Admin marks it paid.
+An Agent's Commissions for one Jalali month, pending until the Full Admin marks it paid.
 _Avoid_: salary, payout
 
 **Audit Log**:

@@ -20,7 +20,7 @@ export const adminsHandler = (routePayload: RoutePayload<unknown>) =>
 export default defineLogicFunction({
   universalIdentifier: ADMINS_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-admins',
-  description: 'Lists Admins with role, status, owned Users and freeze days. Supervisor and Full Admin.',
+  description: 'Lists Agents with role, status, owned Users and freeze days. Supervisor and Full Admin.',
   timeoutSeconds: 30,
   handler: adminsHandler,
   httpRouteTriggerSettings: { path: ADMINS_ROUTE_PATH, httpMethod: 'POST', isAuthRequired: true },

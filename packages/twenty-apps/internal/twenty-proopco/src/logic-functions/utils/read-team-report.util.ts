@@ -5,7 +5,7 @@ import { readReportData } from 'src/logic-functions/utils/read-report.util';
 import { type AdminRoleKey } from 'src/utils/admin-permissions.util';
 import { buildReport, reportRangeOf } from 'src/utils/build-report.util';
 
-// Team totals and every Admin with name and rank. Only Supervisors and the Full Admin call this.
+// Team totals and every Agent with name and rank. Only Supervisors and the Full Admin call this.
 export const readTeamReport = async ({
   client,
   roleKeys,

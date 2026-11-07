@@ -3,7 +3,7 @@ import { type ReportData, type ReportRange } from 'src/utils/build-report.util';
 
 const CALL_ID_CHUNK = 100;
 
-// One fetch per event table, scoped to an Admin or to the whole team; buildReport filters again by date.
+// One fetch per event table, scoped to an Agent or to the whole team; buildReport filters again by date.
 export const readReportData = async ({
   client,
   adminId,

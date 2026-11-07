@@ -7,7 +7,7 @@ import { SEED_DEMO_DATA_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constan
 import { serverErrorLabel } from 'src/utils/front-labels.util';
 
 const SERVER_ERRORS = [
-  msg('Demo data needs at least one active Sales Admin or Supervisor'),
+  msg('Demo data needs at least one active Sales Agent or Supervisor'),
 ];
 
 const SeedDemoDataCommand = () => {

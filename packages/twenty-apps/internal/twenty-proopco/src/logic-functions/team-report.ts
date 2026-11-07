@@ -17,7 +17,7 @@ export const teamReportHandler = (routePayload: RoutePayload<unknown>) =>
 export default defineLogicFunction({
   universalIdentifier: TEAM_REPORT_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-team-report',
-  description: 'Returns team totals and every Admin ranked by name. Supervisor and Full Admin only.',
+  description: 'Returns team totals and every Agent ranked by name. Supervisor and Full Admin only.',
   timeoutSeconds: 60,
   handler: teamReportHandler,
   httpRouteTriggerSettings: { path: TEAM_REPORT_ROUTE_PATH, httpMethod: 'POST', isAuthRequired: true },

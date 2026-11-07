@@ -171,7 +171,7 @@ describe('twenty-proopco sync route', () => {
     });
   });
 
-  it.each(['Sales Admin', 'Supervisor', 'Full Admin'])(
+  it.each(['Sales Agent', 'Supervisor', 'Full Admin'])(
     'refuses %s updates and deletes on synced records',
     async (roleLabel) => {
       await sync([user('read-only', { kycStatus: 'verified' })]);

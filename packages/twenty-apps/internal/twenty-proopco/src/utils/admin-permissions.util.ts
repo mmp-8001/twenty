@@ -15,7 +15,7 @@ const ROLE_KEY_BY_UNIVERSAL_IDENTIFIER: Record<string, AdminRoleKey> = {
 export const roleKeyOf = (roleUniversalIdentifier: string | null | undefined): AdminRoleKey | null =>
   ROLE_KEY_BY_UNIVERSAL_IDENTIFIER[roleUniversalIdentifier ?? ''] ?? null;
 
-// A Supervisor or the Full Admin freezes a Sales Admin; only the Full Admin freezes a
+// A Supervisor or the Full Admin freezes a Sales Agent; only the Full Admin freezes a
 // Supervisor; nobody freezes themself or the Full Admin.
 export const canFreeze = ({
   callerId,

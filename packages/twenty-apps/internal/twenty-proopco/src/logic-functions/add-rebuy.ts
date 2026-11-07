@@ -32,7 +32,7 @@ export const addRebuyHandler = async (routePayload: RoutePayload<unknown>) => {
 export default defineLogicFunction({
   universalIdentifier: ADD_REBUY_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-add-rebuy',
-  description: 'Moves a waiting rebuy case into follow-up for its admin.',
+  description: 'Moves a waiting rebuy case into follow-up for its agent.',
   timeoutSeconds: 30,
   handler: addRebuyHandler,
   httpRouteTriggerSettings: {

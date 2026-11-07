@@ -53,7 +53,7 @@ export default defineObject({
   namePlural: 'calls',
   labelSingular: 'Call',
   labelPlural: 'Calls',
-  description: 'One call an Admin made to a User. Permanent.',
+  description: 'One call an Agent made to a User. Permanent.',
   icon: 'IconPhone',
   disabledObjectPermissionActions: [
     'canSoftDeleteObjectRecords',
@@ -77,8 +77,8 @@ export default defineObject({
       universalIdentifier: CALL_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
       type: FieldType.RELATION,
       name: 'admin',
-      label: 'Admin',
-      description: 'The Admin who made the call; the only one who can edit its note.',
+      label: 'Agent',
+      description: 'The Agent who made the call; the only one who can edit its note.',
       icon: 'IconHeadset',
       isNullable: true,
       relationTargetObjectMetadataUniversalIdentifier:

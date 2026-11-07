@@ -33,7 +33,7 @@ export const editCallNoteHandler = async (routePayload: RoutePayload<unknown>) =
 export default defineLogicFunction({
   universalIdentifier: EDIT_CALL_NOTE_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-edit-call-note',
-  description: "Edits a Call's note. Only the Admin who made the call may.",
+  description: "Edits a Call's note. Only the Agent who made the call may.",
   timeoutSeconds: 15,
   handler: editCallNoteHandler,
   httpRouteTriggerSettings: {

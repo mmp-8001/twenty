@@ -13,7 +13,7 @@ export default defineField({
   type: FieldType.SELECT,
   name: 'crmStatus',
   label: 'CRM status',
-  description: 'Whether the admin is working, frozen or deactivated.',
+  description: 'Whether the agent is working, frozen or deactivated.',
   icon: 'IconUserCheck',
   defaultValue: "'ACTIVE'",
   isUIEditable: false,

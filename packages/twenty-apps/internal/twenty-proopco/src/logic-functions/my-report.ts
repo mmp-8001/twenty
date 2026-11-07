@@ -6,7 +6,7 @@ import { readMyReport } from 'src/logic-functions/utils/read-my-report.util';
 import { runAdminRoute } from 'src/logic-functions/utils/run-admin-route.util';
 import { readReportPeriod } from 'src/utils/read-report-period.util';
 
-// Always the caller's own numbers: the body names a period, never an Admin.
+// Always the caller's own numbers: the body names a period, never an Agent.
 export const myReportHandler = (routePayload: RoutePayload<unknown>) =>
   runAdminRoute(
     routePayload,

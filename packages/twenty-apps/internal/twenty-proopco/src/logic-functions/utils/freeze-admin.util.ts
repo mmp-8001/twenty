@@ -59,7 +59,7 @@ export const freezeAdmin = async ({
   );
 
   if (!member || (member.crmStatus ?? 'ACTIVE') !== 'ACTIVE') {
-    return fail('This admin is not active');
+    return fail('This agent is not active');
   }
 
   await updateRecord(client, 'WorkspaceMember', targetId, {
@@ -128,7 +128,7 @@ export const unfreezeAdmin = async ({
   );
 
   if (!freeze) {
-    return fail('This admin is not frozen');
+    return fail('This agent is not frozen');
   }
 
   const shiftMs = now.getTime() - new Date(freeze.frozenAt).getTime();
@@ -176,7 +176,7 @@ export const unfreezeAdmin = async ({
   }
 
   // The freeze closes and the member reactivates last: a failure above leaves the freeze open, so a retry
-  // resumes the restore, and the sweep keeps skipping this admin's windows until they are shifted.
+  // resumes the restore, and the sweep keeps skipping this agent's windows until they are shifted.
   await updateRecordsWhere(
     client,
     'adminFreezes',

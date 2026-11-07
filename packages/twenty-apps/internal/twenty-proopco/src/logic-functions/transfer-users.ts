@@ -17,9 +17,9 @@ export const transferUsersHandler = (routePayload: RoutePayload<unknown>) =>
         return { success: false, error: 'toAdminId is required' };
       }
 
-      // The Full Admin does no operational work, so users go to a Sales Admin or a Supervisor.
+      // The Full Admin does no operational work, so users go to a Sales Agent or a Supervisor.
       if (!['SALES_ADMIN', 'SUPERVISOR'].includes(roleKeys.get(toAdminId) ?? '')) {
-        return { success: false, error: 'Users can only be transferred to a Sales Admin or a Supervisor' };
+        return { success: false, error: 'Users can only be transferred to a Sales Agent or a Supervisor' };
       }
 
       return reassignUsers({
@@ -37,7 +37,7 @@ export const transferUsersHandler = (routePayload: RoutePayload<unknown>) =>
 export default defineLogicFunction({
   universalIdentifier: TRANSFER_USERS_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-transfer-users',
-  description: 'Transfers one, several or all Users of an Admin to another Admin.',
+  description: 'Transfers one, several or all Users of an Agent to another Agent.',
   timeoutSeconds: 120,
   handler: transferUsersHandler,
   httpRouteTriggerSettings: { path: TRANSFER_USERS_ROUTE_PATH, httpMethod: 'POST', isAuthRequired: true },

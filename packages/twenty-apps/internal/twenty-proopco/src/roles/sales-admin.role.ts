@@ -52,7 +52,7 @@ const { person, workspaceMember } = STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS;
 
 export default defineRole({
   universalIdentifier: SALES_ADMIN_ROLE_UNIVERSAL_IDENTIFIER,
-  label: 'Sales Admin',
+  label: 'Sales Agent',
   description: 'Works Users from the segments assigned to them. Reads synced data but cannot change it.',
   icon: 'IconHeadset',
   canReadAllObjectRecords: true,
@@ -69,8 +69,8 @@ export default defineRole({
         ![CHALLENGE_ACCOUNT_OBJECT_UNIVERSAL_IDENTIFIER, PAYMENT_OBJECT_UNIVERSAL_IDENTIFIER].includes(objectUniversalIdentifier),
     ),
     ...CAMPAIGN_READ_ONLY_OBJECT_PERMISSIONS,
-    // No row rule can scope these to a Sales Admin's Users: the audit trail and freezes are for Supervisors and
-    // the Full Admin, and accounts, activations and call reasons reach a Sales Admin only through routes.
+    // No row rule can scope these to a Sales Agent's Users: the audit trail and freezes are for Supervisors and
+    // the Full Admin, and accounts, activations and call reasons reach a Sales Agent only through routes.
     ...[
       AUDIT_LOG_OBJECT_UNIVERSAL_IDENTIFIER,
       ADMIN_FREEZE_OBJECT_UNIVERSAL_IDENTIFIER,

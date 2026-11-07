@@ -44,15 +44,15 @@ const SERVER_ERRORS = [
   msg('Your account is frozen or deactivated'),
   msg('A reason is required'),
   msg('You are not allowed to do this'),
-  msg('This admin still owns users: transfer or release them first'),
-  msg('This admin is not active'),
-  msg('This admin is not frozen'),
-  msg('Users can only be transferred to a Sales Admin or a Supervisor'),
-  msg('Users can only be transferred to an active admin'),
+  msg('This agent still owns users: transfer or release them first'),
+  msg('This agent is not active'),
+  msg('This agent is not frozen'),
+  msg('Users can only be transferred to a Sales Agent or a Supervisor'),
+  msg('Users can only be transferred to an active agent'),
 ];
 
 const ROLE_LABELS = {
-  SALES_ADMIN: msg({ message: 'Sales Admin', context: 'role' }),
+  SALES_ADMIN: msg({ message: 'Sales Agent', context: 'role' }),
   SUPERVISOR: msg({ message: 'Supervisor', context: 'role' }),
   FULL_ADMIN: msg({ message: 'Full Admin', context: 'role' }),
 };
@@ -92,14 +92,14 @@ const Admins = () => {
       setCallerRole(result.callerRole ?? null);
     } else {
       setError({
-        message: serverErrorLabel(result.error, t('Could not load admins'), SERVER_ERRORS, t),
+        message: serverErrorLabel(result.error, t('Could not load agents'), SERVER_ERRORS, t),
         isNotAllowed: isNotAllowedError(result.error),
       });
     }
   }, [t]);
 
   useEffect(() => {
-    load().catch(() => setError({ message: t('Could not load admins'), isNotAllowed: false }));
+    load().catch(() => setError({ message: t('Could not load agents'), isNotAllowed: false }));
   }, [load]);
 
   const run = async (path: string, body: Record<string, unknown>) => {
@@ -181,14 +181,14 @@ const Admins = () => {
             {pending.kind === 'TRANSFER' && (
               <FieldGroup>
                 <FieldLabel htmlFor="admin-transfer-target">
-                  <Trans>Transfer all to (admin name)</Trans>
+                  <Trans>Transfer all to (agent name)</Trans>
                 </FieldLabel>
                 <SelectInput
                   id="admin-transfer-target"
                   value={targetAdminId}
                   onChange={(event) => setTargetAdminId(event.target.value)}
                 >
-                  <option value="">{t('Choose an admin')}</option>
+                  <option value="">{t('Choose an agent')}</option>
                   {salesAdmins.map(({ memberId, name }) => (
                     <option key={memberId} value={memberId}>
                       {name}
@@ -222,14 +222,14 @@ const Admins = () => {
       {admins === null ? (
         !error && <LoadingState />
       ) : admins.length === 0 ? (
-        <EmptyState icon={IconUsers}>{t('No admins yet.')}</EmptyState>
+        <EmptyState icon={IconUsers}>{t('No agents yet.')}</EmptyState>
       ) : (
         <TableWrapper>
           <Table>
             <thead>
               <tr>
                 <HeaderCell>
-                  <Trans>Admin</Trans>
+                  <Trans>Agent</Trans>
                 </HeaderCell>
                 <HeaderCell>
                   <Trans>Role</Trans>
@@ -330,6 +330,6 @@ const Admins = () => {
 export default defineFrontComponent({
   universalIdentifier: ADMINS_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER,
   name: 'admins',
-  description: 'Admins with role, status and owned Users; freeze, transfer, release and deactivate.',
+  description: 'Sales Team with role, status and owned Users; freeze, transfer, release and deactivate.',
   component: Admins,
 });

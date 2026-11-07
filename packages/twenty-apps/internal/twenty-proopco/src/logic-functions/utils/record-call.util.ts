@@ -306,7 +306,7 @@ export const editCallNote = async ({
   );
 
   if (!call || call.adminId !== memberId) {
-    return fail('Only the admin who made the call can edit its note');
+    return fail('Only the agent who made the call can edit its note');
   }
 
   await updateRecord(client, 'Call', callId, { note, noteEditedAt: now.toISOString() });

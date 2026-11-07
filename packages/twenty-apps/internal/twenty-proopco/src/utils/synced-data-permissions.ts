@@ -74,7 +74,7 @@ export const SYNCED_DATA_OBJECT_PERMISSIONS = [
 
 const readAndUpdate = { ...readOnly, canUpdateObjectRecords: true };
 
-// Campaigns and their Admins are ended or unassigned, never deleted.
+// Campaigns and their Agents are ended or unassigned, never deleted.
 export const CAMPAIGN_MANAGEMENT_OBJECT_PERMISSIONS = [
   CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_ADMIN_OBJECT_UNIVERSAL_IDENTIFIER,

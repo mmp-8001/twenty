@@ -29,7 +29,7 @@ describe('isCampaignActive', () => {
 describe('computeUserAudience', () => {
   const admins = { a: ['m2', 'm1'], b: ['m1', 'm3'], c: [] };
 
-  it('unions the admins of every active campaign the user matches', () => {
+  it('unions the agents of every active campaign the user matches', () => {
     expect(
       computeUserAudience({
         person: available,
@@ -40,7 +40,7 @@ describe('computeUserAudience', () => {
     ).toEqual({ visibleToMemberIds: ['m1', 'm2', 'm3'], candidateCampaignIds: ['a', 'b'] });
   });
 
-  it('keeps a campaign without admins as a candidate only', () => {
+  it('keeps a campaign without agents as a candidate only', () => {
     expect(
       computeUserAudience({
         person: available,

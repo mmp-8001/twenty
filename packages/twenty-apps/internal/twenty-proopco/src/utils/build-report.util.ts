@@ -123,7 +123,7 @@ export const buildReport = ({
     }
   }
 
-  // Freeze time leaves the working days. Only a bounded period for one Admin has them.
+  // Freeze time leaves the working days. Only a bounded period for one Agent has them.
   let workingDays: number | null = null;
   let frozenDays: number | null = null;
 

@@ -49,7 +49,7 @@ export const CALL_OFF_SCHEDULE_REASONS = ['USER_REQUEST', 'ADMIN_DECISION'] as c
 export const PENDING_FIRST_CALL_DAYS = 7;
 export const FOLLOWUP_DAYS = 30;
 
-export const OWN_07_MESSAGE = "This user is in another admin's follow-up list";
+export const OWN_07_MESSAGE = "This user is in another agent's follow-up list";
 export const USER_NOT_AVAILABLE_MESSAGE = 'This user is not available';
 
 export const ADD_TO_FOLLOWUP_ROUTE_PATH = '/proopco/add-to-followup';

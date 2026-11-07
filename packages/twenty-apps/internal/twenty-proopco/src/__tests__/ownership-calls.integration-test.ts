@@ -101,8 +101,8 @@ describe('Ownership, calls and the end-of-call form', () => {
 
   beforeAll(async () => {
     const assigned = await assignSeededRoles([
-      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Admin' },
-      { email: SEEDED_OTHER_AGENT_EMAIL, roleLabel: 'Sales Admin' },
+      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Agent' },
+      { email: SEEDED_OTHER_AGENT_EMAIL, roleLabel: 'Sales Agent' },
       { email: SEEDED_MANAGER_EMAIL, roleLabel: 'Supervisor' },
     ]);
 
@@ -337,7 +337,7 @@ describe('Ownership, calls and the end-of-call form', () => {
       });
 
       it.each([
-        ['Sales Admin', () => agentToken],
+        ['Sales Agent', () => agentToken],
         ['Supervisor', () => supervisorToken],
         ['built-in admin', () => adminToken],
       ])('refuses a status update and a delete from a %s (TS6, TS7)', async (_label, token) => {
@@ -436,7 +436,7 @@ describe('Ownership, calls and the end-of-call form', () => {
   });
 
   describe('Reason lists', () => {
-    it('lets the Full Admin manage them but not a Sales Admin', async () => {
+    it('lets the Full Admin manage them but not a Sales Agent', async () => {
       const create = (token: string) =>
         userRequest({
           token,

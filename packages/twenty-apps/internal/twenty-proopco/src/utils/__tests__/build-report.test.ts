@@ -67,7 +67,7 @@ describe('buildReport', () => {
     expect(report.cases.failedByReason).toEqual({ 'Too expensive': 1 });
   });
 
-  it('RS4: another admin never leaks into a scoped report', () => {
+  it('RS4: another agent never leaks into a scoped report', () => {
     const data: ReportData = {
       ...empty,
       calls: [

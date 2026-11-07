@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { buildIncomeKey, fromMicros, groupCommissionsByAdmin } from 'src/utils/monthly-income.util';
 
 describe('groupCommissionsByAdmin', () => {
-  it('sums per admin exactly and skips commissions without an admin', () => {
+  it('sums per agent exactly and skips commissions without an agent', () => {
     const groups = groupCommissionsByAdmin([
       { id: 'a', adminId: 'x', commissionUsdt: 10 },
       { id: 'b', adminId: 'x', commissionUsdt: 6 },
@@ -19,7 +19,7 @@ describe('groupCommissionsByAdmin', () => {
     expect(groups.size).toBe(2);
   });
 
-  it('keys an income by admin and Jalali month', () => {
+  it('keys an income by agent and Jalali month', () => {
     expect(buildIncomeKey('x', 1403, 8)).toBe('x:1403-8');
   });
 });

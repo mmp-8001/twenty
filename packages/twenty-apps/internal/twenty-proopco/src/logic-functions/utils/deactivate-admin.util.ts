@@ -12,9 +12,9 @@ import {
 import { writeAuditLog } from 'src/logic-functions/utils/write-audit-log.util';
 import { type AdminRoleKey, canDeactivate } from 'src/utils/admin-permissions.util';
 
-export const OWNS_USERS_MESSAGE = 'This admin still owns users: transfer or release them first';
+export const OWNS_USERS_MESSAGE = 'This agent still owns users: transfer or release them first';
 
-// Invariant 9: an Admin is deactivated only when they own no users.
+// Invariant 9: an Agent is deactivated only when they own no users.
 export const deactivateAdmin = async ({
   client,
   callerId,
@@ -55,10 +55,10 @@ export const deactivateAdmin = async ({
   );
 
   if (!member || member.crmStatus === 'DEACTIVATED') {
-    return { success: false, error: 'This admin is already deactivated' };
+    return { success: false, error: 'This agent is already deactivated' };
   }
 
-  // A removed assignment drops the admin from the campaign's visibility through the recompute trigger.
+  // A removed assignment drops the agent from the campaign's visibility through the recompute trigger.
   await updateRecordsWhere(client, 'campaignAdmins', { adminId: { eq: targetId }, removedAt: { is: 'NULL' } }, {
     removedAt: now.toISOString(),
   });

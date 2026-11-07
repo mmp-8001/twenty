@@ -23,9 +23,9 @@ export default defineObject({
   universalIdentifier: ADMIN_FREEZE_OBJECT_UNIVERSAL_IDENTIFIER,
   nameSingular: 'adminFreeze',
   namePlural: 'adminFreezes',
-  labelSingular: 'Admin freeze',
-  labelPlural: 'Admin freezes',
-  description: 'One freeze of an Admin. Open while unfrozen at is empty.',
+  labelSingular: 'Agent freeze',
+  labelPlural: 'Agent freezes',
+  description: 'One freeze of an Agent. Open while unfrozen at is empty.',
   icon: 'IconSnowflake',
   disabledObjectPermissionActions: [
     'canUpdateObjectRecords',
@@ -48,7 +48,7 @@ export default defineObject({
       universalIdentifier: ADMIN_FREEZE_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
       type: FieldType.RELATION,
       name: 'admin',
-      label: 'Admin',
+      label: 'Agent',
       icon: 'IconHeadset',
       isNullable: true,
       relationTargetObjectMetadataUniversalIdentifier:

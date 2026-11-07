@@ -43,7 +43,7 @@ export default defineObject({
   namePlural: 'commissions',
   labelSingular: 'Commission',
   labelPlural: 'Commissions',
-  description: 'The 2% an Admin earns on one purchased Challenge Account.',
+  description: 'The 2% an Agent earns on one purchased Challenge Account.',
   icon: 'IconCoin',
   disabledObjectPermissionActions: [
     'canUpdateObjectRecords',
@@ -140,7 +140,7 @@ export default defineObject({
       universalIdentifier: COMMISSION_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
       type: FieldType.RELATION,
       name: 'admin',
-      label: 'Admin',
+      label: 'Agent',
       icon: 'IconHeadset',
       isNullable: true,
       relationTargetObjectMetadataUniversalIdentifier:

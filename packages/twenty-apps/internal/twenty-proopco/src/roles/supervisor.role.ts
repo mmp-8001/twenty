@@ -11,7 +11,7 @@ import {
 export default defineRole({
   universalIdentifier: SUPERVISOR_ROLE_UNIVERSAL_IDENTIFIER,
   label: 'Supervisor',
-  description: 'Supervises Sales Admins and assigns segments. Reads synced data but cannot change it.',
+  description: 'Supervises Sales Agents and assigns segments. Reads synced data but cannot change it.',
   icon: 'IconUserStar',
   canReadAllObjectRecords: true,
   canUpdateAllObjectRecords: false,

@@ -11,7 +11,7 @@ export const recomputeOnCampaignAdminChangeHandler = async () => ({
 export default defineLogicFunction({
   universalIdentifier: RECOMPUTE_ON_CAMPAIGN_ADMIN_CHANGE_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-recompute-on-campaign-admin-change',
-  description: 'Recomputes the User lists when an Admin is assigned to or removed from a Campaign.',
+  description: 'Recomputes the User lists when an Agent is assigned to or removed from a Campaign.',
   timeoutSeconds: 300,
   handler: recomputeOnCampaignAdminChangeHandler,
   databaseEventTriggerSettings: { eventName: 'campaignAdmin.*' },

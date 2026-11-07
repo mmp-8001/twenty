@@ -11,7 +11,7 @@ export type PersonActivation = {
   offer: { title: string | null; expiresAt: string | null; deactivatedAt: string | null } | null;
 };
 
-// Sales Admins cannot read accounts or activations directly (no row rule scopes them to a User), so the
+// Sales Agents cannot read accounts or activations directly (no row rule scopes them to a User), so the
 // caller's own token decides whether the User is visible and the app reads the rest.
 export const readPersonDetails = async ({
   userClient,

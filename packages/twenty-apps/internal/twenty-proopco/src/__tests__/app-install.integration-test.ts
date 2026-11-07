@@ -191,7 +191,7 @@ describe('twenty-proopco install', () => {
       }
     }`);
 
-    for (const label of ['Sales Admin', 'Supervisor', 'Full Admin']) {
+    for (const label of ['Sales Agent', 'Supervisor', 'Full Admin']) {
       const role = getRoles.find((candidate) => candidate.label === label);
 
       expect(role?.canBeAssignedToUsers).toBe(true);
@@ -206,8 +206,8 @@ describe('twenty-proopco install', () => {
             (permission) => permission.objectMetadataId === objectId,
           ),
         ).toMatchObject({
-          // A Sales Admin reads accounts and payments only through routes that check the User's scope.
-          canReadObjectRecords: !(label === 'Sales Admin' && nameSingular !== 'person'),
+          // A Sales Agent reads accounts and payments only through routes that check the User's scope.
+          canReadObjectRecords: !(label === 'Sales Agent' && nameSingular !== 'person'),
           canUpdateObjectRecords: false,
           canSoftDeleteObjectRecords: false,
           canDestroyObjectRecords: false,

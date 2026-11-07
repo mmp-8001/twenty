@@ -21,7 +21,7 @@ type Connection = {
   edges: { node: { id: string } }[];
 };
 
-describe('Sales Admin visibility and campaigns', () => {
+describe('Sales Agent visibility and campaigns', () => {
   const tag = uniqueId('vis');
   const created: { singular: string; id: string }[] = [];
   let agentToken: string;
@@ -165,8 +165,8 @@ describe('Sales Admin visibility and campaigns', () => {
 
   beforeAll(async () => {
     const assigned = await assignSeededRoles([
-      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Admin' },
-      { email: SEEDED_OTHER_AGENT_EMAIL, roleLabel: 'Sales Admin' },
+      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Agent' },
+      { email: SEEDED_OTHER_AGENT_EMAIL, roleLabel: 'Sales Agent' },
       { email: SEEDED_MANAGER_EMAIL, roleLabel: 'Supervisor' },
     ]);
 
@@ -196,7 +196,7 @@ describe('Sales Admin visibility and campaigns', () => {
 
   describe('objects no row rule can scope', () => {
     it.each(['challengeAccounts', 'payments', 'offerActivations', 'callFeedbackReasons'])(
-      'denies a Sales Admin any %s row',
+      'denies a Sales Agent any %s row',
       async (collection) => {
         const { data, errors } = await userRequest<Record<string, Connection>>({
           token: agentToken,
@@ -221,7 +221,7 @@ describe('Sales Admin visibility and campaigns', () => {
       otherAdminsId = await createPerson('other', { visibleToMemberIds: [otherAgentId] });
     });
 
-    it('lists only users whose list contains the admin or that the admin owns, and counts only those', async () => {
+    it('lists only users whose list contains the agent or that the agent owns, and counts only those', async () => {
       const { ids, totalCount } = await peopleSeenBy(agentToken);
 
       expect(ids.sort()).toEqual([listedId, ownedId].sort());
@@ -279,7 +279,7 @@ describe('Sales Admin visibility and campaigns', () => {
       secondId = await createPerson('second');
     });
 
-    it('lets a Supervisor create a campaign and assign admins (AS1)', async () => {
+    it('lets a Supervisor create a campaign and assign agents (AS1)', async () => {
       const segmentViewId = await createSegmentView([
         { field: 'kycStatus', operand: 'CONTAINS', value: `${tag}` },
       ]);
@@ -309,7 +309,7 @@ describe('Sales Admin visibility and campaigns', () => {
       created.push({ singular: 'CampaignAdmin', id: assignment.data!.createCampaignAdmin.id });
     });
 
-    it('shows the unowned users to every assigned admin, hides owned ones, and drops them when the admin is removed or the campaign ends (S9)', async () => {
+    it('shows the unowned users to every assigned agent, hides owned ones, and drops them when the agent is removed or the campaign ends (S9)', async () => {
       const campaignId = await createCampaign(
         await createSegmentView([{ field: 'kycStatus', operand: 'CONTAINS', value: tag }]),
       );
@@ -445,7 +445,7 @@ describe('Sales Admin visibility and campaigns', () => {
       expect(Number(campaign.availableUserCount)).toBeGreaterThanOrEqual(2);
     });
 
-    it('shows a Sales Admin only their own campaign assignments', async () => {
+    it('shows a Sales Agent only their own campaign assignments', async () => {
       const { data, errors } = await userRequest<{
         campaignAdmins: { edges: { node: { adminId: string } }[] };
       }>({

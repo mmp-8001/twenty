@@ -8,3 +8,5 @@ The list is recomputed for a User after a sync or ownership change, for a Campai
 
 - Hiding Users only in app screens: rejected, because the API, search and Twenty's own views would still expose them.
 - A relation-hop predicate: not available; the server treats such predicates as matching nothing, and the SDK can't declare them.
+
+Note: the "Sales Admin" role was later relabelled "Sales Agent"; identifiers keep `SALES_ADMIN`.

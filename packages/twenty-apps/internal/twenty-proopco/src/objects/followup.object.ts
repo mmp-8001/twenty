@@ -39,14 +39,14 @@ const manyToOne = (joinColumnName: string) => ({
   joinColumnName,
 });
 
-// The Admin never changes: a transfer closes the case and opens a new one.
+// The Agent never changes: a transfer closes the case and opens a new one.
 export default defineObject({
   universalIdentifier: FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
   nameSingular: 'followup',
   namePlural: 'followups',
   labelSingular: 'Followup',
   labelPlural: 'Followups',
-  description: 'A permanent follow-up case for one User and one Admin.',
+  description: 'A permanent follow-up case for one User and one Agent.',
   icon: 'IconPhoneCheck',
   disabledObjectPermissionActions: [
     'canSoftDeleteObjectRecords',
@@ -70,7 +70,7 @@ export default defineObject({
       universalIdentifier: FOLLOWUP_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
       type: FieldType.RELATION,
       name: 'admin',
-      label: 'Admin',
+      label: 'Agent',
       icon: 'IconHeadset',
       isNullable: true,
       relationTargetObjectMetadataUniversalIdentifier:
