@@ -6,6 +6,7 @@ import {
   type RecordsClient,
   updateRecord,
 } from 'src/logic-functions/utils/list-records.util';
+import { readRebuySettings } from 'src/logic-functions/utils/rebuy-settings.util';
 import { recomputeVisibility } from 'src/logic-functions/utils/recompute-visibility.util';
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -17,6 +18,7 @@ type DueFollowup = {
   personId: string | null;
   ownershipId: string | null;
   campaignId: string | null;
+  kind: string | null;
 };
 
 // shortcut: only cooldowns that ended within the last hour are refreshed here; the hourly recompute catches the rest.
@@ -59,10 +61,10 @@ export const sweepFollowups = async ({
     client,
     'followups',
     {
-      status: { in: ['PENDING_FIRST_CALL', 'IN_PROGRESS'] },
+      status: { in: ['PENDING_FIRST_CALL', 'IN_PROGRESS', 'REBUY_PENDING'] },
       deadlineAt: { lte: now.toISOString() },
     },
-    { status: true, deadlineAt: true, personId: true, ownershipId: true, campaignId: true },
+    { status: true, deadlineAt: true, personId: true, ownershipId: true, campaignId: true, kind: true },
   );
   const releasedPersonIds: string[] = [];
   let closedFollowups = 0;
@@ -71,7 +73,11 @@ export const sweepFollowups = async ({
     const plan = planFollowupSweep({
       status: followup.status,
       deadlineAt: followup.deadlineAt,
-      cooldownDays: cooldownDaysByCampaignId.get(followup.campaignId ?? '') ?? 0,
+      // RB-04: a rebuy case has no Campaign, so it cools down with the global value.
+      cooldownDays:
+        followup.kind === 'REBUY'
+          ? readRebuySettings().cooldownDays
+          : (cooldownDaysByCampaignId.get(followup.campaignId ?? '') ?? 0),
       now,
     });
 
