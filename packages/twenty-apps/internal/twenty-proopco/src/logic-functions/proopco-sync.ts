@@ -13,6 +13,8 @@ import {
 } from 'src/logic-functions/types/proopco-sync.type';
 import { isValidJobToken } from 'src/logic-functions/utils/read-job-request.util';
 import { parseProopcoSyncRequest } from 'src/logic-functions/utils/parse-proopco-sync-request.util';
+import { detectLostLastAccount } from 'src/logic-functions/utils/detect-lost-account.util';
+import { detectPurchase } from 'src/logic-functions/utils/detect-purchase.util';
 import { recomputeVisibility } from 'src/logic-functions/utils/recompute-visibility.util';
 import { processProopcoSyncItem } from 'src/logic-functions/utils/process-proopco-sync-item.util';
 
@@ -47,12 +49,32 @@ export const proopcoSyncHandler = async (
   const changedPersonIds: string[] = [];
 
   for (const { item, index } of processingOrder) {
-    results.set(
-      index,
-      await processProopcoSyncItem(client, item, (personId) =>
-        changedPersonIds.push(personId),
-      ),
+    const result = await processProopcoSyncItem(client, item, (personId) =>
+      changedPersonIds.push(personId),
     );
+
+    results.set(index, result);
+
+    if (result.status === 'error' || (item.type !== 'payment' && item.type !== 'account')) {
+      continue;
+    }
+
+    // Also on unchanged, so a resend repairs a hook that failed before.
+    try {
+      if (item.type === 'payment') {
+        await detectPurchase({ client, paymentProopcoId: item.proopcoId });
+      } else {
+        await detectLostLastAccount({ client, accountProopcoId: item.proopcoId });
+      }
+    } catch (error) {
+      results.set(index, {
+        type: item.type,
+        proopcoId: item.proopcoId,
+        status: 'error',
+        reason: `Saved, but its follow-up step failed: ${String(error)}`,
+        retryable: true,
+      });
+    }
   }
 
   try {

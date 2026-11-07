@@ -6,6 +6,10 @@ import {
   CALL_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
   CALL_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_ADMIN_OBJECT_UNIVERSAL_IDENTIFIER,
+  COMMISSION_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+  COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
+  COMMISSION_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  COMMISSION_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
   FOLLOWUP_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
   FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
   FOLLOWUP_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
@@ -85,6 +89,11 @@ export default defineRole({
       objectUniversalIdentifier: TOUCH_OBJECT_UNIVERSAL_IDENTIFIER,
       logicalOperator: 'OR',
     },
+    {
+      universalIdentifier: COMMISSION_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
+      logicalOperator: 'OR',
+    },
   ],
   rowLevelPermissionPredicates: [
     {
@@ -142,6 +151,14 @@ export default defineRole({
       operand: 'IS',
       workspaceMemberFieldUniversalIdentifier: workspaceMember.fields.id.universalIdentifier,
       predicateGroupUniversalIdentifier: TOUCH_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+    },
+    {
+      universalIdentifier: COMMISSION_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
+      fieldUniversalIdentifier: COMMISSION_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: 'IS',
+      workspaceMemberFieldUniversalIdentifier: workspaceMember.fields.id.universalIdentifier,
+      predicateGroupUniversalIdentifier: COMMISSION_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
     },
   ],
   fieldPermissions: SYNCED_PERSON_FIELD_PERMISSIONS,

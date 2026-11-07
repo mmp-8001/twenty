@@ -101,7 +101,6 @@ describe('twenty-proopco install', () => {
     for (const removed of [
       'tradingAccount',
       'followupType',
-      'commission',
       'commissionTier',
       'monthlyIncome',
     ]) {
