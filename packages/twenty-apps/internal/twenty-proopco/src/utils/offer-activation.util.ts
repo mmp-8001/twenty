@@ -61,30 +61,13 @@ export type ActivationView = {
   deactivatedAt: string | null;
 };
 
-// What User details and the form show for an activation, and which button it offers.
-export const describeActivation = ({
-  status,
-  smsStatus,
-  expiresAt,
-  deactivatedAt,
-}: ActivationView): { label: string; action: 'RETRY' | 'RESEND_SMS' | null } => {
-  const until = expiresAt ? ` until ${expiresAt.slice(0, 16).replace('T', ' ')} UTC` : '';
-
-  switch (status) {
-    case 'ACTIVATION_FAILED':
-      return { label: 'Activation failed', action: 'RETRY' };
-    case 'ACTIVATING':
-      return { label: 'Activating…', action: null };
-    case 'USED':
-      return { label: 'Code used', action: null };
-    case 'DEACTIVATED':
-      return {
-        label: `Deactivated by Full Admin${deactivatedAt ? `, ${deactivatedAt.slice(0, 10)}` : ''}`,
-        action: null,
-      };
-    default:
-      return smsStatus === 'FAILED'
-        ? { label: `Active for this user${until} · SMS not sent`, action: 'RESEND_SMS' }
-        : { label: `Active for this user${until}`, action: null };
+// Which button an activation offers; the label text is translated in front-labels.util.
+export const describeActivation = ({ status, smsStatus }: ActivationView): { action: 'RETRY' | 'RESEND_SMS' | null } => {
+  if (status === 'ACTIVATION_FAILED') {
+    return { action: 'RETRY' };
   }
+
+  const isLive = status !== 'ACTIVATING' && status !== 'USED' && status !== 'DEACTIVATED';
+
+  return { action: isLive && smsStatus === 'FAILED' ? 'RESEND_SMS' : null };
 };

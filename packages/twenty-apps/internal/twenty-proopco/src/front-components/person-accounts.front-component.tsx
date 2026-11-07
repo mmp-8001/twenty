@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { defineFrontComponent } from 'twenty-sdk/define';
-import { useRecordId } from 'twenty-sdk/front-component';
+import { Trans, useRecordId } from 'twenty-sdk/front-component';
 
 import { PERSON_DETAILS_ROUTE_PATH } from 'src/constants/ownership.constant';
 import { PERSON_ACCOUNTS_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
@@ -23,7 +23,9 @@ const PersonAccounts = () => {
   }, [personId]);
 
   if (accounts.length === 0) {
-    return <p style={{ padding: 16 }}>No challenge accounts.</p>;
+    return <p style={{ padding: 16 }}>
+        <Trans>No challenge accounts.</Trans>
+      </p>;
   }
 
   return (

@@ -5,8 +5,11 @@ import { defineFrontComponent } from 'twenty-sdk/define';
 import {
   closeSidePanel,
   enqueueSnackbar,
+  msg,
+  Trans,
   unmountFrontComponent,
   useSelectedRecordIds,
+  useTranslate,
 } from 'twenty-sdk/front-component';
 
 import { ACTIVATE_OFFER_ROUTE_PATH, OFFER_OPTIONS_ROUTE_PATH } from 'src/constants/offer.constant';
@@ -23,7 +26,36 @@ import {
   suggestTouchNo,
   type TouchWindow,
 } from 'src/utils/call-windows.util';
-import { describeActivation } from 'src/utils/offer-activation.util';
+import { activationLabel, serverErrorLabel, translateValue } from 'src/utils/front-labels.util';
+
+const CALL_STATUS_LABELS = {
+  ANSWERED: msg({ message: 'Answered', context: 'call-status' }),
+  NO_ANSWER: msg({ message: 'No answer', context: 'call-status' }),
+  BUSY: msg({ message: 'Busy', context: 'call-status' }),
+  SWITCHED_OFF: msg({ message: 'Switched off', context: 'call-status' }),
+  REJECTED: msg({ message: 'Rejected', context: 'call-status' }),
+  INVALID_NUMBER: msg({ message: 'Invalid number', context: 'call-status' }),
+};
+const ACTIVATION_MESSAGES = {
+  failed: msg('Activation failed'),
+  activating: msg('Activating…'),
+  used: msg('Code used'),
+  deactivated: msg('Deactivated by Full Admin'),
+  active: msg('Active for this user'),
+  until: msg('until {until} UTC'),
+  smsNotSent: msg('SMS not sent'),
+};
+
+const OFF_SCHEDULE_LABELS = {
+  USER_REQUEST: msg({ message: 'User request', context: 'off-schedule-reason' }),
+  ADMIN_DECISION: msg({ message: 'Admin decision', context: 'off-schedule-reason' }),
+};
+
+const CAPABILITY_LABELS = {
+  DISCOUNT: msg({ message: 'Discount', context: 'offer-capability' }),
+  RESET: msg({ message: 'Reset', context: 'offer-capability' }),
+  INSTALLMENT: msg({ message: 'Installment', context: 'offer-capability' }),
+};
 
 type Reason = { id: string; title: string };
 type SaveResponse = { success: boolean; error?: string; callId?: string };
@@ -34,6 +66,20 @@ type OfferOptionView = {
   expiresAt: string | null;
   activation: { status: string; smsStatus: string } | null;
 };
+
+const SERVER_ERRORS = [
+  msg('Sign in required'),
+  msg('Your account is frozen or deactivated'),
+  msg('You can only call users in your follow-up list'),
+  msg('This user cannot be called now'),
+  msg('Choose why the next call is outside the suggested window'),
+  msg('You can only activate offers for users in your follow-up list'),
+  msg('Offers can only be activated after an answered call'),
+  msg('This offer is not available'),
+  msg('This offer is already activated for this user'),
+  msg('The user has no phone number'),
+  msg('SMS not sent'),
+];
 
 const loadReasons = async (): Promise<{ feedback: Reason[]; failure: Reason[] }> => {
   const result = (await new CoreApiClient().query({
@@ -100,6 +146,7 @@ const loadOfferOptions = async (callId: string): Promise<OfferOptionView[]> => {
 };
 
 const CallForm = () => {
+  const { t } = useTranslate();
   const [personId] = useSelectedRecordIds();
   const [reasons, setReasons] = useState<{ feedback: Reason[]; failure: Reason[] }>({
     feedback: [],
@@ -119,7 +166,7 @@ const CallForm = () => {
 
   useEffect(() => {
     loadReasons().then(setReasons, () =>
-      enqueueSnackbar({ message: 'Could not load the reasons', variant: 'error' }),
+      enqueueSnackbar({ message: t('Could not load the reasons'), variant: 'error' }),
     );
   }, []);
 
@@ -186,8 +233,8 @@ const CallForm = () => {
 
       await enqueueSnackbar(
         result.success
-          ? { message: 'Call saved', variant: 'success' }
-          : { message: result.error ?? 'Could not save the call', variant: 'error' },
+          ? { message: t('Call saved'), variant: 'success' }
+          : { message: serverErrorLabel(result.error, t('Could not save the call'), SERVER_ERRORS, t), variant: 'error' },
       );
 
       // The code section follows an answered call, so the form stays open when there is one.
@@ -203,7 +250,7 @@ const CallForm = () => {
         closeSidePanel();
       }
     } catch {
-      await enqueueSnackbar({ message: 'Could not save the call', variant: 'error' });
+      await enqueueSnackbar({ message: t('Could not save the call'), variant: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -222,8 +269,8 @@ const CallForm = () => {
 
     await enqueueSnackbar(
       result.success
-        ? { message: 'Offer activated', variant: 'success' }
-        : { message: result.error ?? 'Could not activate the offer', variant: 'error' },
+        ? { message: t('Offer activated'), variant: 'success' }
+        : { message: serverErrorLabel(result.error, t('Could not activate the offer'), SERVER_ERRORS, t), variant: 'error' },
     );
     setSavedCall({ callId: savedCall.callId, options: await loadOfferOptions(savedCall.callId) });
   };
@@ -231,16 +278,22 @@ const CallForm = () => {
   if (savedCall) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
-        <h3>Offer codes</h3>
+        <h3>
+          <Trans>Offer codes</Trans>
+        </h3>
         {savedCall.options.map((option) => {
-          const { label } = option.activation
-            ? describeActivation({
-                status: option.activation.status,
-                smsStatus: option.activation.smsStatus,
-                expiresAt: option.expiresAt,
-                deactivatedAt: null,
-              })
-            : { label: null };
+          const label = option.activation
+            ? activationLabel(
+                {
+                  status: option.activation.status,
+                  smsStatus: option.activation.smsStatus,
+                  expiresAt: option.expiresAt,
+                  deactivatedAt: null,
+                },
+                ACTIVATION_MESSAGES,
+                t,
+              )
+            : null;
 
           return (
             <div key={option.id}>
@@ -249,7 +302,7 @@ const CallForm = () => {
                 disabled={option.activation !== null && option.activation.status !== 'ACTIVATION_FAILED'}
                 onClick={() => activateOffer(option.id)}
               >
-                {option.title} ({option.capability.toLowerCase()})
+                {option.title} ({translateValue(CAPABILITY_LABELS, option.capability, t)})
               </button>
               {label && <span> {label}</span>}
             </div>
@@ -262,7 +315,7 @@ const CallForm = () => {
             closeSidePanel();
           }}
         >
-          Done
+          <Trans context="call-form">Done</Trans>
         </button>
       </div>
     );
@@ -270,7 +323,9 @@ const CallForm = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
-      <label htmlFor="call-status">How did the call go?</label>
+      <label htmlFor="call-status">
+        <Trans>How did the call go?</Trans>
+      </label>
       <select
         id="call-status"
         value={technicalStatus}
@@ -278,15 +333,19 @@ const CallForm = () => {
       >
         {CALL_TECHNICAL_STATUSES.map((status) => (
           <option key={status} value={status}>
-            {status.replace(/_/g, ' ').toLowerCase()}
+            {translateValue(CALL_STATUS_LABELS, status, t)}
           </option>
         ))}
       </select>
-      <label htmlFor="call-note">Note</label>
+      <label htmlFor="call-note">
+        <Trans context="call-form">Note</Trans>
+      </label>
       <textarea id="call-note" value={note} onChange={(event) => setNote(event.target.value)} />
       {isAnswered && (
         <fieldset>
-          <legend>Feedback reasons</legend>
+          <legend>
+            <Trans>Feedback reasons</Trans>
+          </legend>
           {reasons.feedback.map((reason) => (
             <label key={reason.id} style={{ display: 'block' }}>
               <input
@@ -297,7 +356,9 @@ const CallForm = () => {
               {reason.title}
             </label>
           ))}
-          <label htmlFor="call-other">Other reason text</label>
+          <label htmlFor="call-other">
+            <Trans>Other reason text</Trans>
+          </label>
           <input
             id="call-other"
             value={feedbackOtherText}
@@ -307,7 +368,9 @@ const CallForm = () => {
       )}
       {!isMovingToFailed && (
         <>
-          <label htmlFor="call-next">Next call</label>
+          <label htmlFor="call-next">
+            <Trans>Next call</Trans>
+          </label>
           <input
             id="call-next"
             type="datetime-local"
@@ -315,14 +378,14 @@ const CallForm = () => {
             onChange={(event) => setNextCallAt(event.target.value)}
           />
           <label htmlFor="call-off-schedule">
-            Off-schedule reason
+            <Trans>Off-schedule reason</Trans>
             {nextCallAt !== '' &&
             isOutsideSuggestedWindow({
               windows: windowsFor(followupWindows, isAnswered),
               suggestedTouchNo: suggestedTouchNoFor(followupWindows, isAnswered),
               nextCallAt: new Date(nextCallAt),
             })
-              ? ' (required)'
+              ? ` ${t('(required)')}`
               : ''}
           </label>
           <select
@@ -330,10 +393,10 @@ const CallForm = () => {
             value={offScheduleReason}
             onChange={(event) => setOffScheduleReason(event.target.value)}
           >
-            <option value="">None</option>
+            <option value="">{t('None')}</option>
             {CALL_OFF_SCHEDULE_REASONS.map((reason) => (
               <option key={reason} value={reason}>
-                {reason.replace(/_/g, ' ').toLowerCase()}
+                {translateValue(OFF_SCHEDULE_LABELS, reason, t)}
               </option>
             ))}
           </select>
@@ -345,17 +408,19 @@ const CallForm = () => {
           checked={isMovingToFailed}
           onChange={(event) => setIsMovingToFailed(event.target.checked)}
         />
-        Move to failed
+        <Trans>Move to failed</Trans>
       </label>
       {isMovingToFailed && (
         <>
-          <label htmlFor="call-failure">Failure reason</label>
+          <label htmlFor="call-failure">
+            <Trans context="call-form">Failure reason</Trans>
+          </label>
           <select
             id="call-failure"
             value={failureReasonId}
             onChange={(event) => setFailureReasonId(event.target.value)}
           >
-            <option value="">Choose a reason</option>
+            <option value="">{t('Choose a reason')}</option>
             {reasons.failure.map((reason) => (
               <option key={reason.id} value={reason.id}>
                 {reason.title}
@@ -365,7 +430,7 @@ const CallForm = () => {
         </>
       )}
       <button type="button" onClick={submit} disabled={isSubmitting}>
-        {isSubmitting ? 'Saving…' : 'Save call'}
+        {isSubmitting ? t('Saving…') : t('Save call')}
       </button>
     </div>
   );

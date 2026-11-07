@@ -1,9 +1,14 @@
 import { RestApiClient } from 'twenty-client-sdk/rest';
 import { defineFrontComponent } from 'twenty-sdk/define';
-import { Command, enqueueSnackbar } from 'twenty-sdk/front-component';
+import { Command, enqueueSnackbar, msg, t } from 'twenty-sdk/front-component';
 
 import { SEED_DEMO_DATA_ROUTE_PATH } from 'src/constants/demo-data.constant';
 import { SEED_DEMO_DATA_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
+import { serverErrorLabel } from 'src/utils/front-labels.util';
+
+const SERVER_ERRORS = [
+  msg('Demo data needs at least one active Sales Admin or Supervisor'),
+];
 
 const SeedDemoDataCommand = () => {
   const run = async () => {
@@ -15,11 +20,11 @@ const SeedDemoDataCommand = () => {
 
       await enqueueSnackbar(
         result.success
-          ? { message: 'Demo data created', variant: 'success' }
-          : { message: result.error ?? 'Seed demo data failed', variant: 'error' },
+          ? { message: t('Demo data created'), variant: 'success' }
+          : { message: serverErrorLabel(result.error, t('Seed demo data failed'), SERVER_ERRORS, t), variant: 'error' },
       );
     } catch {
-      await enqueueSnackbar({ message: 'Seed demo data failed', variant: 'error' });
+      await enqueueSnackbar({ message: t('Seed demo data failed'), variant: 'error' });
     }
   };
 
