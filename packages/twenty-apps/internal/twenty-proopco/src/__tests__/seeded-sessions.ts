@@ -151,14 +151,14 @@ export const assignSeededRoles = async (
   };
 };
 
-// Runs the deployed post-install function the way an admin session would invoke it.
-export const runDeployedPostInstall = async () => {
+// Runs a deployed logic function the way an admin session would invoke it.
+export const runDeployedLogicFunction = async (functionName: string) => {
   const token = await signIn(SEEDED_ADMIN_EMAIL);
   const { findManyLogicFunctions } = await metadataRequest<{
     findManyLogicFunctions: { id: string; name: string }[];
   }>('{ findManyLogicFunctions { id name } }');
-  const postInstall = findManyLogicFunctions.find(
-    ({ name }) => name === 'post-install',
+  const logicFunction = findManyLogicFunctions.find(
+    ({ name }) => name === functionName,
   );
   const { data, errors } = await userRequest<{
     executeOneLogicFunction: { status: string; error: unknown };
@@ -168,10 +168,12 @@ export const runDeployedPostInstall = async () => {
     query: `mutation ($id: UUID!) {
       executeOneLogicFunction(input: { id: $id, payload: {} }) { status error }
     }`,
-    variables: { id: postInstall?.id },
+    variables: { id: logicFunction?.id },
   });
 
   if (errors?.length || data?.executeOneLogicFunction.status !== 'SUCCESS') {
-    throw new Error(`post-install failed: ${JSON.stringify(errors ?? data)}`);
+    throw new Error(`${functionName} failed: ${JSON.stringify(errors ?? data)}`);
   }
 };
+
+export const runDeployedPostInstall = () => runDeployedLogicFunction('post-install');

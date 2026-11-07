@@ -14,6 +14,7 @@ import {
   type RecordsClient,
   updateRecord,
 } from 'src/logic-functions/utils/list-records.util';
+import { writeAuditLog } from 'src/logic-functions/utils/write-audit-log.util';
 import { recomputeVisibility } from 'src/logic-functions/utils/recompute-visibility.util';
 import {
   buildTouchWindows,
@@ -202,6 +203,7 @@ export const recordCall = async ({
   const callId = await createRecord(client, 'Call', {
     personId,
     adminId: memberId,
+    visibleToMemberIds: [memberId],
     ownershipId: ownership.id,
     followupId: followup?.id ?? null,
     kind,
@@ -291,11 +293,11 @@ export const editCallNote = async ({
   note: string | null;
   now?: Date;
 }): Promise<RecordCallResult> => {
-  const [call] = await listRecords<{ adminId: string | null }>(
+  const [call] = await listRecords<{ adminId: string | null; note: string | null }>(
     client,
     'calls',
     { id: { eq: callId } },
-    { adminId: true },
+    { adminId: true, note: true },
   );
 
   if (!call || call.adminId !== memberId) {
@@ -303,6 +305,14 @@ export const editCallNote = async ({
   }
 
   await updateRecord(client, 'Call', callId, { note, noteEditedAt: now.toISOString() });
+  await writeAuditLog({
+    client,
+    actorId: memberId,
+    action: 'NOTE_EDIT',
+    subjectType: 'call',
+    subjectId: callId,
+    payload: { previousNote: call.note },
+  });
 
   return { success: true, callId };
 };
