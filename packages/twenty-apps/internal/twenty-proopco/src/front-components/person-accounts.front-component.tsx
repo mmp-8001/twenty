@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { defineFrontComponent } from 'twenty-sdk/define';
-import { Trans, useRecordId } from 'twenty-sdk/front-component';
+import { Trans, useRecordId, useTranslate } from 'twenty-sdk/front-component';
+
+import { IconUsers } from 'twenty-ui/icon';
+import { Tag } from 'twenty-ui/primitives/data-display';
+
+import { Item, ItemList, MutedText, Page, Row } from 'src/front-components/components/layout';
+import { EmptyState, ErrorCallout, LoadingState } from 'src/front-components/components/state-views';
 
 import { PERSON_DETAILS_ROUTE_PATH } from 'src/constants/ownership.constant';
 import { PERSON_ACCOUNTS_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
@@ -10,7 +16,9 @@ type AccountRow = { id: string; proopcoId: string | null; status: string | null;
 
 const PersonAccounts = () => {
   const personId = useRecordId();
-  const [accounts, setAccounts] = useState<AccountRow[]>([]);
+  const { t } = useTranslate();
+  const [accounts, setAccounts] = useState<AccountRow[] | null>(null);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     if (!personId) {
@@ -19,23 +27,39 @@ const PersonAccounts = () => {
 
     postRoute<{ success: boolean; accounts?: AccountRow[] }>(PERSON_DETAILS_ROUTE_PATH, { personId })
       .then((result) => setAccounts(result.accounts ?? []))
-      .catch(() => setAccounts([]));
+      .catch(() => setHasError(true));
   }, [personId]);
 
+  if (hasError) {
+    return <ErrorCallout title={t('Could not load the accounts')} />;
+  }
+
+  if (accounts === null) {
+    return <LoadingState />;
+  }
+
   if (accounts.length === 0) {
-    return <p style={{ padding: 16 }}>
+    return (
+      <EmptyState icon={IconUsers}>
         <Trans>No challenge accounts.</Trans>
-      </p>;
+      </EmptyState>
+    );
   }
 
   return (
-    <ul style={{ padding: 16 }}>
-      {accounts.map((account) => (
-        <li key={account.id}>
-          {account.proopcoId} · {account.status} · {account.phase}
-        </li>
-      ))}
-    </ul>
+    <Page>
+      <ItemList>
+        {accounts.map((account) => (
+          <Item key={account.id}>
+            <Row>
+              <strong>{account.proopcoId}</strong>
+              {account.status && <Tag color="gray">{account.status}</Tag>}
+            </Row>
+            {account.phase && <MutedText>{account.phase}</MutedText>}
+          </Item>
+        ))}
+      </ItemList>
+    </Page>
   );
 };
 

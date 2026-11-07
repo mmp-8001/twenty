@@ -12,6 +12,23 @@ import {
   useTranslate,
 } from 'twenty-sdk/front-component';
 
+import { Tag } from 'twenty-ui/primitives/data-display';
+import { Button } from 'twenty-ui/primitives/input';
+
+import {
+  Card,
+  CheckboxRow,
+  FieldGroup,
+  FieldLabel,
+  MutedText,
+  Page,
+  Row,
+  SectionTitle,
+  SelectInput,
+  Stack,
+  TextArea,
+  TextInput,
+} from 'src/front-components/components/layout';
 import { ACTIVATE_OFFER_ROUTE_PATH, OFFER_OPTIONS_ROUTE_PATH } from 'src/constants/offer.constant';
 import {
   CALL_OFF_SCHEDULE_REASONS,
@@ -277,10 +294,10 @@ const CallForm = () => {
 
   if (savedCall) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
-        <h3>
+      <Page>
+        <SectionTitle>
           <Trans>Offer codes</Trans>
-        </h3>
+        </SectionTitle>
         {savedCall.options.map((option) => {
           const label = option.activation
             ? activationLabel(
@@ -296,126 +313,144 @@ const CallForm = () => {
             : null;
 
           return (
-            <div key={option.id}>
-              <button
-                type="button"
-                disabled={option.activation !== null && option.activation.status !== 'ACTIVATION_FAILED'}
-                onClick={() => activateOffer(option.id)}
-              >
-                {option.title} ({translateValue(CAPABILITY_LABELS, option.capability, t)})
-              </button>
-              {label && <span> {label}</span>}
-            </div>
+            <Card key={option.id}>
+              <Row>
+                <Button
+                  variant="outline"
+                  disabled={option.activation !== null && option.activation.status !== 'ACTIVATION_FAILED'}
+                  onClick={() => activateOffer(option.id)}
+                >
+                  {option.title}
+                </Button>
+                <Tag color="gray" variant="outline">
+                  {translateValue(CAPABILITY_LABELS, option.capability, t)}
+                </Tag>
+                {label && <MutedText>{label}</MutedText>}
+              </Row>
+            </Card>
           );
         })}
-        <button
-          type="button"
+        <Button
+          color="accent"
           onClick={() => {
             unmountFrontComponent();
             closeSidePanel();
           }}
         >
           <Trans context="call-form">Done</Trans>
-        </button>
-      </div>
+        </Button>
+      </Page>
     );
   }
 
+  const isOutsideWindow =
+    nextCallAt !== '' &&
+    isOutsideSuggestedWindow({
+      windows: windowsFor(followupWindows, isAnswered),
+      suggestedTouchNo: suggestedTouchNoFor(followupWindows, isAnswered),
+      nextCallAt: new Date(nextCallAt),
+    });
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 16 }}>
-      <label htmlFor="call-status">
-        <Trans>How did the call go?</Trans>
-      </label>
-      <select
-        id="call-status"
-        value={technicalStatus}
-        onChange={(event) => changeTechnicalStatus(event.target.value)}
-      >
-        {CALL_TECHNICAL_STATUSES.map((status) => (
-          <option key={status} value={status}>
-            {translateValue(CALL_STATUS_LABELS, status, t)}
-          </option>
-        ))}
-      </select>
-      <label htmlFor="call-note">
-        <Trans context="call-form">Note</Trans>
-      </label>
-      <textarea id="call-note" value={note} onChange={(event) => setNote(event.target.value)} />
-      {isAnswered && (
-        <fieldset>
-          <legend>
-            <Trans>Feedback reasons</Trans>
-          </legend>
-          {reasons.feedback.map((reason) => (
-            <label key={reason.id} style={{ display: 'block' }}>
-              <input
-                type="checkbox"
-                checked={feedbackReasonIds.includes(reason.id)}
-                onChange={() => toggleFeedbackReason(reason.id)}
-              />
-              {reason.title}
-            </label>
+    <Page>
+      <FieldGroup>
+        <FieldLabel htmlFor="call-status">
+          <Trans>How did the call go?</Trans>
+        </FieldLabel>
+        <SelectInput
+          id="call-status"
+          value={technicalStatus}
+          onChange={(event) => changeTechnicalStatus(event.target.value)}
+        >
+          {CALL_TECHNICAL_STATUSES.map((status) => (
+            <option key={status} value={status}>
+              {translateValue(CALL_STATUS_LABELS, status, t)}
+            </option>
           ))}
-          <label htmlFor="call-other">
-            <Trans>Other reason text</Trans>
-          </label>
-          <input
-            id="call-other"
-            value={feedbackOtherText}
-            onChange={(event) => setFeedbackOtherText(event.target.value)}
-          />
-        </fieldset>
+        </SelectInput>
+      </FieldGroup>
+      <FieldGroup>
+        <FieldLabel htmlFor="call-note">
+          <Trans context="call-form">Note</Trans>
+        </FieldLabel>
+        <TextArea id="call-note" value={note} onChange={(event) => setNote(event.target.value)} />
+      </FieldGroup>
+      {isAnswered && (
+        <Card>
+          <Stack>
+            <FieldLabel as="span">
+              <Trans>Feedback reasons</Trans>
+            </FieldLabel>
+            {reasons.feedback.map((reason) => (
+              <CheckboxRow key={reason.id}>
+                <input
+                  type="checkbox"
+                  checked={feedbackReasonIds.includes(reason.id)}
+                  onChange={() => toggleFeedbackReason(reason.id)}
+                />
+                {reason.title}
+              </CheckboxRow>
+            ))}
+            <FieldGroup>
+              <FieldLabel htmlFor="call-other">
+                <Trans>Other reason text</Trans>
+              </FieldLabel>
+              <TextInput
+                id="call-other"
+                value={feedbackOtherText}
+                onChange={(event) => setFeedbackOtherText(event.target.value)}
+              />
+            </FieldGroup>
+          </Stack>
+        </Card>
       )}
       {!isMovingToFailed && (
         <>
-          <label htmlFor="call-next">
-            <Trans>Next call</Trans>
-          </label>
-          <input
-            id="call-next"
-            type="datetime-local"
-            value={nextCallAt}
-            onChange={(event) => setNextCallAt(event.target.value)}
-          />
-          <label htmlFor="call-off-schedule">
-            <Trans>Off-schedule reason</Trans>
-            {nextCallAt !== '' &&
-            isOutsideSuggestedWindow({
-              windows: windowsFor(followupWindows, isAnswered),
-              suggestedTouchNo: suggestedTouchNoFor(followupWindows, isAnswered),
-              nextCallAt: new Date(nextCallAt),
-            })
-              ? ` ${t('(required)')}`
-              : ''}
-          </label>
-          <select
-            id="call-off-schedule"
-            value={offScheduleReason}
-            onChange={(event) => setOffScheduleReason(event.target.value)}
-          >
-            <option value="">{t('None')}</option>
-            {CALL_OFF_SCHEDULE_REASONS.map((reason) => (
-              <option key={reason} value={reason}>
-                {translateValue(OFF_SCHEDULE_LABELS, reason, t)}
-              </option>
-            ))}
-          </select>
+          <FieldGroup>
+            <FieldLabel htmlFor="call-next">
+              <Trans>Next call</Trans>
+            </FieldLabel>
+            <TextInput
+              id="call-next"
+              type="datetime-local"
+              value={nextCallAt}
+              onChange={(event) => setNextCallAt(event.target.value)}
+            />
+          </FieldGroup>
+          <FieldGroup>
+            <FieldLabel htmlFor="call-off-schedule">
+              <Trans>Off-schedule reason</Trans>
+              {isOutsideWindow ? ` ${t('(required)')}` : ''}
+            </FieldLabel>
+            <SelectInput
+              id="call-off-schedule"
+              value={offScheduleReason}
+              onChange={(event) => setOffScheduleReason(event.target.value)}
+            >
+              <option value="">{t('None')}</option>
+              {CALL_OFF_SCHEDULE_REASONS.map((reason) => (
+                <option key={reason} value={reason}>
+                  {translateValue(OFF_SCHEDULE_LABELS, reason, t)}
+                </option>
+              ))}
+            </SelectInput>
+          </FieldGroup>
         </>
       )}
-      <label>
+      <CheckboxRow>
         <input
           type="checkbox"
           checked={isMovingToFailed}
           onChange={(event) => setIsMovingToFailed(event.target.checked)}
         />
         <Trans>Move to failed</Trans>
-      </label>
+      </CheckboxRow>
       {isMovingToFailed && (
-        <>
-          <label htmlFor="call-failure">
+        <FieldGroup>
+          <FieldLabel htmlFor="call-failure">
             <Trans context="call-form">Failure reason</Trans>
-          </label>
-          <select
+          </FieldLabel>
+          <SelectInput
             id="call-failure"
             value={failureReasonId}
             onChange={(event) => setFailureReasonId(event.target.value)}
@@ -426,13 +461,13 @@ const CallForm = () => {
                 {reason.title}
               </option>
             ))}
-          </select>
-        </>
+          </SelectInput>
+        </FieldGroup>
       )}
-      <button type="button" onClick={submit} disabled={isSubmitting}>
+      <Button color="accent" onClick={submit} loading={isSubmitting} fullWidth>
         {isSubmitting ? t('Saving…') : t('Save call')}
-      </button>
-    </div>
+      </Button>
+    </Page>
   );
 };
 

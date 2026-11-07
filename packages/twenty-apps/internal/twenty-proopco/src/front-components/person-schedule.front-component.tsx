@@ -3,6 +3,12 @@ import { CoreApiClient } from 'twenty-client-sdk/core';
 import { defineFrontComponent } from 'twenty-sdk/define';
 import { msg, Trans, useRecordId, useTranslate } from 'twenty-sdk/front-component';
 
+import { IconCheckbox } from 'twenty-ui/icon';
+import { Tag } from 'twenty-ui/primitives/data-display';
+
+import { Item, ItemList, MutedText, NumericValue, Page, Row } from 'src/front-components/components/layout';
+import { EmptyState, ErrorCallout, LoadingState } from 'src/front-components/components/state-views';
+
 import { PERSON_SCHEDULE_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { translateValue } from 'src/utils/front-labels.util';
 import { formatTehranTime } from 'src/utils/format-tehran-time.util';
@@ -16,10 +22,18 @@ const TOUCH_STATUS_LABELS = {
   DEFERRED_BY_USER: msg({ message: 'Deferred by user', context: 'touch-status' }),
 };
 
+const TOUCH_STATUS_COLORS: Record<string, 'green' | 'red' | 'yellow' | 'blue'> = {
+  OPEN: 'blue',
+  DONE: 'green',
+  MISSED: 'red',
+  DEFERRED_BY_USER: 'yellow',
+};
+
 const PersonSchedule = () => {
   const personId = useRecordId();
   const { t } = useTranslate();
-  const [touches, setTouches] = useState<TouchRow[]>([]);
+  const [touches, setTouches] = useState<TouchRow[] | null>(null);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     if (!personId) {
@@ -37,6 +51,8 @@ const PersonSchedule = () => {
       const followupId = followups.edges[0]?.node.id;
 
       if (!followupId) {
+        setTouches([]);
+
         return;
       }
 
@@ -48,28 +64,45 @@ const PersonSchedule = () => {
       } as never)) as unknown as { touches: { edges: { node: TouchRow }[] } };
 
       setTouches(result.touches.edges.map(({ node }) => node));
-    })().catch(() => setTouches([]));
+    })().catch(() => setHasError(true));
   }, [personId]);
 
+  if (hasError) {
+    return <ErrorCallout title={t('Could not load the schedule')} />;
+  }
+
+  if (touches === null) {
+    return <LoadingState />;
+  }
+
   if (touches.length === 0) {
-    return <p style={{ padding: 16 }}>
+    return (
+      <EmptyState icon={IconCheckbox}>
         <Trans>The call schedule starts with the first answered call.</Trans>
-      </p>;
+      </EmptyState>
+    );
   }
 
   return (
-    <ol style={{ padding: 16 }}>
-      {touches.map((touch) => (
-        <li key={touch.id}>
-          {t('Touch {touchNo}: {start} to {end} · {status}', {
-            touchNo: touch.touchNo,
-            start: formatTehranTime(touch.windowStartAt),
-            end: formatTehranTime(touch.windowEndAt),
-            status: translateValue(TOUCH_STATUS_LABELS, touch.status, t),
-          })}
-        </li>
-      ))}
-    </ol>
+    <Page>
+      <ItemList>
+        {touches.map((touch) => (
+          <Item key={touch.id}>
+            <Row>
+              <strong>{t('Touch {touchNo}', { touchNo: touch.touchNo })}</strong>
+              <Tag color={TOUCH_STATUS_COLORS[touch.status] ?? 'gray'}>
+                {translateValue(TOUCH_STATUS_LABELS, touch.status, t)}
+              </Tag>
+            </Row>
+            <MutedText>
+              <NumericValue>
+                {formatTehranTime(touch.windowStartAt)} - {formatTehranTime(touch.windowEndAt)}
+              </NumericValue>
+            </MutedText>
+          </Item>
+        ))}
+      </ItemList>
+    </Page>
   );
 };
 
