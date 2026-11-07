@@ -12,6 +12,10 @@ import {
   COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
   COMMISSION_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
   COMMISSION_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
   FOLLOWUP_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
   FOLLOWUP_OBJECT_UNIVERSAL_IDENTIFIER,
   FOLLOWUP_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
@@ -104,6 +108,11 @@ export default defineRole({
       objectUniversalIdentifier: COMMISSION_OBJECT_UNIVERSAL_IDENTIFIER,
       logicalOperator: 'OR',
     },
+    {
+      universalIdentifier: MONTHLY_INCOME_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
+      logicalOperator: 'OR',
+    },
   ],
   rowLevelPermissionPredicates: [
     {
@@ -169,6 +178,14 @@ export default defineRole({
       operand: 'IS',
       workspaceMemberFieldUniversalIdentifier: workspaceMember.fields.id.universalIdentifier,
       predicateGroupUniversalIdentifier: COMMISSION_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+    },
+    {
+      universalIdentifier: MONTHLY_INCOME_OWN_PREDICATE_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
+      fieldUniversalIdentifier: MONTHLY_INCOME_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: 'IS',
+      workspaceMemberFieldUniversalIdentifier: workspaceMember.fields.id.universalIdentifier,
+      predicateGroupUniversalIdentifier: MONTHLY_INCOME_OWN_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
     },
   ],
   fieldPermissions: SYNCED_PERSON_FIELD_PERMISSIONS,
