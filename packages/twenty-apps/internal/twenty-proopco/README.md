@@ -127,3 +127,11 @@ Each payment must carry `accountProopcoId` to earn a commission: one Commission 
 ### Limits
 
 Each item costs two to four internal API calls, and the application is limited to 500 requests per minute. Send batches well under 200 items, and send them one after another, not in parallel.
+
+## Offers and SMS
+
+- The Full Admin creates Offers (title, capability, parameters, one fixed expiry); a Supervisor only links existing Offers to a Campaign (Campaign Offer). Rebuy and retention sets are Offer Set records; the rebuy values stay application variables. There is no combined Settings page yet.
+- After an answered call the form shows the case's offers: the Campaign's, the rebuy set or the retention set. Activation (`/proopco/activate-offer`, also the Retry route) creates one Offer Activation per offer and user, calls the code service, then queues the SMS with the `twenty-sms` app. "SMS not sent" means the enqueue failed, not that delivery failed; Resend is safe because the SMS app dedups on `offer-activation:<id>`.
+- Server variables: `CODE_SERVICE_PROVIDER` (`http` calls `PROOPCO_API_BASE_URL` `POST /crm/offer-codes` with `{ userProopcoId, capability, params, expiresAt }` and expects `{ id, code }`, an assumed contract until #39; `fake` invents codes; unset refuses), `SMS_ENQUEUE_URL`, `SMS_ENQUEUE_TOKEN`.
+- A payment sync item may carry `offerCode`; when it matches an ACTIVE activation of that user, the activation becomes USED and counts for the activating admin.
+- Deactivating an Offer (`/proopco/deactivate-offer`, Full Admin) voids its activations in the CRM only; it does not call proopco to void the code.
