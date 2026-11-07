@@ -1,6 +1,6 @@
 import { RestApiClient } from 'twenty-client-sdk/rest';
 import { defineFrontComponent } from 'twenty-sdk/define';
-import { Command, enqueueSnackbar } from 'twenty-sdk/front-component';
+import { Command, enqueueSnackbar, t } from 'twenty-sdk/front-component';
 
 import { REMOVE_DEMO_DATA_ROUTE_PATH } from 'src/constants/demo-data.constant';
 import { REMOVE_DEMO_DATA_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
@@ -15,11 +15,11 @@ const RemoveDemoDataCommand = () => {
 
       await enqueueSnackbar(
         result.success
-          ? { message: 'Demo data removed', variant: 'success' }
-          : { message: result.error ?? 'Remove demo data failed', variant: 'error' },
+          ? { message: t('Demo data removed'), variant: 'success' }
+          : { message: result.error ?? t('Remove demo data failed'), variant: 'error' },
       );
     } catch {
-      await enqueueSnackbar({ message: 'Remove demo data failed', variant: 'error' });
+      await enqueueSnackbar({ message: t('Remove demo data failed'), variant: 'error' });
     }
   };
 
