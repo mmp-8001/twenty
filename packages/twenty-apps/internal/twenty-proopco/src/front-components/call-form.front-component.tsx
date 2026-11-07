@@ -15,6 +15,13 @@ import {
   RECORD_CALL_ROUTE_PATH,
 } from 'src/constants/ownership.constant';
 import { CALL_FORM_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
+import {
+  buildTouchWindows,
+  defaultNextCallAt,
+  isOutsideSuggestedWindow,
+  suggestTouchNo,
+  type TouchWindow,
+} from 'src/utils/call-windows.util';
 
 type Reason = { id: string; title: string };
 type SaveResponse = { success: boolean; error?: string };
@@ -37,6 +44,44 @@ const loadReasons = async (): Promise<{ feedback: Reason[]; failure: Reason[] }>
   };
 };
 
+type FollowupWindows = { status: string; touches: TouchWindow[] };
+
+const loadFollowupWindows = async (personId: string): Promise<FollowupWindows | null> => {
+  const client = new CoreApiClient();
+  const { followups } = (await client.query({
+    followups: {
+      __args: { filter: { personId: { eq: personId }, openKey: { eq: personId } }, first: 1 },
+      edges: { node: { id: true, status: true } },
+    },
+  } as never)) as unknown as { followups: { edges: { node: { id: string; status: string } }[] } };
+  const followup = followups.edges[0]?.node;
+
+  if (!followup) {
+    return null;
+  }
+
+  const { touches } = (await client.query({
+    touches: {
+      __args: { filter: { followupId: { eq: followup.id } }, first: 5 },
+      edges: { node: { touchNo: true, windowStartAt: true, windowEndAt: true } },
+    },
+  } as never)) as unknown as {
+    touches: { edges: { node: { touchNo: number; windowStartAt: string; windowEndAt: string } }[] };
+  };
+
+  return {
+    status: followup.status,
+    touches: touches.edges.map(({ node }) => ({
+      touchNo: node.touchNo,
+      windowStartAt: new Date(node.windowStartAt),
+      windowEndAt: new Date(node.windowEndAt),
+    })),
+  };
+};
+
+const toLocalInputValue = (date: Date) =>
+  new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+
 const CallForm = () => {
   const [personId] = useSelectedRecordIds();
   const [reasons, setReasons] = useState<{ feedback: Reason[]; failure: Reason[] }>({
@@ -52,12 +97,52 @@ const CallForm = () => {
   const [isMovingToFailed, setIsMovingToFailed] = useState(false);
   const [failureReasonId, setFailureReasonId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [followupWindows, setFollowupWindows] = useState<FollowupWindows | null>(null);
 
   useEffect(() => {
     loadReasons().then(setReasons, () =>
       enqueueSnackbar({ message: 'Could not load the reasons', variant: 'error' }),
     );
   }, []);
+
+  // The windows an answered first call would create are not stored yet, so they are built from now.
+  const windowsFor = (loaded: FollowupWindows | null, answered: boolean) =>
+    loaded?.status === 'PENDING_FIRST_CALL'
+      ? answered
+        ? buildTouchWindows(new Date())
+        : []
+      : (loaded?.touches ?? []);
+
+  const suggestedTouchNoFor = (loaded: FollowupWindows | null, answered: boolean) =>
+    suggestTouchNo({ windows: windowsFor(loaded, answered), now: new Date(), isAnswered: answered });
+
+  const applyDefaultNextCall = (loaded: FollowupWindows | null, status: string) => {
+    const answered = status === 'ANSWERED';
+    const suggested = defaultNextCallAt({
+      windows: windowsFor(loaded, answered),
+      suggestedTouchNo: suggestedTouchNoFor(loaded, answered),
+      now: new Date(),
+    });
+
+    setNextCallAt(suggested ? toLocalInputValue(suggested) : '');
+  };
+
+  useEffect(() => {
+    if (personId) {
+      loadFollowupWindows(personId).then(
+        (loaded) => {
+          setFollowupWindows(loaded);
+          applyDefaultNextCall(loaded, 'ANSWERED');
+        },
+        () => setFollowupWindows(null),
+      );
+    }
+  }, [personId]);
+
+  const changeTechnicalStatus = (status: string) => {
+    setTechnicalStatus(status);
+    applyDefaultNextCall(followupWindows, status);
+  };
 
   const isAnswered = technicalStatus === 'ANSWERED';
 
@@ -104,7 +189,7 @@ const CallForm = () => {
       <select
         id="call-status"
         value={technicalStatus}
-        onChange={(event) => setTechnicalStatus(event.target.value)}
+        onChange={(event) => changeTechnicalStatus(event.target.value)}
       >
         {CALL_TECHNICAL_STATUSES.map((status) => (
           <option key={status} value={status}>
@@ -144,7 +229,17 @@ const CallForm = () => {
             value={nextCallAt}
             onChange={(event) => setNextCallAt(event.target.value)}
           />
-          <label htmlFor="call-off-schedule">Off-schedule reason</label>
+          <label htmlFor="call-off-schedule">
+            Off-schedule reason
+            {nextCallAt !== '' &&
+            isOutsideSuggestedWindow({
+              windows: windowsFor(followupWindows, isAnswered),
+              suggestedTouchNo: suggestedTouchNoFor(followupWindows, isAnswered),
+              nextCallAt: new Date(nextCallAt),
+            })
+              ? ' (required)'
+              : ''}
+          </label>
           <select
             id="call-off-schedule"
             value={offScheduleReason}
