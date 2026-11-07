@@ -214,6 +214,9 @@ describe('Freeze, transfer, deactivation and audit log', () => {
     expect(await freeze('supervisor', 'agent', 'Sick leave')).toEqual({ success: true });
     expect(await statusOf('agent')).toMatchObject({ crmStatus: 'FROZEN' });
     expect((await statusOf('agent')).frozenSince).toBeTruthy();
+    expect(
+      (await route('agent', ADD_TO_FOLLOWUP_ROUTE_PATH, { personId: '00000000-0000-4000-8000-000000000000' })).error,
+    ).toBe('Your account is frozen or deactivated');
     expect(await freeze('supervisor', 'agent')).toMatchObject({ success: false, error: 'This admin is not active' });
     expect(await auditOf(ids.agent, 'FREEZE')).toMatchObject([{ actorId: ids.supervisor, reason: 'Sick leave' }]);
 
@@ -269,7 +272,12 @@ describe('Freeze, transfer, deactivation and audit log', () => {
   });
 
   it('keeps a rebuy case created during a freeze at its full 72h until unfreeze (FRZ-03)', async () => {
+    // A frozen admin cannot add users, so the case is owned first and the freeze comes after.
+    await unfreeze('supervisor', 'agent');
+
     const user = await ownedUser('agent', 'rebuy', 'SUCCESSFUL');
+
+    expect(await freeze('supervisor', 'agent', 'Rebuy during freeze')).toEqual({ success: true });
 
     await sync([{ type: 'account', proopcoId: `${user.proopcoId}-a1`, data: { userProopcoId: user.proopcoId, status: 'active' } }]);
     await sync([{ type: 'account', proopcoId: `${user.proopcoId}-a1`, data: { userProopcoId: user.proopcoId, status: 'breached' } }]);
