@@ -25,7 +25,7 @@ export const unfreezeAdminHandler = (routePayload: RoutePayload<unknown>) =>
 export default defineLogicFunction({
   universalIdentifier: UNFREEZE_ADMIN_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-unfreeze-admin',
-  description: 'Unfreezes an Admin: deadlines resume and open call windows shift.',
+  description: 'Unfreezes an Agent: deadlines resume and open call windows shift.',
   timeoutSeconds: 120,
   handler: unfreezeAdminHandler,
   httpRouteTriggerSettings: { path: UNFREEZE_ADMIN_ROUTE_PATH, httpMethod: 'POST', isAuthRequired: true },

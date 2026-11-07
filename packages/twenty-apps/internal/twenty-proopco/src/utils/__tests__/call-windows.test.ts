@@ -135,7 +135,7 @@ describe('planTouchChanges', () => {
     ).toEqual([{ touchNo: 4, status: 'DONE' }]);
   });
 
-  it('leaves the skipped window open on an admin decision so it counts as missed', () => {
+  it('leaves the skipped window open on an agent decision so it counts as missed', () => {
     expect(
       planTouchChanges({ touches, now: tehranDay(2), isAnswered: true, suggestedTouchNo: 3, offScheduleReason: 'ADMIN_DECISION', nextCallAt: tehranDay(10) }),
     ).toEqual([{ touchNo: 2, status: 'DONE' }]);

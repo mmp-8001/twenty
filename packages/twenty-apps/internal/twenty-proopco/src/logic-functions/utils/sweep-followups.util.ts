@@ -56,7 +56,7 @@ export const sweepFollowups = async ({
   const cooldownDaysByCampaignId = new Map(
     campaigns.map(({ id, cooldownDays }) => [id, cooldownDays ?? 0]),
   );
-  // A frozen Admin's cases have no deadline, so the lte filter leaves them alone.
+  // A frozen Agent's cases have no deadline, so the lte filter leaves them alone.
   const dueFollowups = await listRecords<DueFollowup>(
     client,
     'followups',
@@ -101,7 +101,7 @@ export const sweepFollowups = async ({
     }
   }
 
-  // A frozen Admin's windows wait: unfreeze shifts them, so they must not be missed meanwhile.
+  // A frozen Agent's windows wait: unfreeze shifts them, so they must not be missed meanwhile.
   const frozenAdminIds = (
     await listRecords<{ id: string }>(client, 'workspaceMembers', { crmStatus: { eq: 'FROZEN' } }, {})
   ).map(({ id }) => id);

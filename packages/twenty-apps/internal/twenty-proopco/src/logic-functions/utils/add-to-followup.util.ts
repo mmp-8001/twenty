@@ -24,7 +24,7 @@ export type AddToFollowupResult =
 const openOwnershipExists = async (client: RecordsClient, personId: string) =>
   (await listRecords(client, 'ownerships', { openUserKey: { eq: personId } }, {})).length > 0;
 
-// Campaign the Admin works this User through: the first candidate Campaign the Admin is assigned to.
+// Campaign the Agent works this User through: the first candidate Campaign the Agent is assigned to.
 const pickCampaignId = async (
   client: RecordsClient,
   memberId: string,

@@ -17,7 +17,7 @@ export default defineField({
   type: FieldType.RELATION,
   name: 'ownedUsers',
   label: 'Owned Users',
-  description: 'Users this admin owns.',
+  description: 'Users this agent owns.',
   icon: 'IconUsers',
   isNullable: true,
   isUIEditable: false,

@@ -65,7 +65,7 @@ const ACTIVATION_MESSAGES = {
 
 const OFF_SCHEDULE_LABELS = {
   USER_REQUEST: msg({ message: 'User request', context: 'off-schedule-reason' }),
-  ADMIN_DECISION: msg({ message: 'Admin decision', context: 'off-schedule-reason' }),
+  ADMIN_DECISION: msg({ message: 'Agent decision', context: 'off-schedule-reason' }),
 };
 
 const CAPABILITY_LABELS = {

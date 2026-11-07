@@ -18,7 +18,7 @@ export default defineField({
   type: FieldType.RELATION,
   name: 'currentOwner',
   label: 'Current owner',
-  description: 'Admin who owns this User right now. Empty means unowned.',
+  description: 'Agent who owns this User right now. Empty means unowned.',
   icon: 'IconUserCircle',
   isNullable: true,
   isUIEditable: false,

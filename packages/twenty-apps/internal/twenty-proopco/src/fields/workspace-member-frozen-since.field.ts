@@ -13,7 +13,7 @@ export default defineField({
   type: FieldType.DATE_TIME,
   name: 'frozenSince',
   label: 'Frozen since',
-  description: 'When the admin was frozen. Empty unless frozen.',
+  description: 'When the agent was frozen. Empty unless frozen.',
   icon: 'IconSnowflake',
   isNullable: true,
   isUIEditable: false,

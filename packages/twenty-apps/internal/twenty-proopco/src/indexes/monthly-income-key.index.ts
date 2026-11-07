@@ -7,7 +7,7 @@ import {
   MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
 } from 'src/constants/universal-identifiers';
 
-// An Admin has one income per Jalali month, even if two rollups race.
+// An Agent has one income per Jalali month, even if two rollups race.
 export default defineIndex({
   universalIdentifier: MONTHLY_INCOME_KEY_UNIQUE_INDEX_UNIVERSAL_IDENTIFIER,
   objectUniversalIdentifier: MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,

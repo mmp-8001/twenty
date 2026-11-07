@@ -15,7 +15,7 @@ export type AdminRow = {
   countsByState: Record<string, number>;
 };
 
-// The Admins page and the frozen-admins list: every Sales Admin and Supervisor with what they own.
+// The Sales Team page and the frozen-agents list: every Sales Agent and Supervisor with what they own.
 export const readAdmins = async ({
   client,
   roleKeys,

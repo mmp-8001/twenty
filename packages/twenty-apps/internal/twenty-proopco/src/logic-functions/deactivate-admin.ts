@@ -24,7 +24,7 @@ export const deactivateAdminHandler = (routePayload: RoutePayload<unknown>) =>
 export default defineLogicFunction({
   universalIdentifier: DEACTIVATE_ADMIN_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-deactivate-admin',
-  description: 'Deactivates an Admin who owns no users. Full Admin only.',
+  description: 'Deactivates an Agent who owns no users. Full Admin only.',
   timeoutSeconds: 30,
   handler: deactivateAdminHandler,
   httpRouteTriggerSettings: { path: DEACTIVATE_ADMIN_ROUTE_PATH, httpMethod: 'POST', isAuthRequired: true },

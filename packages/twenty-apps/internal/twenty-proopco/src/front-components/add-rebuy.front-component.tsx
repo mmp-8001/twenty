@@ -12,7 +12,7 @@ const SERVER_ERRORS = [
   msg('Sign in required'),
   msg('Your account is frozen or deactivated'),
   msg('This rebuy user is no longer available'),
-  msg("This user is in another admin's follow-up list"),
+  msg("This user is in another agent's follow-up list"),
 ];
 
 const AddRebuyCommand = () => {

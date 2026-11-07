@@ -165,8 +165,8 @@ describe('Offers and SMS', () => {
 
   beforeAll(async () => {
     const assigned = await assignSeededRoles([
-      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Admin' },
-      { email: SEEDED_OTHER_AGENT_EMAIL, roleLabel: 'Sales Admin' },
+      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Agent' },
+      { email: SEEDED_OTHER_AGENT_EMAIL, roleLabel: 'Sales Agent' },
       { email: SUPERVISOR_EMAIL, roleLabel: 'Supervisor' },
       { email: SEEDED_MANAGER_EMAIL, roleLabel: 'Full Admin' },
     ]);
@@ -451,7 +451,7 @@ describe('Offers and SMS', () => {
     expect((await route('full', DEACTIVATE_OFFER_ROUTE_PATH, { offerId })).success).toBe(false);
   });
 
-  it('credits the activating admin when a purchase uses the code, whoever owns the user later (RS2)', async () => {
+  it('credits the activating agent when a purchase uses the code, whoever owns the user later (RS2)', async () => {
     const offerId = await createOffer('rs2');
 
     await create('OfferSet', { setType: 'RETENTION', offerId });

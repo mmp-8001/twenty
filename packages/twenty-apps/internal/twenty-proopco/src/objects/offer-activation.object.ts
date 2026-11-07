@@ -44,7 +44,7 @@ export default defineObject({
   namePlural: 'offerActivations',
   labelSingular: 'Offer Activation',
   labelPlural: 'Offer Activations',
-  description: 'An Offer activated for one User by one Admin.',
+  description: 'An Offer activated for one User by one Agent.',
   icon: 'IconTicket',
   disabledObjectPermissionActions: [
     'canUpdateObjectRecords',
@@ -93,7 +93,7 @@ export default defineObject({
       type: FieldType.TEXT,
       name: 'adminId',
       label: 'Activated by (member id)',
-      description: 'The Admin credited with "code used" when a purchase uses the code.',
+      description: 'The Agent credited with "code used" when a purchase uses the code.',
       icon: 'IconHeadset',
       isNullable: true,
     },

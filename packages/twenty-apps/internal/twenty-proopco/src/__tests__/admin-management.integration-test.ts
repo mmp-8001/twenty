@@ -164,7 +164,7 @@ describe('Freeze, transfer, deactivation and audit log', () => {
 
   beforeAll(async () => {
     const assigned = await assignSeededRoles([
-      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Admin' },
+      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Agent' },
       { email: SECOND_SALES_ADMIN_EMAIL, roleLabel: 'Supervisor' },
       { email: SEEDED_OTHER_AGENT_EMAIL, roleLabel: 'Supervisor' },
       { email: SEEDED_MANAGER_EMAIL, roleLabel: 'Full Admin' },
@@ -217,7 +217,7 @@ describe('Freeze, transfer, deactivation and audit log', () => {
     expect(
       (await route('agent', ADD_TO_FOLLOWUP_ROUTE_PATH, { personId: '00000000-0000-4000-8000-000000000000' })).error,
     ).toBe('Your account is frozen or deactivated');
-    expect(await freeze('supervisor', 'agent')).toMatchObject({ success: false, error: 'This admin is not active' });
+    expect(await freeze('supervisor', 'agent')).toMatchObject({ success: false, error: 'This agent is not active' });
     expect(await auditOf(ids.agent, 'FREEZE')).toMatchObject([{ actorId: ids.supervisor, reason: 'Sick leave' }]);
 
     expect(await freeze('full', 'supervisor2', 'Audit')).toEqual({ success: true });
@@ -323,7 +323,7 @@ describe('Freeze, transfer, deactivation and audit log', () => {
   });
 
   it('transfers users with remaining time, linked cases and visible calls (S13, TRF-01, TRF-02)', async () => {
-    const secondRole = await assignSeededRoles([{ email: SECOND_SALES_ADMIN_EMAIL, roleLabel: 'Sales Admin' }]);
+    const secondRole = await assignSeededRoles([{ email: SECOND_SALES_ADMIN_EMAIL, roleLabel: 'Sales Agent' }]);
 
     restoreSecondRole = secondRole.restore;
 
@@ -352,7 +352,7 @@ describe('Freeze, transfer, deactivation and audit log', () => {
 
     expect(result.results?.map(({ status }) => status)).toEqual(['DONE', 'DONE', 'DONE']);
 
-    // Old records close and keep their admin (invariant 5).
+    // Old records close and keep their agent (invariant 5).
     expect(await followupOf(inFollowup.followupId)).toMatchObject({ status: 'TRANSFERRED', openKey: '', adminId: ids.agent });
     expect((await followupOf(inFollowup.followupId)).closedAt).toBeTruthy();
     expect(await ownershipOf(inFollowup.ownershipId)).toMatchObject({ endReason: 'TRANSFERRED', openUserKey: '', adminId: ids.agent });
@@ -407,7 +407,7 @@ describe('Freeze, transfer, deactivation and audit log', () => {
     expect(await auditOf(inFollowup.personId, 'TRANSFER')).toHaveLength(1);
   });
 
-  it('refuses deactivation while the admin owns users, then deactivates after release (S14)', async () => {
+  it('refuses deactivation while the agent owns users, then deactivates after release (S14)', async () => {
     const [existing] = await readAll('ownerships', { adminId: { eq: ids.other }, openUserKey: { is: 'NOT_NULL' } }, {});
 
     expect(existing).toBeTruthy();

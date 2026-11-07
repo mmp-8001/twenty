@@ -28,7 +28,7 @@ export default defineObject({
   namePlural: 'monthlyIncomes',
   labelSingular: 'Monthly income',
   labelPlural: 'Monthly incomes',
-  description: 'One Admin\'s Commissions for one Jalali month.',
+  description: 'One Agent\'s Commissions for one Jalali month.',
   icon: 'IconCoin',
   disabledObjectPermissionActions: [
     'canUpdateObjectRecords',
@@ -44,14 +44,14 @@ export default defineObject({
       type: FieldType.TEXT,
       name: 'incomeKey',
       label: 'Income key',
-      description: 'Admin id and Jalali year-month. A unique index allows one income per Admin and month.',
+      description: 'Agent id and Jalali year-month. A unique index allows one income per Agent and month.',
       icon: 'IconKey',
     },
     {
       universalIdentifier: MONTHLY_INCOME_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
       type: FieldType.RELATION,
       name: 'admin',
-      label: 'Admin',
+      label: 'Agent',
       icon: 'IconHeadset',
       isNullable: true,
       relationTargetObjectMetadataUniversalIdentifier:

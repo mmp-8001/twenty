@@ -11,7 +11,7 @@ export default defineField({
   type: FieldType.ARRAY,
   name: 'visibleToMemberIds',
   label: 'Visible to members',
-  description: 'The Admin who made the call and every later owner of the User. Set by the app.',
+  description: 'The Agent who made the call and every later owner of the User. Set by the app.',
   icon: 'IconEye',
   isNullable: true,
   isUIEditable: false,
