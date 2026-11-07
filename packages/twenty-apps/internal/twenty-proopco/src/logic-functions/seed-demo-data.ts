@@ -6,7 +6,7 @@ import { listRecords } from 'src/logic-functions/utils/list-records.util';
 import { runAdminRoute } from 'src/logic-functions/utils/run-admin-route.util';
 import { seedDemoData } from 'src/logic-functions/utils/seed-demo-data.util';
 
-// The Full Admin does no operational work, so demo cases belong to active Sales Admins or Supervisors.
+// The Full Admin does no operational work, so demo cases belong to active Sales Agents or Supervisors.
 // A real member is never frozen or otherwise changed.
 export const seedDemoDataHandler = (routePayload: RoutePayload<unknown>) =>
   runAdminRoute(
@@ -20,7 +20,7 @@ export const seedDemoDataHandler = (routePayload: RoutePayload<unknown>) =>
         .map(({ id }) => id);
 
       if (!ownerA) {
-        return { success: false, error: 'Demo data needs at least one active Sales Admin or Supervisor' };
+        return { success: false, error: 'Demo data needs at least one active Sales Agent or Supervisor' };
       }
 
       return { success: true, ...(await seedDemoData({ client, callerId, members: { ownerA, ownerB } })) };

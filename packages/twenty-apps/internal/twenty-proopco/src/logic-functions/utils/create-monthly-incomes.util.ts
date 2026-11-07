@@ -18,7 +18,7 @@ type IncomeRow = { id: string; status: string | null };
 const findIncome = async (client: RecordsClient, incomeKey: string) =>
   (await listRecords<IncomeRow>(client, 'monthlyIncomes', { incomeKey: { eq: incomeKey } }, { status: true }))[0];
 
-// The previous Jalali month's unassigned Commissions become one pending income per Admin.
+// The previous Jalali month's unassigned Commissions become one pending income per Agent.
 // A second run finds nothing unassigned and creates nothing; a PAID income is never reopened.
 export const createMonthlyIncomes = async ({
   client,

@@ -25,7 +25,7 @@ export const freezeAdminHandler = (routePayload: RoutePayload<unknown>) =>
 export default defineLogicFunction({
   universalIdentifier: FREEZE_ADMIN_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-freeze-admin',
-  description: 'Freezes an Admin: their cases keep the remaining time and lose their deadline.',
+  description: 'Freezes an Agent: their cases keep the remaining time and lose their deadline.',
   timeoutSeconds: 60,
   handler: freezeAdminHandler,
   httpRouteTriggerSettings: { path: FREEZE_ADMIN_ROUTE_PATH, httpMethod: 'POST', isAuthRequired: true },

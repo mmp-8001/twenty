@@ -9,18 +9,18 @@ import {
 
 export default definePageLayout({
   universalIdentifier: ADMINS_PAGE_LAYOUT_UNIVERSAL_IDENTIFIER,
-  name: 'Admins',
+  name: 'Sales Team',
   type: PageLayoutType.STANDALONE_PAGE,
   tabs: [
     {
       universalIdentifier: ADMINS_PAGE_LAYOUT_TAB_UNIVERSAL_IDENTIFIER,
-      title: 'Admins',
+      title: 'Sales Team',
       position: 0,
       layoutMode: PageLayoutTabLayoutMode.VERTICAL_LIST,
       widgets: [
         {
           universalIdentifier: ADMINS_WIDGET_UNIVERSAL_IDENTIFIER,
-          title: 'Admins',
+          title: 'Sales Team',
           type: 'FRONT_COMPONENT',
           heightBehavior: 'TAB_VIEWPORT',
           configuration: {

@@ -150,7 +150,7 @@ describe('Purchases, commission, retention and rebuy', () => {
   };
 
   beforeAll(async () => {
-    const assigned = await assignSeededRoles([{ email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Admin' }]);
+    const assigned = await assignSeededRoles([{ email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Agent' }]);
 
     restoreRoles = assigned.restore;
     agentId = assigned.memberIds[SEEDED_AGENT_EMAIL];

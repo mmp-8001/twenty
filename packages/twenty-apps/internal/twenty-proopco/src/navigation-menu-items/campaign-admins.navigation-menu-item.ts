@@ -11,7 +11,7 @@ import {
 export default defineNavigationMenuItem({
   universalIdentifier: CAMPAIGN_ADMINS_NAVIGATION_UNIVERSAL_IDENTIFIER,
   type: NavigationMenuItemType.VIEW,
-  name: 'Campaign Admins',
+  name: 'Campaign Agents',
   icon: 'IconUserPlus',
   position: 101,
   viewUniversalIdentifier: CAMPAIGN_ADMINS_VIEW_UNIVERSAL_IDENTIFIER,

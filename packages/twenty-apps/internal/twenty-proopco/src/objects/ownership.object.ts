@@ -30,7 +30,7 @@ export default defineObject({
   namePlural: 'ownerships',
   labelSingular: 'Ownership',
   labelPlural: 'Ownerships',
-  description: 'Which Admin owns a User, and for how long. Closed, never deleted.',
+  description: 'Which Agent owns a User, and for how long. Closed, never deleted.',
   icon: 'IconUserCheck',
   disabledObjectPermissionActions: [
     'canSoftDeleteObjectRecords',
@@ -58,7 +58,7 @@ export default defineObject({
       universalIdentifier: OWNERSHIP_ADMIN_FIELD_UNIVERSAL_IDENTIFIER,
       type: FieldType.RELATION,
       name: 'admin',
-      label: 'Admin',
+      label: 'Agent',
       icon: 'IconHeadset',
       isNullable: true,
       relationTargetObjectMetadataUniversalIdentifier:

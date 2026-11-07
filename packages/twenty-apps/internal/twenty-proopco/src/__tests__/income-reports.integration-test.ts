@@ -118,8 +118,8 @@ describe('Monthly income and reports', () => {
 
   beforeAll(async () => {
     const assigned = await assignSeededRoles([
-      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Admin' },
-      { email: SECOND_SALES_ADMIN_EMAIL, roleLabel: 'Sales Admin' },
+      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Agent' },
+      { email: SECOND_SALES_ADMIN_EMAIL, roleLabel: 'Sales Agent' },
       { email: SEEDED_OTHER_AGENT_EMAIL, roleLabel: 'Supervisor' },
       { email: SEEDED_MANAGER_EMAIL, roleLabel: 'Full Admin' },
     ]);
@@ -153,7 +153,7 @@ describe('Monthly income and reports', () => {
     }
   });
 
-  it('rolls the previous Jalali month into one pending income per admin and never twice (CS2)', async () => {
+  it('rolls the previous Jalali month into one pending income per agent and never twice (CS2)', async () => {
     expect(await rollup()).toMatchObject({ success: true, year: YEAR, month: MONTH, incomes: 2 });
 
     expect(await incomesOf('agent')).toMatchObject([{ status: 'PENDING', totalUsdt: 20 }]);
@@ -186,7 +186,7 @@ describe('Monthly income and reports', () => {
     expect(await incomesOf('agent')).toMatchObject([{ status: 'PAID', totalUsdt: 20 }]);
   });
 
-  it('shows a Sales Admin only their own commissions and incomes', async () => {
+  it('shows a Sales Agent only their own commissions and incomes', async () => {
     const read = async (collection: string) => {
       const { data, errors } = await userRequest<Record<string, { edges: { node: Row }[] }>>({
         token: tokens.agent,

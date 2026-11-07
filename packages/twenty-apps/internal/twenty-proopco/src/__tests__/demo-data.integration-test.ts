@@ -55,7 +55,7 @@ describe('Demo data', () => {
 
   beforeAll(async () => {
     const assigned = await assignSeededRoles([
-      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Admin' },
+      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Agent' },
       { email: SEEDED_OTHER_AGENT_EMAIL, roleLabel: 'Supervisor' },
       { email: SEEDED_MANAGER_EMAIL, roleLabel: 'Full Admin' },
     ]);

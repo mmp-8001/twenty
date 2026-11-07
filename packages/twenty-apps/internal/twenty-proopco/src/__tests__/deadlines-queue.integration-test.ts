@@ -185,7 +185,7 @@ describe('Deadlines, call windows and the My follow-ups queue', () => {
 
   beforeAll(async () => {
     const assigned = await assignSeededRoles([
-      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Admin' },
+      { email: SEEDED_AGENT_EMAIL, roleLabel: 'Sales Agent' },
     ]);
 
     restoreRoles = assigned.restore;

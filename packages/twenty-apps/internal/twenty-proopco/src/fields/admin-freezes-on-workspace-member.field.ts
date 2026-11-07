@@ -16,7 +16,7 @@ export default defineField({
   objectUniversalIdentifier: STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS.workspaceMember.universalIdentifier,
   type: FieldType.RELATION,
   name: 'adminFreezes',
-  label: 'Admin freezes',
+  label: 'Agent freezes',
   icon: 'IconSnowflake',
   isNullable: true,
   isUIEditable: false,

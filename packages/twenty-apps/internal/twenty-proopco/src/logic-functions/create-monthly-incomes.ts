@@ -34,7 +34,7 @@ export const createMonthlyIncomesHandler = async (payload: unknown) => {
 export default defineLogicFunction({
   universalIdentifier: CREATE_MONTHLY_INCOMES_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-create-monthly-incomes',
-  description: 'On the first Jalali day, rolls the previous month Commissions into one pending income per Admin.',
+  description: 'On the first Jalali day, rolls the previous month Commissions into one pending income per Agent.',
   timeoutSeconds: 120,
   handler: createMonthlyIncomesHandler,
   cronTriggerSettings: { pattern: CREATE_MONTHLY_INCOMES_CRON_PATTERN },

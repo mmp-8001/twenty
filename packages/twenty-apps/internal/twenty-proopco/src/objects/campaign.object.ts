@@ -20,7 +20,7 @@ export default defineObject({
   namePlural: 'campaigns',
   labelSingular: 'Campaign',
   labelPlural: 'Campaigns',
-  description: 'A Segment given to Admins to work, with a cooldown and a time window.',
+  description: 'A Segment given to Agents to work, with a cooldown and a time window.',
   icon: 'IconSpeakerphone',
   disabledObjectPermissionActions: [
     'canSoftDeleteObjectRecords',
@@ -94,7 +94,7 @@ export default defineObject({
       universalIdentifier: CAMPAIGN_ADMINS_ON_CAMPAIGN_FIELD_UNIVERSAL_IDENTIFIER,
       type: FieldType.RELATION,
       name: 'campaignAdmins',
-      label: 'Admins',
+      label: 'Agents',
       icon: 'IconHeadset',
       isNullable: true,
       relationTargetObjectMetadataUniversalIdentifier:

@@ -11,7 +11,7 @@ import { HOUR_MS } from 'src/constants/time.constant';
 export const isActiveAccountStatus = (status: string | null | undefined) =>
   status?.trim().toLowerCase() === ACTIVE_ACCOUNT_STATUS;
 
-// A successful User whose active accounts drop to zero goes to their admin's Rebuy list.
+// A successful User whose active accounts drop to zero goes to their agent's Rebuy list.
 // Runs after every Account sync item; once the Ownership leaves SUCCESSFUL it does nothing.
 export const detectLostLastAccount = async ({
   client,
@@ -64,7 +64,7 @@ export const detectLostLastAccount = async ({
   );
 
   if (!openFollowup) {
-    // A frozen Admin's rebuy case holds its full 72h until unfreeze.
+    // A frozen Agent's rebuy case holds its full 72h until unfreeze.
     const [admin] = ownership.adminId
       ? await listRecords<{ crmStatus: string | null }>(
           client,

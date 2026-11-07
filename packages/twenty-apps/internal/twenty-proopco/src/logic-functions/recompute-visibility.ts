@@ -25,7 +25,7 @@ export default defineLogicFunction({
   universalIdentifier: RECOMPUTE_VISIBILITY_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-recompute-visibility',
   description:
-    'Rewrites every User list from the active Campaigns, their Segments and Admins.',
+    'Rewrites every User list from the active Campaigns, their Segments and Agents.',
   timeoutSeconds: 300,
   handler: recomputeVisibilityHandler,
   cronTriggerSettings: { pattern: RECOMPUTE_VISIBILITY_CRON_PATTERN },

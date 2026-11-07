@@ -29,7 +29,7 @@ export const flagLongFreezesHandler = async (payload: unknown) => {
 export default defineLogicFunction({
   universalIdentifier: FLAG_LONG_FREEZES_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'proopco-flag-long-freezes',
-  description: 'Daily: flags Admin freezes that reached day 7.',
+  description: 'Daily: flags Agent freezes that reached day 7.',
   timeoutSeconds: 60,
   handler: flagLongFreezesHandler,
   cronTriggerSettings: { pattern: FLAG_LONG_FREEZES_CRON_PATTERN },

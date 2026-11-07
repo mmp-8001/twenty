@@ -233,7 +233,7 @@ const IncomeTable = ({
 
 const RankingTable = ({ admins, locale, t }: { admins: TeamReport['admins']; locale: string; t: Translate }) =>
   admins.length === 0 ? (
-    <EmptyState icon={IconUsers}>{t('No admins yet.')}</EmptyState>
+    <EmptyState icon={IconUsers}>{t('No agents yet.')}</EmptyState>
   ) : (
     <TableWrapper>
       <Table>
@@ -241,7 +241,7 @@ const RankingTable = ({ admins, locale, t }: { admins: TeamReport['admins']; loc
           <tr>
             <HeaderCell>#</HeaderCell>
             <HeaderCell>
-              <Trans>Admin</Trans>
+              <Trans>Agent</Trans>
             </HeaderCell>
             <HeaderCell>{t('Conversion rate')}</HeaderCell>
             <HeaderCell>{t('Revenue (USDT)')}</HeaderCell>
@@ -402,7 +402,7 @@ const Reports = () => {
                   <thead>
                     <tr>
                       <HeaderCell>
-                        <Trans>Admin</Trans>
+                        <Trans>Agent</Trans>
                       </HeaderCell>
                       <HeaderCell>{t('Month')}</HeaderCell>
                       <HeaderCell>{t('Total (USDT)')}</HeaderCell>
@@ -446,6 +446,6 @@ const Reports = () => {
 export default defineFrontComponent({
   universalIdentifier: REPORTS_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER,
   name: 'reports',
-  description: 'My report for every Admin; team report and Mark paid for Supervisors and the Full Admin.',
+  description: 'My report for every Agent; team report and Mark paid for Supervisors and the Full Admin.',
   component: Reports,
 });
