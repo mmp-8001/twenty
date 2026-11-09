@@ -110,6 +110,7 @@ const workspaceMember: FlatWorkspaceMember = {
   userEmail: null,
   jobTitle: null,
   calendarStartDay: 0,
+  calendar: 'GREGORIAN',
   timeZone: 'system',
   dateFormat: 'SYSTEM',
   timeFormat: 'SYSTEM',
