@@ -105,3 +105,16 @@ A platform reward with one capability (discount, reset or two-step payment) and 
 
 **Code activation**:
 One discount code turned on for one contact.
+
+## Platform
+
+**Platform**:
+The Proopco system where users sign up, buy challenge accounts and receive discount codes and SMS. It is the source of truth for users, accounts and purchases.
+
+**Platform event**:
+A fact the platform reports about a contact: a profile change, a purchase, or a last account lost. It counts by when it happened, not when the CRM received it.
+_Avoid_: Webhook, sync
+
+**Last account lost**:
+A customer's final active challenge account ended, leaving them with none. Losing one of several accounts is not this.
+_Avoid_: Account lost, churn
