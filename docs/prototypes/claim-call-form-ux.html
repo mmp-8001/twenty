@@ -1,0 +1,566 @@
+<title>Claim and Call Form</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+<style>
+/* PROTOTYPE, throwaway. Layout: prototype bar, mock Twenty window (record page + side panel), then live state. Mimics twenty-ui look. */
+:root{
+  --bg:#f3f3f1; --surface:#fff; --surface2:#fafafa; --hover:#f1f1f1; --border:#ebebeb; --border2:#d6d6d6;
+  --fg:#333; --fg2:#666; --fg3:#999; --accent:#1961ed; --accent-soft:#e8efff;
+  --danger:#cf2f37; --danger-soft:#fdeded; --ok:#18794e; --ok-soft:#e5f4ea; --warn:#9a5100; --warn-soft:#fff2df;
+  --proto-bg:#1b1b1b; --proto-fg:#fafafa; --proto-dim:#a8a8a8;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",sans-serif; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f0f0f; --surface:#171717; --surface2:#1d1d1d; --hover:#262626; --border:#2b2b2b; --border2:#3a3a3a;
+  --fg:#ebebeb; --fg2:#b3b3b3; --fg3:#808080; --accent:#5b8cff; --accent-soft:#1c2a4a;
+  --danger:#ff6b70; --danger-soft:#3a1d1f; --ok:#4cc38a; --ok-soft:#163324; --warn:#f0a44b; --warn-soft:#3a2810;
+  --proto-bg:#fafafa; --proto-fg:#151515; --proto-dim:#5c5c5c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f0f0f; --surface:#171717; --surface2:#1d1d1d; --hover:#262626; --border:#2b2b2b; --border2:#3a3a3a;
+  --fg:#ebebeb; --fg2:#b3b3b3; --fg3:#808080; --accent:#5b8cff; --accent-soft:#1c2a4a;
+  --danger:#ff6b70; --danger-soft:#3a1d1f; --ok:#4cc38a; --ok-soft:#163324; --warn:#f0a44b; --warn-soft:#3a2810;
+  --proto-bg:#fafafa; --proto-fg:#151515; --proto-dim:#5c5c5c; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:13px/1.45 var(--font)}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 96px;max-width:1280px;margin:0 auto;display:grid;gap:16px}
+
+.proto{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;background:var(--proto-bg);color:var(--proto-fg);border-radius:10px;padding:10px 14px}
+.proto b{font-weight:600}
+.proto .tag{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--proto-dim)}
+.proto label{display:flex;gap:8px;align-items:center;color:var(--proto-dim)}
+.proto select{background:transparent;color:var(--proto-fg);border:1px solid var(--proto-dim);border-radius:6px;padding:4px 6px;max-width:100%}
+.proto select option{color:#151515;background:#fff}
+.seg-switch{display:inline-flex;border:1px solid var(--proto-dim);border-radius:6px;overflow:hidden}
+.seg-switch button{background:transparent;border:0;padding:4px 10px;cursor:pointer;color:var(--proto-dim)}
+.seg-switch button[aria-pressed="true"]{background:var(--proto-fg);color:var(--proto-bg)}
+
+.app{position:relative;display:grid;grid-template-columns:52px minmax(0,1fr) 400px;min-height:660px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.app.nopanel{grid-template-columns:52px minmax(0,1fr)}
+.nav{background:var(--surface2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:14px}
+.nav i{width:22px;height:22px;border-radius:5px;background:var(--border);display:block}
+.nav i.on{background:var(--accent)}
+.record{min-width:0;display:flex;flex-direction:column}
+.crumbs{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border);color:var(--fg2)}
+.cmds{display:flex;gap:6px;flex-wrap:wrap}
+.rec-head{display:flex;align-items:center;gap:12px;padding:20px 24px 12px}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:600}
+.rec-head h1{font-size:18px;margin:0;font-weight:600}
+.fields{display:grid;grid-template-columns:150px minmax(0,1fr);gap:2px 12px;padding:4px 24px 24px}
+.fields dt{color:var(--fg3);padding:5px 0}
+.fields dd{margin:0;padding:5px 0;min-width:0}
+.hintcard{margin:0 24px 24px;padding:12px 14px;border:1px dashed var(--border2);border-radius:8px;color:var(--fg2)}
+.gone{margin:auto;text-align:center;color:var(--fg2);padding:40px 24px;max-width:340px}
+.gone h2{font-size:15px;color:var(--fg);margin:0 0 6px}
+
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:4px;padding:1px 7px;font-size:12px;background:var(--hover);color:var(--fg2);white-space:nowrap}
+.chip.blue{background:var(--accent-soft);color:var(--accent)}
+.chip.green{background:var(--ok-soft);color:var(--ok)}
+.chip.red{background:var(--danger-soft);color:var(--danger)}
+.chip.amber{background:var(--warn-soft);color:var(--warn)}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border2);background:var(--surface);border-radius:6px;padding:5px 10px;cursor:pointer;font-weight:500}
+.btn:hover:not(:disabled){background:var(--hover)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover:not(:disabled){filter:brightness(1.08);background:var(--accent)}
+.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn.danger-ghost{color:var(--danger)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.big{flex:1;justify-content:center;padding:14px 10px;font-size:14px}
+.btn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+
+.panel{border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;min-width:0}
+.panel[hidden]{display:none}
+.p-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.p-head h2{font-size:14px;margin:0;font-weight:600}
+.p-head .meta{color:var(--fg2);display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;align-items:center}
+.x{border:0;background:transparent;cursor:pointer;color:var(--fg3);font-size:16px;line-height:1;padding:4px}
+.p-body{padding:14px 16px;display:grid;gap:16px;overflow:auto;flex:1;align-content:start}
+.p-foot{border-top:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.p-foot .miss{color:var(--fg3);font-size:12px;min-width:0;flex:1}
+
+.field{display:grid;gap:6px;border:0;margin:0;padding:0;min-width:0}
+.field>label,.field>legend,.lbl{font-weight:500;color:var(--fg);padding:0}
+.field i,.lbl i{font-style:normal;color:var(--fg3);font-weight:400;font-size:12px;margin-left:4px}
+.field select,.field input[type="text"],.field input[type="datetime-local"],.field textarea{width:100%;border:1px solid var(--border2);border-radius:6px;padding:6px 8px;background:var(--surface)}
+.field textarea{min-height:56px;resize:vertical}
+.sub{color:var(--fg2);font-size:12px}
+.hint{color:var(--fg3);font-size:12px}
+.group{display:grid;gap:4px}
+.group h4{margin:4px 0 2px;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--fg3)}
+.opt{display:flex;gap:8px;align-items:flex-start;padding:4px 6px;border-radius:5px;cursor:pointer}
+.opt:hover{background:var(--hover)}
+.opt input{margin-top:2px}
+.opt small{display:block;color:var(--fg3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips .btn{font-weight:400;padding:4px 9px;border-radius:14px}
+.box{border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:grid;gap:8px}
+.box.warn{border-color:var(--warn);background:var(--warn-soft)}
+.box.danger{border-color:var(--danger);background:var(--danger-soft)}
+.box.ok{border-color:var(--ok);background:var(--ok-soft)}
+.code{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:8px 10px}
+.code b{font-family:var(--mono);font-weight:600}
+.code span{color:var(--fg2);font-size:12px}
+.code em{grid-column:1/-1;font-style:normal;font-size:12px;color:var(--fg3)}
+.code em.ok{color:var(--ok)}
+.code.done{background:var(--surface2)}
+label.code{cursor:pointer}
+.steps{display:flex;gap:4px}
+.steps span{flex:1;height:4px;border-radius:2px;background:var(--border)}
+.steps span.on{background:var(--accent)}
+.steplbl{color:var(--fg3);font-size:12px}
+.timeline{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.timeline .seg{border:1px solid var(--border);border-radius:6px;padding:6px 4px;background:var(--surface);display:grid;gap:1px;text-align:center;cursor:pointer;min-width:0}
+.timeline .seg b{font-size:12px;font-weight:600}
+.timeline .seg span,.timeline .seg em{font-size:11px;color:var(--fg3);font-style:normal;overflow-wrap:anywhere}
+.timeline .seg.done{background:var(--ok-soft)} .timeline .seg.done em{color:var(--ok)}
+.timeline .seg.missed{background:var(--danger-soft)} .timeline .seg.missed em{color:var(--danger)}
+.timeline .seg.moved{background:var(--warn-soft)} .timeline .seg.moved em{color:var(--warn)}
+.timeline .seg.current{border-color:var(--fg2)}
+.timeline .seg.holds{outline:2px solid var(--accent);outline-offset:-1px}
+.timeline .seg:disabled{cursor:default}
+.reach{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.reach span{height:8px;border-radius:2px;background:var(--border)}
+.reach span.past{background:var(--warn)}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pills label{border:1px solid var(--border2);border-radius:14px;padding:4px 10px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.pills input{position:absolute;opacity:0;pointer-events:none}
+.pills label:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.pills label:has(input:focus-visible){outline:2px solid var(--accent)}
+.pills label.ans:has(input:checked){border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+
+.snack{position:absolute;left:68px;bottom:16px;max-width:min(460px,calc(100% - 84px));padding:10px 14px;border-radius:8px;background:var(--fg);color:var(--surface);box-shadow:0 6px 24px rgba(0,0,0,.18);display:flex;gap:10px;align-items:flex-start}
+.snack.error{background:var(--danger);color:#fff}
+
+.below{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;min-width:0}
+.card h3{margin:0 0 8px;font-size:13px;font-weight:600}
+.card ul{margin:0;padding-left:18px;display:grid;gap:6px;color:var(--fg2)}
+.card .k{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg3);margin:12px 0 6px}
+.states{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:12px;margin-bottom:10px}
+.states dt{color:var(--fg2)} .states dd{margin:0}
+pre{margin:0;font:12px/1.5 var(--mono);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;overflow-x:auto;max-height:340px}
+
+.switcher{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:4px;background:var(--proto-bg);color:var(--proto-fg);border-radius:999px;padding:4px;box-shadow:0 8px 28px rgba(0,0,0,.28);z-index:20;max-width:calc(100% - 32px)}
+.switcher button{border:0;background:transparent;color:var(--proto-fg);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px}
+.switcher button:hover{background:rgba(127,127,127,.25)}
+.switcher span{padding:0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+@media (max-width:960px){
+  .app,.app.nopanel{grid-template-columns:minmax(0,1fr)}
+  .nav{display:none}
+  .panel{border-left:0;border-top:1px solid var(--border)}
+  .below{grid-template-columns:minmax(0,1fr)}
+  .fields{grid-template-columns:120px minmax(0,1fr)}
+  .snack{left:16px;max-width:calc(100% - 32px)}
+}
+@media (prefers-reduced-motion:no-preference){.btn,.seg{transition:background .12s}}
+</style>
+
+<div class="wrap">
+  <header class="proto" aria-label="Prototype controls">
+    <span class="tag">Prototype · throwaway</span>
+    <label for="scenario">Scenario <select id="scenario" data-f="scenario"></select></label>
+    <span>Claim <span class="seg-switch" id="claimSwitch"></span></span>
+    <span>Form <span class="seg-switch" id="formSwitch"></span></span>
+    <span class="tag">Now: <b id="nowLbl"></b> Tehran</span>
+  </header>
+
+  <section class="app" id="app" aria-label="Mock Twenty window">
+    <nav class="nav" aria-hidden="true"><i></i><i class="on"></i><i></i><i></i></nav>
+    <div class="record" id="record"></div>
+    <aside class="panel" id="panel" aria-label="Side panel"></aside>
+    <div class="snack" id="snack" role="status" hidden></div>
+  </section>
+
+  <section class="below">
+    <div class="card" id="judge"></div>
+    <div class="card">
+      <h3>What the app would receive</h3>
+      <dl class="states" id="states"></dl>
+      <pre id="payload"></pre>
+    </div>
+  </section>
+</div>
+<div class="switcher" aria-label="Variant switcher"><button data-act="prev" aria-label="Previous variant">&larr;</button><span id="swLbl"></span><button data-act="next" aria-label="Next variant">&rarr;</button></div>
+
+<script>
+const DAY=864e5,H=36e5,NOW=Date.UTC(2026,10,10,14,30); // Tehran wall clock stored as UTC
+const J=new Intl.DateTimeFormat('en-u-ca-persian',{timeZone:'UTC',weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+const JD=new Intl.DateTimeFormat('en-u-ca-persian',{timeZone:'UTC',month:'short',day:'numeric'});
+const jal=t=>J.format(t).replace(' AP',''), jd=t=>JD.format(t).replace(' AP','');
+const mid=t=>Math.floor(t/DAY)*DAY, at11=t=>mid(t)+11*H;
+const toL=t=>new Date(t).toISOString().slice(0,16), fromL=s=>Date.parse(s+':00Z');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const SAT=[['s1','Likes the payout rules (example)'],['s2','Ready to buy soon (example)']];
+const DIS=[['d1','Not interested'],['d2','Price too high'],['d3','Not enough knowledge'],['d4','Waiting for budget'],['d5','Challenge rules too hard'],['d6','Buying from other platforms']];
+const DNC=[['n1','Wrong contact details'],['n2','Not a trader / referral only'],['n3','Asked not to be called']];
+const NAMES=Object.fromEntries([...SAT,...DIS,...DNC,['other','Other']]);
+const UNANSWERED=['No answer','Busy','Switched off','Rejected','Invalid number'];
+const TECH=['Answered',...UNANSWERED];
+const SLOTS=[[0,0],[1,3],[4,7],[8,15],[16,Infinity]];
+const code=(c,cap,expDays,activated)=>({c,cap,exp:NOW+expDays*DAY,activated});
+
+const SC={
+  s1:{label:'Free, in 1 of my campaigns',name:'Sara Rahimi',stage:'Free',campaigns:['Recently rejected'],fields:{Country:'Iran',KYC:'Verified',Purchases:'0'}},
+  s2:{label:'Free, in 2 of my campaigns',name:'Reza Karimi',stage:'Free',campaigns:['Recently rejected','KYC done, no purchase'],fields:{Country:'Iran',KYC:'Verified',Purchases:'0'}},
+  s3:{label:'Free, another agent claims first',name:'Neda Hosseini',stage:'Free',campaigns:['Recently rejected'],race:true,fields:{Country:'Turkey',KYC:'Pending',Purchases:'0'}},
+  s4:{label:'Awaiting first call, campaign deal',name:'Ali Moradi',stage:'Awaiting first call',kind:'Follow-up',deal:'Recently rejected',claimAt:NOW-2*DAY-3*H,length:30,codeSet:'campaign codes',codes:[code('BACK20','Discount 20%',12),code('RESET-OLD','Reset',-1)],fields:{Country:'Iran',KYC:'Verified',Purchases:'0'}},
+  s5:{label:'In follow-up, slot 3, one code active',name:'Maryam Jafari',stage:'In follow-up',kind:'Follow-up',deal:'KYC done, no purchase',start:NOW-5*DAY-2*H,length:30,slots:['done','done'],codeSet:'campaign codes',codes:[code('BACK20','Discount 20%',12,true),code('SPLIT2','Two-step payment',20)],fields:{Country:'UAE',KYC:'Verified',Purchases:'0'}},
+  s6:{label:'Customer, retention call, no codes',name:'Hamid Najafi',stage:'Customer',kind:'Retention',codeSet:'retention codes',codes:[],fields:{Country:'Iran',KYC:'Verified',Purchases:'3'}},
+  s7:{label:'Rebuy deal, slot 5',name:'Leila Sadeghi',stage:'In follow-up',kind:'Follow-up',rebuy:true,deal:'Rebuy',start:NOW-17*DAY,length:30,slots:['done','missed','done','moved'],codeSet:'rebuy codes',codes:[code('REBUY15','Discount 15%',9)],fields:{Country:'Iran',KYC:'Verified',Purchases:'2'}},
+};
+
+const blank=()=>({tech:'',na:false,reasons:new Set(),other:'',note:'',next:'',touched:false,outside:'',dnc:false,dncReason:'',codes:new Set(),live:{},step:0,what:'schedule',saved:false});
+const S={sc:'s5',claim:'A',form:'A',f:blank(),panel:'form',claimState:null,pick:'',dncp:{reason:'',note:'',saved:false}};
+const sc=()=>SC[S.sc], isFree=()=>sc().stage==='Free';
+
+function slotWin(start,i,deadline){const [a,b]=SLOTS[i];return{from:Math.max(mid(start)+a*DAY,NOW),rawFrom:mid(start)+a*DAY,to:Math.min(mid(start)+(b+1)*DAY-60e3,deadline)}}
+function plan(c,answered){
+  if(c.kind==='Retention')return{deadline:null,target:null,def:answered?null:at11(NOW+DAY),hint:answered?'Optional on answered retention calls.':'Retention calls have no slot plan.'};
+  let start=c.start;
+  if(!start){
+    if(!answered){const d=c.claimAt+7*DAY;return{deadline:d,target:null,def:Math.min(at11(NOW+DAY),d),hint:`No answered call yet. Released at ${jal(d)} if none.`}}
+    start=NOW;
+  }
+  const deadline=start+c.length*DAY,day=Math.floor((mid(NOW)-mid(start))/DAY);
+  const cur=SLOTS.findIndex(([a,b])=>day>=a&&day<=b),idx=answered?cur+1:cur;
+  if(idx>4)return{deadline,start,day,cur,target:{from:NOW,to:deadline,n:null},def:Math.min(at11(NOW+DAY),deadline),hint:'All 5 slots used. Any time before the deadline.'};
+  const w=slotWin(start,idx,deadline);
+  const def=answered?Math.max(at11(w.from),w.from):Math.min(NOW+2*H,w.to);
+  return{deadline,start,day,cur,target:{...w,n:idx+1},def,hint:answered?`Default: start of slot ${idx+1} (${jd(w.from)} to ${jd(w.to)}).`:`Default: retry inside slot ${idx+1}, which ends ${jal(w.to)}.`};
+}
+function progress(c){
+  if(c.stage==='Free')return'—';
+  if(c.kind==='Retention')return'Retention';
+  if(!c.start)return`Day ${Math.floor((NOW-c.claimAt)/DAY)+1} of 7 to reach`;
+  const p=plan(c,false);return`Slot ${p.cur+1} of 5 · day ${p.day+1} of ${c.length}`;
+}
+const allowed=c=>(c.codes||[]).filter(x=>x.exp>NOW);
+
+function rules(){
+  const c=sc(),f=S.f,answered=f.tech==='Answered',retention=c.kind==='Retention',p=plan(c,answered);
+  const inFormDnc=S.form!=='C';
+  const show={reasons:answered,next:!!f.tech&&!f.dnc&&!(S.form==='B'&&f.what==='none'),codes:answered&&!f.dnc&&allowed(c).length>0,dnc:inFormDnc&&!!f.tech};
+  const nextReq=show.next&&!(retention&&answered);
+  const t=f.next?fromL(f.next):null;
+  show.outside=show.next&&!retention&&!!p.target&&t!=null&&(t<p.target.from||t>p.target.to);
+  const m=[];
+  if(!f.tech)m.push({msg:'technical status',step:'outcome'});
+  if(show.reasons&&!f.reasons.size)m.push({msg:'a reason',step:'reasons'});
+  if(show.reasons&&f.reasons.has('other')&&!f.other.trim())m.push({msg:'text for Other',step:'reasons'});
+  if(nextReq&&!f.next)m.push({msg:'next call',step:'next'});
+  if(show.next&&t!=null&&p.deadline&&t>p.deadline)m.push({msg:'next call before the deadline',step:'next'});
+  if(show.next&&t!=null&&t<NOW)m.push({msg:'next call in the future',step:'next'});
+  if(show.outside&&!f.outside)m.push({msg:'outside-plan reason',step:'next'});
+  if(f.dnc&&!f.dncReason)m.push({msg:'do not contact reason',step:'next'});
+  return{c,answered,retention,p,show,nextReq,t,missing:m};
+}
+function setTech(v){
+  const f=S.f;f.tech=v;
+  if(v!=='Answered'){f.reasons.clear();f.other='';f.codes.clear();}
+  if(!f.touched){const d=plan(sc(),v==='Answered').def;f.next=d!=null?toL(d):'';}
+}
+
+/* ---------- record page ---------- */
+function renderRecord(){
+  const c=sc(),el=document.getElementById('record');
+  if(S.claimState==='gone'){
+    el.innerHTML=`<div class="crumbs"><span>People / ${esc(c.name)}</span></div><div class="gone"><h2>This record isn't available</h2>Another agent claimed this contact. The row rule now hides it from you everywhere, so a refresh lands here.</div>`;return;
+  }
+  const won=S.claimState==='won',stage=won?'Awaiting first call':c.stage,owned=!isFree()||won;
+  const stageChip={Free:'',"Awaiting first call":'amber',"In follow-up":'blue',Customer:'green'}[stage]||'';
+  let cmds='';
+  if(!owned)cmds=`<button class="btn primary" id="cmd-claim" data-act="claim">+ Add to follow-up</button>`;
+  else{
+    cmds=`<button class="btn primary" id="cmd-log" data-act="open-form">Log call</button>`;
+    if(S.form==='C'&&!won)cmds+=`<button class="btn danger-ghost" id="cmd-dnc" data-act="open-dnc">Do not contact</button>`;
+  }
+  const deal=won?`${c.campaigns[S.claim==='B'&&S.pick?c.campaigns.indexOf(S.pick):0]}`:c.deal;
+  const rows={
+    'Lifecycle stage':`<span class="chip ${stageChip}">${stage}</span>`,
+    'Owner':owned?'You':'—',
+    'Deal':deal?`${esc(deal)} <span class="chip">${c.kind==='Retention'?'—':stage}</span>`:'—',
+    'Progress':won?`Day 1 of 7 to reach · released ${jal(NOW+7*DAY)} if no answer`:progress(c),
+    'Next call':owned&&!won&&c.stage!=='Free'?jal(NOW+20*60e3):'—',
+    'Last call':c.stage==='Free'||won?'—':(c.kind==='Retention'?'Answered · Aban 2 · "Happy with payouts"':'No answer · yesterday'),
+    ...c.fields,
+  };
+  el.innerHTML=`<div class="crumbs"><span>People / ${esc(c.name)}</span><div class="cmds">${cmds}</div></div>
+  <div class="rec-head"><div class="avatar">${c.name.split(' ').map(w=>w[0]).join('')}</div><div><h1>${esc(c.name)}</h1><div class="sub">Platform user · +98 912 *** 4471</div></div></div>
+  <dl class="fields">${Object.entries(rows).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+  ${!owned&&S.claim==='A'?`<div class="hintcard">"Add to follow-up" is a pinned headless command. The same command sits in the row right-click menu of the User list, the selection bar and Cmd+K. Click it.</div>`:''}
+  ${!owned&&S.claim==='B'?`<div class="hintcard">"Add to follow-up" opens the side panel from the record page, row menu, selection bar or Cmd+K.</div>`:''}`;
+}
+
+/* ---------- panel pieces ---------- */
+function head(title,c,extra=''){
+  const label=c.rebuy?'<span class="chip amber">Rebuy</span>':c.kind==='Retention'?'<span class="chip green">Retention</span>':c.deal?`<span class="chip blue">${esc(c.deal)}</span>`:'';
+  return`<div class="p-head"><div><h2>${title}</h2><div class="meta"><span>${esc(c.name)}</span>${label}${c.stage!=='Free'?`<span>${progress(c)}</span>`:''}${extra}</div></div><button class="x" data-act="close" aria-label="Close panel">&times;</button></div>`;
+}
+const techSelect=()=>`<div class="field"><label for="tech">Technical status <i>required</i></label><select id="tech" data-f="tech"><option value="">Pick one</option>${TECH.map(t=>`<option ${S.f.tech===t?'selected':''}>${t}</option>`).join('')}</select><div class="hint">Answered or not comes from this, never picked separately.</div></div>`;
+function reasonsList(){
+  const f=S.f,box=([id,n])=>`<label class="opt"><input type="checkbox" id="r-${id}" data-f="reason" value="${id}" ${f.reasons.has(id)?'checked':''}>${n}</label>`;
+  return`<div class="field"><span class="lbl">Reasons <i>required, pick any</i></span>
+  <div class="group"><h4>Satisfaction</h4>${SAT.map(box).join('')}<h4>Dissatisfaction</h4>${DIS.map(box).join('')}${box(['other','Other'])}</div>
+  ${f.reasons.has('other')?`<input type="text" id="other" data-f="other" placeholder="Describe the other reason" value="${esc(f.other)}">`:''}</div>`;
+}
+function reasonChips(){
+  const f=S.f,chip=([id,n])=>`<button class="btn" id="rc-${id}" data-act="reason:${id}" aria-pressed="${f.reasons.has(id)}">${n}</button>`;
+  return`<div class="field"><span class="lbl">Why? <i>required, tap all that apply</i></span>
+  <div class="group"><h4>Satisfaction</h4><div class="chips">${SAT.map(chip).join('')}</div><h4>Dissatisfaction</h4><div class="chips">${DIS.map(chip).join('')}${chip(['other','Other'])}</div></div>
+  ${f.reasons.has('other')?`<input type="text" id="other" data-f="other" placeholder="Describe the other reason" value="${esc(f.other)}">`:''}</div>`;
+}
+function nextField(r){
+  const p=r.p,f=S.f;
+  return`<div class="field"><label for="next">Next call <i>${r.nextReq?'required':'optional'}</i></label>
+  <input type="datetime-local" id="next" data-f="next" value="${f.next}" min="${toL(NOW)}" ${p.deadline?`max="${toL(p.deadline)}"`:''}>
+  <div class="sub">${f.next?`${jal(fromL(f.next))} Tehran`:'Not set'}${p.deadline?` · deadline ${jal(p.deadline)}`:''}</div>
+  <div class="hint">${p.hint}</div></div>`;
+}
+const outsideField=r=>`<fieldset class="field box warn"><legend>Outside the plan${r.p.target?.n?` (slot ${r.p.target.n}: ${jd(r.p.target.from)} to ${jd(r.p.target.to)})`:''}. Why? <i>required</i></legend>
+  <label class="opt"><input type="radio" name="outside" id="out-user" data-f="outside" value="User request" ${S.f.outside==='User request'?'checked':''}><span>User request<small>Slot counts as moved, not missed</small></span></label>
+  <label class="opt"><input type="radio" name="outside" id="out-admin" data-f="outside" value="Admin decision" ${S.f.outside==='Admin decision'?'checked':''}><span>Admin decision<small>Slot counts as missed</small></span></label></fieldset>`;
+function dncReasons(key,val){return DNC.map(([id,n])=>`<label class="opt"><input type="radio" name="${key}" id="${key}-${id}" data-f="${key}" value="${id}" ${val===id?'checked':''}>${n}</label>`).join('')}
+function dncField(){
+  const f=S.f;
+  return`<div class="field"><label class="opt"><input type="checkbox" id="dnc" data-f="dnc" ${f.dnc?'checked':''}><span><b>Do not contact</b><small>Closes the deal as Lost and removes them from every list. Permanent.</small></span></label>
+  ${f.dnc?`<div class="box danger"><span class="lbl">Reason <i>required</i></span>${dncReasons('dncReason',f.dncReason)}</div>`:''}</div>`;
+}
+function codeRow(x,mode){
+  if(x.activated)return`<div class="code done"><b>${x.c}</b><span>${x.cap}</span><span></span><em>Activated for this user, until ${jal(x.exp)}</em></div>`;
+  if(mode==='queue')return`<label class="code"><input type="checkbox" id="code-${x.c}" data-f="code" value="${x.c}" ${S.f.codes.has(x.c)?'checked':''}><span><b>${x.c}</b> ${x.cap}</span><span>until ${jd(x.exp)}</span></label>`;
+  const st=S.f.live[x.c];
+  return`<div class="code"><b>${x.c}</b><span>${x.cap} · until ${jd(x.exp)}</span>${st==='active'?'<span class="chip green">Active</span><em class="ok">SMS sent with the code and expiry</em>':`<button class="btn" id="act-${x.c}" data-act="activate:${x.c}" ${st?'disabled':''}>${st?'Activating…':'Activate now'}</button>`}</div>`;
+}
+function codesField(mode){
+  const c=sc();
+  return`<div class="field"><span class="lbl">Offer a code <i>optional · ${c.codeSet}</i></span>${allowed(c).map(x=>codeRow(x,mode)).join('')}
+  <div class="hint">${mode==='queue'?'Ticked codes activate when you save; the SMS goes right after.':'Activates on the platform the moment you click, before the call is saved.'}</div></div>`;
+}
+const noteField=()=>`<div class="field"><label for="note">Note <i>optional, you can edit it later</i></label><textarea id="note" data-f="note" placeholder="What did they say?">${esc(S.f.note)}</textarea></div>`;
+function foot(r,btn){
+  const miss=r.missing.length?`Still needed: ${r.missing.map(m=>m.msg).join(', ')}`:'Ready. Status and reasons lock once saved.';
+  return`<div class="p-foot"><span class="miss" id="miss">${miss}</span>${btn??`<button class="btn primary" id="save" data-act="save" ${r.missing.length?'disabled':''}>Save call</button>`}</div>`;
+}
+function saved(r){
+  const f=S.f,codes=S.form==='C'?Object.keys(f.live):[...f.codes];
+  const lines=[`<b>${f.tech}</b>${r.answered&&f.reasons.size?` · ${[...f.reasons].map(id=>NAMES[id]).join(', ')}`:''}`];
+  if(f.dnc)lines.push(`Do not contact: ${NAMES[f.dncReason]}. Deal closed as Lost.`);
+  else if(r.show.next&&f.next)lines.push(`Next call ${jal(fromL(f.next))}${r.show.outside?` (outside plan: ${f.outside})`:''}`);
+  else lines.push('No next call scheduled');
+  if(codes.length)lines.push(S.form==='C'?`Codes already active: ${codes.join(', ')}`:`Activating ${codes.join(', ')}; SMS follows. A failure shows Retry in user details, the call stays saved.`);
+  return`${head('Call saved',sc())}<div class="p-body"><div class="box ok">${lines.map(l=>`<div>${l}</div>`).join('')}</div><div class="hint">The panel would close and a snackbar confirm. Status and reasons are now locked for everyone.</div><button class="btn" id="again" data-act="again">Log another (reset)</button></div>`;
+}
+
+/* ---------- claim panels ---------- */
+function claimPanel(){
+  const c=sc(),st=S.claimState;
+  if(st==='lost')return`${head('Add to follow-up',c)}<div class="p-body"><div class="box danger"><b>This user is in another agent's follow-ups.</b><span>Nothing changed on your side. Pick someone else from your User list.</span></div></div>`;
+  if(st==='won'){const camp=S.pick||c.campaigns[0];return`${head('Added to your follow-ups',c)}<div class="p-body"><div class="box ok"><div><b>${esc(c.name)}</b> is yours from <b>${esc(camp)}</b>.</div><div>Reach them by ${jal(NOW+7*DAY)} or they're released.</div></div><button class="btn primary" id="log-first" data-act="open-form">Log first call</button></div>`}
+  const multi=c.campaigns.length>1,ok=!multi||S.pick;
+  return`${head('Add to follow-up',c)}<div class="p-body">
+    ${multi?`<fieldset class="field"><legend>Which campaign is this for? <i>required</i></legend>${c.campaigns.map((n,i)=>`<label class="opt"><input type="radio" name="pick" id="pick-${i}" data-f="pick" value="${esc(n)}" ${S.pick===n?'checked':''}><span>${esc(n)}<small>${i?'Codes: SPLIT2 · cool-down 45 days':'Codes: BACK20 · cool-down 30 days'}</small></span></label>`).join('')}<div class="hint">They're in several of your campaigns. The deal, its codes and the reports follow the one you pick.</div></fieldset>`
+    :`<div class="field"><span class="lbl">Campaign</span><span>${esc(c.campaigns[0])}</span></div>`}
+    <div class="hint">You'll have 7 days, until ${jal(NOW+7*DAY)}, to get a first answered call.</div>
+  </div><div class="p-foot"><span class="miss">${ok?'':'Pick a campaign'}</span><button class="btn primary" id="claim-confirm" data-act="claim-confirm" ${ok?'':'disabled'}>Add to follow-up</button></div>`;
+}
+function dncPanel(){
+  const c=sc(),d=S.dncp;
+  if(d.saved)return`${head('Marked do not contact',c)}<div class="p-body"><div class="box danger">${NAMES[d.reason]}. Deal closed as Lost (do not contact). They're out of every list for good.</div></div>`;
+  return`${head('Do not contact',c)}<div class="p-body"><div class="hint">Permanent. Closes the open deal as Lost and removes them from every list. Use the call form first if you just spoke to them.</div>
+  <fieldset class="field"><legend>Reason <i>required</i></legend>${dncReasons('dncp',d.reason)}</fieldset>
+  <div class="field"><label for="dncnote">Note <i>optional</i></label><textarea id="dncnote" data-f="dncnote">${esc(d.note)}</textarea></div></div>
+  <div class="p-foot"><span class="miss">${d.reason?'':'Pick a reason'}</span><button class="btn danger" id="dnc-save" data-act="dnc-save" ${d.reason?'':'disabled'}>Mark do not contact</button></div>`;
+}
+
+/* ---------- form variants ---------- */
+function formA(r){
+  return`${head('Log call',r.c)}<div class="p-body">${techSelect()}${r.show.reasons?reasonsList():''}${r.show.next?nextField(r):''}${r.show.outside?outsideField(r):''}${r.show.codes?codesField('queue'):''}${noteField()}${r.show.dnc?dncField():''}</div>${foot(r)}`;
+}
+function formB(r){
+  const f=S.f,steps=['outcome',r.answered&&'reasons','next',r.show.codes&&'code'].filter(Boolean);
+  const i=Math.min(f.step,steps.length-1),cur=steps[i],last=i===steps.length-1;
+  const titles={outcome:'What happened?',reasons:'Why?',next:'What next?',code:'Offer a code?'};
+  let body='';
+  if(cur==='outcome'){
+    const na=f.na||(f.tech&&f.tech!=='Answered');
+    body=`<div class="lbl">${titles.outcome}</div><div style="display:flex;gap:8px"><button class="btn big" id="b-ans" data-act="tech:Answered" aria-pressed="${f.tech==='Answered'}">They answered</button><button class="btn big" id="b-na" data-act="na" aria-pressed="${!!na}">No answer</button></div>
+    ${na?`<div class="field"><span class="lbl">What did you get?</span><div class="chips">${UNANSWERED.map(t=>`<button class="btn" id="b-${t.replace(/ /g,'')}" data-act="tech:${t}" aria-pressed="${f.tech===t}">${t}</button>`).join('')}</div></div>`:''}`;
+  }else if(cur==='reasons')body=reasonChips();
+  else if(cur==='next'){
+    const opt=(v,t,s)=>`<label class="opt box" style="padding:8px 10px"><input type="radio" name="what" id="what-${v}" data-f="what" value="${v}" ${f.what===v?'checked':''}><span><b>${t}</b><small>${s}</small></span></label>`;
+    body=`<div class="lbl">${titles.next}</div>${opt('schedule','Schedule the next call',r.p.hint)}${f.what==='schedule'?nextField(r)+(r.show.outside?outsideField(r):''):''}
+    ${r.retention&&r.answered?opt('none','No next call','They stay your customer; off the queue until you schedule one.'):''}
+    ${opt('dnc','Do not contact','Permanent. Closes the deal as Lost.')}${f.what==='dnc'?`<div class="box danger"><span class="lbl">Reason <i>required</i></span>${dncReasons('dncReason',f.dncReason)}</div>`:''}
+    ${noteField()}`;
+  }else body=codesField('queue');
+  const blocked=last?r.missing.length>0:r.missing.some(m=>m.step===cur);
+  const btns=`<span style="display:flex;gap:6px">${i?`<button class="btn" id="back" data-act="step:${i-1}">Back</button>`:''}${last?`<button class="btn primary" id="save" data-act="save" ${blocked?'disabled':''}>Save call</button>`:`<button class="btn primary" id="fwd" data-act="step:${i+1}" ${blocked?'disabled':''}>Next</button>`}</span>`;
+  return`${head('Log call',r.c)}<div class="p-body"><div><div class="steps">${steps.map((_,k)=>`<span class="${k<=i?'on':''}"></span>`).join('')}</div><div class="steplbl">Step ${i+1} of ${steps.length}</div></div>${body}</div>${foot(r,btns)}`;
+}
+function timeline(r){
+  const c=r.c;if(c.kind==='Retention')return'';
+  const start=c.start??(r.answered?NOW:null);
+  if(start==null){const d=Math.floor((NOW-c.claimAt)/DAY);return`<div class="field"><span class="lbl">Reach window <i>day ${d+1} of 7 · released ${jal(c.claimAt+7*DAY)}</i></span><div class="reach">${Array.from({length:7},(_,k)=>`<span class="${k<=d?'past':''}"></span>`).join('')}</div><div class="hint">Pick Answered to see the 5-slot plan this call would start.</div></div>`}
+  const deadline=start+c.length*DAY,day=Math.floor((mid(NOW)-mid(start))/DAY),cur=SLOTS.findIndex(([a,b])=>day>=a&&day<=b);
+  const t=S.f.next?fromL(S.f.next):null;
+  const segs=SLOTS.map(([a,b],i)=>{
+    const w=slotWin(start,i,deadline);
+    const st=i<cur?(c.slots?.[i]||'done'):i===cur?(c.start?'current':'done'):'upcoming';
+    const lbl={done:i===cur?'This call':'Done',missed:'Missed',moved:'Moved by user',current:'Now',upcoming:jd(w.rawFrom)}[st];
+    const bb=Math.min(b,c.length),range=a===bb?`day ${a}`:`days ${a}–${bb}`;
+    const holds=t!=null&&t>=w.from&&t<=w.to&&!S.f.dnc;
+    return`<button class="seg ${st} ${holds?'holds':''}" id="seg-${i}" data-act="slot:${i}" ${st==='done'||st==='missed'||st==='moved'?'disabled':''}><b>Slot ${i+1}</b><span>${range}</span><em>${lbl}</em></button>`;
+  }).join('');
+  return`<div class="field"><span class="lbl">Slot plan <i>tap a slot to set the next call</i></span><div class="timeline">${segs}</div><div class="hint">Deadline ${jal(deadline)}</div></div>`;
+}
+function formC(r){
+  const f=S.f;
+  const tech=`<fieldset class="field"><legend>Technical status <i>required</i></legend><div class="pills">${TECH.map(t=>`<label class="${t==='Answered'?'ans':''}"><input type="radio" name="tech" id="t-${t.replace(/ /g,'')}" data-f="tech" value="${t}" ${f.tech===t?'checked':''}>${t}</label>`).join('')}</div></fieldset>`;
+  const inval=f.tech==='Invalid number'?`<div class="box warn"><span>Number is invalid. If it's wrong for good, mark them do not contact instead of scheduling a retry.</span><button class="btn" id="suggest-dnc" data-act="suggest-dnc">Do not contact: wrong contact details</button></div>`:'';
+  return`${head('Log call',r.c)}<div class="p-body">${timeline(r)}${tech}${inval}${r.show.reasons?reasonChips():''}${r.show.next?nextField(r):''}${r.show.outside?outsideField(r):''}${r.show.codes?codesField('live'):''}${noteField()}</div>${foot(r)}`;
+}
+
+function renderPanel(){
+  const el=document.getElementById('panel'),app=document.getElementById('app');
+  el.hidden=!S.panel;app.classList.toggle('nopanel',!S.panel);
+  if(!S.panel){el.innerHTML='';return}
+  if(S.panel==='claim'){el.innerHTML=claimPanel();return}
+  if(S.panel==='dnc'){el.innerHTML=dncPanel();return}
+  const r=rules();
+  el.innerHTML=S.f.saved?saved(r):S.form==='A'?formA(r):S.form==='B'?formB(r):formC(r);
+}
+
+/* ---------- notes + state ---------- */
+const CLAIM_NOTES={
+  A:{name:'One click',pts:['Headless command: one click from the record page, row menu, selection bar or Cmd+K. No panel.','Several campaigns: the app picks one by rule (here: the one they joined first). The agent never chooses, yet the pick sets codes, cool-down and reports.','Race lost: red snackbar, then the record vanishes because the row rule hides it.']},
+  B:{name:'Side panel',pts:['Always opens the panel, so one extra click even with a single campaign.','Several campaigns: the agent picks, with each campaign\'s codes shown to help.','Race lost: message in the panel, no name or details of the other agent.','After a win the panel offers "Log first call".']},
+};
+const FORM_NOTES={
+  A:{name:'One panel',pts:['Everything in one scroll. Fields appear and hide as answers change, matching the PRD table.','Reasons are a checkbox list, not a dropdown: sandbox popovers clip at 200px.','Codes are ticked and activated on save, so the call and its codes land together.','Do not contact is a checkbox at the bottom; ticking it hides next call and codes.']},
+  B:{name:'Steps',pts:['One decision per screen: outcome, reasons, what next, code.','A missed call takes 3 clicks plus Save; the common case gets slower.','Do not contact is one of the "What next?" choices, which naturally replaces the next call.','"No next call" appears only on answered retention calls.']},
+  C:{name:'Call sheet',pts:['Slot plan always visible; tap a slot to set the next call.','Status as pills, reasons as chips: one screen, little scrolling.','Codes activate the moment you click, before the call is saved. If the agent abandons the form, the code is still live.','Do not contact leaves the form and becomes its own red command. "Invalid number" suggests it.']},
+};
+function renderJudge(){
+  const free=isFree(),n=free?CLAIM_NOTES[S.claim]:FORM_NOTES[S.form],k=free?'Claim':'Form',v=free?S.claim:S.form;
+  document.getElementById('judge').innerHTML=`<h3>${k} ${v}: ${n.name}</h3><ul>${n.pts.map(p=>`<li>${p}</li>`).join('')}</ul>
+  <div class="k">Holds in every variant</div><ul>
+  <li>Native datetime-local picker, since twenty-ui has no time picker. It shows the browser's Gregorian calendar; the Jalali line under it is our own text.</li>
+  <li>Max next call = current deadline in the picker, and the server re-checks every rule (claim, deadline, single submit).</li>
+  <li>Expired codes are hidden (Ali Moradi has one). With no allowed codes the section is gone (Hamid Najafi).</li>
+  <li>Satisfaction reasons are marked "example": the PRD seeds only dissatisfaction reasons.</li></ul>`;
+}
+function claimPayload(){const c=sc();return{command:'addToFollowUp',person:c.name,sourceCampaign:S.claim==='A'?c.campaigns[0]+' (auto)':(S.pick||(c.campaigns.length===1?c.campaigns[0]:null)),result:S.claimState==='won'?'claimed (1 row updated)':S.claimState==='lost'||S.claimState==='gone'?'409: in another agent\'s follow-ups (0 rows)':null}}
+function updateStatus(){
+  const states=document.getElementById('states'),pre=document.getElementById('payload');
+  if(isFree()&&S.panel!=='form'){states.innerHTML='';pre.textContent=JSON.stringify(claimPayload(),null,2);return}
+  if(S.panel==='dnc'){states.innerHTML='';pre.textContent=JSON.stringify({command:'markDoNotContact',contact:sc().name,reason:NAMES[S.dncp.reason]||null,note:S.dncp.note||null},null,2);return}
+  const r=rules(),f=S.f;
+  const st=[['Technical status','required'],['Reasons',r.show.reasons?'required':'hidden'],['Next call',r.show.next?(r.nextReq?'required':'optional'):'hidden'],['Outside-plan reason',r.show.outside?'required':'hidden'],['Codes',r.show.codes?'shown':'hidden'],['Do not contact',S.form==='C'?'separate command':r.show.dnc?(f.dnc?'on, reason required':'optional'):'after status']];
+  states.innerHTML=st.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('');
+  const c=r.c;
+  pre.textContent=JSON.stringify({command:'logCall',contact:c.name,deal:c.kind==='Retention'?null:`${c.name} · ${c.deal}`,callKind:c.kind,technicalStatus:f.tech||null,answered:r.answered,
+    reasons:r.show.reasons?[...f.reasons].map(id=>NAMES[id]):[],otherReasonText:r.show.reasons&&f.reasons.has('other')?f.other:null,
+    nextCallAt:r.show.next&&f.next?f.next+':00+03:30':null,outsidePlanReason:r.show.outside?f.outside||null:null,
+    doNotContactReason:f.dnc?NAMES[f.dncReason]||null:null,activateCodes:S.form==='C'?[]:(r.show.codes?[...f.codes]:[]),
+    ...(S.form==='C'?{codesActivatedDuringCall:Object.keys(f.live)}:{}),note:f.note||null,idempotencyKey:'call-7f3a'},null,2);
+  const miss=document.getElementById('miss'),save=document.getElementById('save');
+  if(miss&&!f.saved)miss.textContent=r.missing.length?`Still needed: ${r.missing.map(m=>m.msg).join(', ')}`:'Ready. Status and reasons lock once saved.';
+  if(save&&S.form!=='B')save.disabled=r.missing.length>0;
+}
+function renderChrome(){
+  document.getElementById('nowLbl').textContent=jal(NOW);
+  const sel=document.getElementById('scenario');
+  if(!sel.options.length)sel.innerHTML=Object.entries(SC).map(([k,v])=>`<option value="${k}">${v.name}: ${v.label}</option>`).join('');
+  sel.value=S.sc;
+  document.getElementById('claimSwitch').innerHTML=['A','B'].map(v=>`<button data-act="claim-variant:${v}" aria-pressed="${S.claim===v}">${v} ${CLAIM_NOTES[v].name}</button>`).join('');
+  document.getElementById('formSwitch').innerHTML=['A','B','C'].map(v=>`<button data-act="form-variant:${v}" aria-pressed="${S.form===v}">${v} ${FORM_NOTES[v].name}</button>`).join('');
+  const free=isFree()&&S.panel!=='form';
+  document.getElementById('swLbl').textContent=free?`Claim ${S.claim} (${CLAIM_NOTES[S.claim].name})`:`Form ${S.form} (${FORM_NOTES[S.form].name})`;
+  try{history.replaceState(null,'',`#${S.sc}-${S.claim.toLowerCase()}-${S.form.toLowerCase()}`)}catch(e){}
+}
+function render(){renderChrome();renderRecord();renderPanel();renderJudge();updateStatus()}
+function rerender(){const id=document.activeElement?.id;render();if(id)document.getElementById(id)?.focus()}
+
+function reset(){S.f=blank();S.claimState=null;S.pick='';S.dncp={reason:'',note:'',saved:false};S.panel=isFree()?(S.claim==='B'?'claim':null):'form';hideSnack()}
+let snackTimer;
+function snack(msg,type=''){const el=document.getElementById('snack');el.className='snack '+type;el.textContent=msg;el.hidden=false;clearTimeout(snackTimer);snackTimer=setTimeout(hideSnack,5000)}
+function hideSnack(){document.getElementById('snack').hidden=true}
+function cycle(d){
+  if(isFree()&&S.panel!=='form'){const l=['A','B'];S.claim=l[(l.indexOf(S.claim)+d+2)%2]}
+  else{const l=['A','B','C'];S.form=l[(l.indexOf(S.form)+d+3)%3]}
+  reset();rerender();
+}
+
+document.addEventListener('change',e=>{
+  const el=e.target.closest('[data-f]');if(!el)return;const f=S.f,k=el.dataset.f,v=el.value;
+  switch(k){
+    case'scenario':S.sc=v;reset();break;
+    case'tech':setTech(v);break;
+    case'reason':el.checked?f.reasons.add(v):f.reasons.delete(v);break;
+    case'next':f.next=v;f.touched=true;break;
+    case'outside':f.outside=v;break;
+    case'dnc':f.dnc=el.checked;if(!f.dnc)f.dncReason='';break;
+    case'dncReason':f.dncReason=v;break;
+    case'code':el.checked?f.codes.add(v):f.codes.delete(v);break;
+    case'pick':S.pick=v;break;
+    case'dncp':S.dncp.reason=v;break;
+    case'what':f.what=v;f.dnc=v==='dnc';if(v!=='dnc')f.dncReason='';if(v==='none')f.next='';if(v==='schedule'&&!f.next){const d=plan(sc(),f.tech==='Answered').def;f.next=d!=null?toL(d):''}break;
+    default:return;
+  }
+  rerender();
+});
+document.addEventListener('input',e=>{
+  const el=e.target.closest('[data-f]');if(!el)return;const k=el.dataset.f;
+  if(k==='other')S.f.other=el.value;else if(k==='note')S.f.note=el.value;else if(k==='dncnote')S.dncp.note=el.value;else return;
+  updateStatus();
+});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b||b.disabled)return;
+  const i=b.dataset.act.indexOf(':'),act=i<0?b.dataset.act:b.dataset.act.slice(0,i),arg=i<0?'':b.dataset.act.slice(i+1),f=S.f,c=sc();
+  switch(act){
+    case'prev':return cycle(-1);
+    case'next':return cycle(1);
+    case'claim-variant':S.claim=arg;reset();break;
+    case'form-variant':S.form=arg;reset();break;
+    case'claim':
+      if(S.claim==='B'){S.panel='claim';break}
+      if(c.race){snack("This user is in another agent's follow-ups.",'error');setTimeout(()=>{S.claimState='gone';rerender()},1800)}
+      else{S.claimState='won';snack(`Added to your follow-ups from ${c.campaigns[0]}.${c.campaigns.length>1?' Picked automatically: the campaign you joined first.':''}`)}
+      break;
+    case'claim-confirm':S.claimState=c.race?'lost':'won';break;
+    case'open-form':if(S.claimState==='won'){S.sc='s4';reset();break}S.panel='form';break;
+    case'open-dnc':S.panel='dnc';break;
+    case'close':S.panel=null;break;
+    case'tech':setTech(arg);f.na=arg!=='Answered';break;
+    case'na':f.na=true;if(f.tech==='Answered')f.tech='';break;
+    case'reason':f.reasons.has(arg)?f.reasons.delete(arg):f.reasons.add(arg);break;
+    case'step':f.step=Number(arg);break;
+    case'slot':{
+      const start=c.start??NOW,deadline=start+c.length*DAY,w=slotWin(start,Number(arg),deadline),r=rules();
+      const t=r.p.target&&r.p.target.n===Number(arg)+1?r.p.def:Math.max(at11(w.from),w.from);
+      f.next=toL(Math.min(t,w.to));f.touched=true;break}
+    case'activate':f.live[arg]='activating';setTimeout(()=>{f.live[arg]='active';rerender()},700);break;
+    case'save':f.saved=true;break;
+    case'dnc-save':S.dncp.saved=true;break;
+    case'suggest-dnc':S.panel='dnc';S.dncp.reason='n1';break;
+    case'again':reset();break;
+    default:return;
+  }
+  rerender();
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.closest('input,textarea,select,[contenteditable]'))return;
+  if(e.key==='ArrowLeft')cycle(-1);else if(e.key==='ArrowRight')cycle(1);
+});
+(function boot(){
+  const m=/^#(s\d)-([ab])-([abc])$/.exec(location.hash);
+  if(m&&SC[m[1]]){S.sc=m[1];S.claim=m[2].toUpperCase();S.form=m[3].toUpperCase()}
+  reset();
+  if(!isFree()){S.f.tech='Answered';setTech('Answered');S.f.reasons.add('d2')}
+  render();
+})();
+</script>
