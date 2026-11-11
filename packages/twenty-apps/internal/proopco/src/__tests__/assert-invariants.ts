@@ -43,4 +43,23 @@ export const assertInvariants = async (client: CoreApiClient) => {
     expect(person.lifecycleStage, 'Only a Free contact has eligible members').toBe('FREE');
     expect(person.ownerId, 'An eligible contact has no owner').toBeNull();
   }
+
+  const openDeals = await listRecords<{
+    openDealKey: string;
+    dealStage: string;
+    pointOfContactId: string | null;
+  }>(
+    client,
+    'opportunities',
+    { openDealKey: { is: 'NOT_NULL' } },
+    { openDealKey: true, dealStage: true, pointOfContactId: true },
+  );
+
+  for (const deal of openDeals) {
+    expect(
+      ['AWAITING_FIRST_CALL', 'IN_FOLLOW_UP', 'REBUY_WINDOW'],
+      'Only an open deal holds the open deal key',
+    ).toContain(deal.dealStage);
+    expect(deal.openDealKey, 'The open deal key is the contact id').toBe(deal.pointOfContactId);
+  }
 };

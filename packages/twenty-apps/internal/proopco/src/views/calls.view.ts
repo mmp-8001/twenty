@@ -1,0 +1,53 @@
+import { defineView, ViewSortDirection, ViewType } from 'twenty-sdk/define';
+
+import {
+  CALL_CALLED_AT_FIELD_UNIVERSAL_IDENTIFIER,
+  CALL_NEXT_CALL_AT_FIELD_UNIVERSAL_IDENTIFIER,
+  CALL_NOTE_FIELD_UNIVERSAL_IDENTIFIER,
+  CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+  CALL_TECHNICAL_STATUS_FIELD_UNIVERSAL_IDENTIFIER,
+  CALLS_VIEW_CALLED_AT_FIELD_UNIVERSAL_IDENTIFIER,
+  CALLS_VIEW_CALLED_AT_SORT_UNIVERSAL_IDENTIFIER,
+  CALLS_VIEW_CONTACT_FIELD_UNIVERSAL_IDENTIFIER,
+  CALLS_VIEW_NEXT_CALL_FIELD_UNIVERSAL_IDENTIFIER,
+  CALLS_VIEW_NOTE_FIELD_UNIVERSAL_IDENTIFIER,
+  CALLS_VIEW_STATUS_FIELD_UNIVERSAL_IDENTIFIER,
+  CALLS_VIEW_UNIVERSAL_IDENTIFIER,
+} from 'src/constants/universal-identifiers';
+import { CALL_CONTACT_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/call-contact.field';
+
+const column = (
+  universalIdentifier: string,
+  fieldMetadataUniversalIdentifier: string,
+  position: number,
+) => ({
+  universalIdentifier,
+  fieldMetadataUniversalIdentifier,
+  position,
+  isVisible: true,
+  size: 180,
+});
+
+// The Agent row rule narrows this to their own calls and those on their contacts.
+export default defineView({
+  universalIdentifier: CALLS_VIEW_UNIVERSAL_IDENTIFIER,
+  name: 'Calls',
+  objectUniversalIdentifier: CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+  type: ViewType.TABLE,
+  icon: 'IconPhone',
+  position: 0,
+  fields: [
+    column(CALLS_VIEW_CALLED_AT_FIELD_UNIVERSAL_IDENTIFIER, CALL_CALLED_AT_FIELD_UNIVERSAL_IDENTIFIER, 0),
+    column(CALLS_VIEW_CONTACT_FIELD_UNIVERSAL_IDENTIFIER, CALL_CONTACT_FIELD_UNIVERSAL_IDENTIFIER, 1),
+    column(CALLS_VIEW_STATUS_FIELD_UNIVERSAL_IDENTIFIER, CALL_TECHNICAL_STATUS_FIELD_UNIVERSAL_IDENTIFIER, 2),
+    column(CALLS_VIEW_NEXT_CALL_FIELD_UNIVERSAL_IDENTIFIER, CALL_NEXT_CALL_AT_FIELD_UNIVERSAL_IDENTIFIER, 3),
+    column(CALLS_VIEW_NOTE_FIELD_UNIVERSAL_IDENTIFIER, CALL_NOTE_FIELD_UNIVERSAL_IDENTIFIER, 4),
+  ],
+  sorts: [
+    {
+      universalIdentifier: CALLS_VIEW_CALLED_AT_SORT_UNIVERSAL_IDENTIFIER,
+      fieldMetadataUniversalIdentifier: CALL_CALLED_AT_FIELD_UNIVERSAL_IDENTIFIER,
+      direction: ViewSortDirection.DESC,
+    },
+  ],
+});

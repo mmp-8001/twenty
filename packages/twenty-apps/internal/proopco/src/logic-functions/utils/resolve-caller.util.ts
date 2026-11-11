@@ -2,10 +2,10 @@ import { MetadataApiClient } from 'twenty-client-sdk/metadata';
 import { type RoutePayload } from 'twenty-sdk/define';
 import { isDefined } from 'twenty-sdk/utils';
 
-// Identity comes from the caller's token, never the body; roles are read as the app because the caller's token may not list them.
-export const resolveCallerRoleIdentifiers = async (
+// Identity comes from the caller's token, never the body.
+export const resolveCallerMemberId = async (
   routePayload: RoutePayload<unknown>,
-): Promise<string[] | null> => {
+): Promise<string | null> => {
   if (!isDefined(routePayload.userWorkspaceId)) {
     return null;
   }
@@ -13,7 +13,15 @@ export const resolveCallerRoleIdentifiers = async (
   const { currentUser } = await new MetadataApiClient().query({
     currentUser: { workspaceMember: { id: true } },
   });
-  const memberId = currentUser?.workspaceMember?.id;
+
+  return currentUser?.workspaceMember?.id ?? null;
+};
+
+// Roles are read as the app because the caller's token may not list them.
+export const resolveCallerRoleIdentifiers = async (
+  routePayload: RoutePayload<unknown>,
+): Promise<string[] | null> => {
+  const memberId = await resolveCallerMemberId(routePayload);
 
   if (!isDefined(memberId)) {
     return null;

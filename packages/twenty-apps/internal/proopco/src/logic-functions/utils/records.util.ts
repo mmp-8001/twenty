@@ -76,13 +76,28 @@ export const updateRecord = async (
   });
 };
 
+// Returns the ids that matched the filter at write time; an empty list means the condition no longer held.
 export const updateRecordsWhere = async (
   client: RecordsClient,
   plural: string,
   filter: Record<string, unknown>,
   data: Record<string, unknown>,
-): Promise<void> => {
-  await client.mutation({
+): Promise<string[]> => {
+  const result = (await client.mutation({
     [`update${plural}`]: { __args: { filter, data }, id: true },
-  });
+  })) as unknown as Record<string, { id: string }[] | null>;
+
+  return (result[`update${plural}`] ?? []).map(({ id }) => id);
+};
+
+export const countRecords = async (
+  client: RecordsClient,
+  collection: string,
+  filter: Record<string, unknown>,
+): Promise<number> => {
+  const result = (await client.query({
+    [collection]: { __args: { filter }, totalCount: true },
+  })) as unknown as Record<string, { totalCount?: number } | undefined>;
+
+  return result[collection]?.totalCount ?? 0;
 };
