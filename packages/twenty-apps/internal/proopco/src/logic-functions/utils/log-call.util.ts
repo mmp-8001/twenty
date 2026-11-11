@@ -1,3 +1,4 @@
+import { isNonEmptyString } from '@sniptt/guards';
 import { isDefined } from 'twenty-sdk/utils';
 
 import { type AgentActor } from 'src/logic-functions/utils/agent-actor.util';
@@ -6,15 +7,21 @@ import {
   loadOfferedCodes,
   type ActivationOutcome,
 } from 'src/logic-functions/utils/code-activation.util';
+import { rewriteContactOwner } from 'src/logic-functions/utils/contact-owner.util';
 import {
   loadCallContext,
   personDisplayName,
+  type CallContactRow,
 } from 'src/logic-functions/utils/call-context.util';
 import {
   OPEN_DEAL_STAGES,
+  clockOfDeal,
   dealClockFields,
+  loadOpenDeal,
   personMirrorFields,
+  type DealRow,
 } from 'src/logic-functions/utils/deal.util';
+import { recountOwnedContacts } from 'src/logic-functions/utils/recount-owned-contacts.util';
 import {
   createPlatformClient,
   type PlatformClient,
@@ -30,6 +37,7 @@ import {
   applyCall,
   requiresOutsidePlanReason,
   slotsEndingBefore,
+  type DealClock,
 } from 'src/utils/deal-clock.util';
 
 const TECHNICAL_STATUSES = ['ANSWERED', 'NO_ANSWER', 'BUSY', 'SWITCHED_OFF', 'REJECTED', 'INVALID_NUMBER'];
@@ -63,13 +71,40 @@ type ReasonRow = { id: string; kind: string; name: string; isActive: boolean; re
 
 const invalid = (code: string, message: string) => new Refusal(422, code, message);
 
+type SavedCall = {
+  id: string;
+  agentId: string | null;
+  contactId: string;
+  callKind: 'FOLLOW_UP' | 'RETENTION';
+  calledAt: string;
+  answered: boolean;
+  technicalStatus: string;
+  nextCallAt: string | null;
+  outsidePlanReason: string | null;
+  otherReasonText: string | null;
+  doNotContactReasonId: string | null;
+  callReasons: { edges: { node: { reason: { name: string } | null } }[] };
+};
+
 const callByKey = async (client: RecordsClient, idempotencyKey: string) =>
   (
-    await listRecords<{ id: string; agentId: string | null }>(
+    await listRecords<SavedCall>(
       client,
       'calls',
       { idempotencyKey: { eq: idempotencyKey } },
-      { agentId: true },
+      {
+        agentId: true,
+        contactId: true,
+        callKind: true,
+        calledAt: true,
+        answered: true,
+        technicalStatus: true,
+        nextCallAt: true,
+        outsidePlanReason: true,
+        otherReasonText: true,
+        doNotContactReasonId: true,
+        callReasons: { edges: { node: { reason: { name: true } } } },
+      },
       1,
     )
   )[0] ?? null;
@@ -78,6 +113,185 @@ const loadReasons = (client: RecordsClient, ids: string[]) =>
   ids.length === 0
     ? Promise.resolve([] as ReasonRow[])
     : listRecords<ReasonRow>(client, 'reasons', { id: { in: ids } }, { kind: true, name: true, isActive: true, requiresText: true });
+
+type OutcomeInput = {
+  client: RecordsClient;
+  actor: AgentActor;
+  person: Pick<CallContactRow, 'id' | 'name'>;
+  kind: 'FOLLOW_UP' | 'RETENTION';
+  deal: DealRow | null;
+  now: Date;
+  answered: boolean;
+  nextCallAt: Date | null;
+  outsidePlanReason: string | null;
+  doNotContactReasonId: string | null;
+  lastCallSummary: string;
+  replay: boolean;
+};
+
+// Every write here is conditional on the state the call saw, so a retry after a crash can run it again; `replay` tolerates writes that already landed.
+const applyCallOutcome = async ({
+  client,
+  actor,
+  person,
+  kind,
+  deal,
+  now,
+  answered,
+  nextCallAt,
+  outsidePlanReason,
+  doNotContactReasonId,
+  lastCallSummary,
+  replay,
+}: OutcomeInput) => {
+  const clock = deal === null ? null : clockOfDeal(deal);
+  const applied = clock === null ? null : applyCall(clock, { now, answered });
+  const nextClock: DealClock | null = applied?.clock ?? null;
+  const closesContact = isDefined(doNotContactReasonId);
+  const slotsToMove =
+    outsidePlanReason === 'USER_REQUEST' && nextClock !== null && nextCallAt !== null
+      ? slotsEndingBefore(nextClock, now, nextCallAt)
+      : [];
+  const dealTypeLabel = kind === 'RETENTION' ? 'Retention' : deal?.dealType === 'REBUY' ? 'Rebuy' : 'Campaign';
+
+  if (kind === 'FOLLOW_UP' && deal !== null && nextClock !== null) {
+    const slots = nextClock.slots.map((status, index) => (slotsToMove.includes(index + 1) ? 'MOVED' : status));
+    const dealData = closesContact
+      ? {
+          dealStage: 'LOST',
+          closeReason: 'DO_NOT_CONTACT',
+          doNotContactReasonId,
+          closeDate: now.toISOString(),
+          openDealKey: null,
+        }
+      : dealClockFields({ ...nextClock, slots: slots as typeof nextClock.slots }, applied?.slotNumber ?? null);
+    const written = await updateRecordsWhere(
+      client,
+      'Opportunities',
+      {
+        and: [
+          { id: { eq: deal.id } },
+          { dealStage: { in: OPEN_DEAL_STAGES } },
+          { deadlineAt: { eq: deal.deadlineAt } },
+        ],
+      },
+      dealData,
+    );
+
+    if (written.length === 0 && !replay) {
+      throw new Refusal(409, 'FOLLOW_UP_ENDED', 'This follow-up has ended.');
+    }
+  } else if (kind === 'RETENTION' && closesContact) {
+    const [existing] = await listRecords<{ id: string }>(
+      client,
+      'opportunities',
+      {
+        and: [
+          { pointOfContactId: { eq: person.id } },
+          { closeReason: { eq: 'DO_NOT_CONTACT' } },
+          { closeDate: { eq: now.toISOString() } },
+        ],
+      },
+      {},
+      1,
+    );
+
+    // A Customer is not an open deal: the DNC is a closed deal, amount 0. Dealt as CAMPAIGN without a campaign so
+    // the Report counts it in the Retention row, never in Rebuy.
+    if (!isDefined(existing)) {
+      await createRecord(client, 'Opportunity', {
+        name: `${personDisplayName(person.name)} · Retention`,
+        pointOfContactId: person.id,
+        dealType: 'CAMPAIGN',
+        dealStage: 'LOST',
+        closeReason: 'DO_NOT_CONTACT',
+        doNotContactReasonId,
+        closeDate: now.toISOString(),
+        openedAt: now.toISOString(),
+        deadlineAt: now.toISOString(),
+        amountUsdt: 0,
+        agentId: actor.agentId,
+        agentMemberId: actor.memberId,
+        contactOwnerId: actor.agentId,
+        contactOwnerMemberId: actor.memberId,
+      });
+    }
+  }
+
+  const personData = closesContact
+    ? {
+        lifecycleStage: 'DO_NOT_CONTACT',
+        doNotContactReasonId,
+        doNotContactAt: now.toISOString(),
+        eligibleMemberIds: [],
+        ownerId: null,
+        ownerMemberId: null,
+        ownedSince: null,
+        cooldownUntil: null,
+        ...personMirrorFields({ clock: null, dealTypeLabel, sourceCampaignId: null, nextCallAt: null, now }),
+      }
+    : {
+        ...(nextClock?.stage === 'IN_FOLLOW_UP' ? { lifecycleStage: 'IN_FOLLOW_UP' } : {}),
+        ...personMirrorFields({ clock: nextClock, dealTypeLabel, nextCallAt, now }),
+      };
+  const personWritten = await updateRecordsWhere(
+    client,
+    'People',
+    { and: [{ id: { eq: person.id } }, { ownerId: { eq: actor.agentId } }] },
+    { ...personData, lastCallAt: now.toISOString(), lastCallSummary },
+  );
+
+  if (personWritten.length === 0 && !replay) {
+    throw new Refusal(409, 'NOT_OWNER', 'You can only call contacts you follow up.');
+  }
+
+  if (closesContact) {
+    await rewriteContactOwner(client, person.id, actor.agentId, null);
+    await recountOwnedContacts(client, actor.agentId);
+  }
+};
+
+const summaryOf = (technicalStatus: string, reasonNames: string[]) =>
+  [STATUS_LABELS[technicalStatus], reasonNames.join(', ')]
+    .filter((part) => part !== '')
+    .join(' · ')
+    .slice(0, 200);
+
+// The call row exists, so the retry redoes the deal and contact writes from it instead of the validation the save already passed.
+const replaySavedCall = async (client: RecordsClient, actor: AgentActor, saved: SavedCall) => {
+  const [person] = await listRecords<{ id: string; name: CallContactRow['name'] }>(
+    client,
+    'people',
+    { id: { eq: saved.contactId } },
+    { name: { firstName: true, lastName: true } },
+    1,
+  );
+
+  if (!isDefined(person)) {
+    return;
+  }
+
+  const openDeal = saved.callKind === 'FOLLOW_UP' ? await loadOpenDeal(client, person.id) : null;
+  const reasonNames = [
+    ...saved.callReasons.edges.flatMap(({ node }) => (node.reason ? [node.reason.name] : [])),
+    ...(isNonEmptyString(saved.otherReasonText) ? [saved.otherReasonText] : []),
+  ];
+
+  await applyCallOutcome({
+    client,
+    actor,
+    person,
+    kind: saved.callKind,
+    deal: openDeal,
+    now: new Date(saved.calledAt),
+    answered: saved.answered,
+    nextCallAt: isDefined(saved.nextCallAt) ? new Date(saved.nextCallAt) : null,
+    outsidePlanReason: saved.outsidePlanReason,
+    doNotContactReasonId: saved.doNotContactReasonId,
+    lastCallSummary: summaryOf(saved.technicalStatus, reasonNames),
+    replay: true,
+  });
+};
 
 export const logCall = async (
   client: RecordsClient,
@@ -97,6 +311,8 @@ export const logCall = async (
     if (existing.agentId !== actor.agentId) {
       throw new Refusal(409, 'IDEMPOTENCY_KEY_TAKEN', 'This key belongs to another call.');
     }
+
+    await replaySavedCall(client, actor, existing);
 
     return { callId: existing.id, repeated: true, activations: [] };
   }
@@ -133,7 +349,6 @@ export const logCall = async (
   let nextCallAt: Date | null = null;
   let outsidePlanReason: string | null = null;
   let doNotContactReason: ReasonRow | null = null;
-  let slotsToMove: number[] = [];
 
   if (input.next.mode === 'doNotContact') {
     [doNotContactReason] = await loadReasons(client, [input.next.reasonId]);
@@ -163,9 +378,6 @@ export const logCall = async (
         throw invalid('OUTSIDE_PLAN_REASON_REQUIRED', 'A time outside the plan needs a reason.');
       }
 
-      if (outsidePlanReason === 'USER_REQUEST' && nextClock !== null) {
-        slotsToMove = slotsEndingBefore(nextClock, now, nextCallAt);
-      }
     }
   }
 
@@ -185,10 +397,7 @@ export const logCall = async (
 
   const note = (input.note ?? '').trim();
   const reasonNames = [...reasons.map(({ name }) => name), ...(otherText === '' ? [] : [otherText])];
-  const lastCallSummary = [STATUS_LABELS[input.technicalStatus], reasonNames.join(', ')]
-    .filter((part) => part !== '')
-    .join(' · ')
-    .slice(0, 200);
+  const lastCallSummary = summaryOf(input.technicalStatus, reasonNames);
   const agentLinks = {
     agentId: actor.agentId,
     agentMemberId: actor.memberId,
@@ -237,75 +446,20 @@ export const logCall = async (
     });
   }
 
-  const dealTypeLabel = kind === 'RETENTION' ? 'Retention' : deal?.dealType === 'REBUY' ? 'Rebuy' : 'Campaign';
-
-  if (deal !== null && nextClock !== null) {
-    const closesDeal = doNotContactReason !== null;
-    const slots = nextClock.slots.map((status, index) => (slotsToMove.includes(index + 1) ? 'MOVED' : status));
-    const dealData = closesDeal
-      ? {
-          dealStage: 'LOST',
-          closeReason: 'DO_NOT_CONTACT',
-          doNotContactReasonId: doNotContactReason?.id,
-          closeDate: now.toISOString(),
-          openDealKey: null,
-        }
-      : dealClockFields({ ...nextClock, slots: slots as typeof nextClock.slots }, applied?.slotNumber ?? null);
-    const written = await updateRecordsWhere(
-      client,
-      'Opportunities',
-      {
-        and: [
-          { id: { eq: deal.id } },
-          { dealStage: { in: OPEN_DEAL_STAGES } },
-          { deadlineAt: { eq: deal.deadlineAt } },
-        ],
-      },
-      dealData,
-    );
-
-    if (written.length === 0) {
-      throw new Refusal(409, 'FOLLOW_UP_ENDED', 'This follow-up has ended.');
-    }
-  } else if (isDefined(doNotContactReason)) {
-    // A Customer is not an open deal: the DNC is recorded as a closed deal with no amount.
-    await createRecord(client, 'Opportunity', {
-      name: `${personDisplayName(person.name)} · Rebuy`,
-      pointOfContactId: person.id,
-      dealType: 'REBUY',
-      dealStage: 'LOST',
-      closeReason: 'DO_NOT_CONTACT',
-      doNotContactReasonId: doNotContactReason.id,
-      closeDate: now.toISOString(),
-      openedAt: now.toISOString(),
-      deadlineAt: now.toISOString(),
-      amountUsdt: 0,
-      ...agentLinks,
-    });
-  }
-
-  const personData = isDefined(doNotContactReason)
-    ? {
-        lifecycleStage: 'DO_NOT_CONTACT',
-        doNotContactReasonId: doNotContactReason.id,
-        doNotContactAt: now.toISOString(),
-        eligibleMemberIds: [],
-        ...personMirrorFields({ clock: null, dealTypeLabel, nextCallAt: null, now }),
-      }
-    : {
-        ...(nextClock?.stage === 'IN_FOLLOW_UP' ? { lifecycleStage: 'IN_FOLLOW_UP' } : {}),
-        ...personMirrorFields({ clock: nextClock, dealTypeLabel, nextCallAt, now }),
-      };
-  const personWritten = await updateRecordsWhere(
+  await applyCallOutcome({
     client,
-    'People',
-    { and: [{ id: { eq: person.id } }, { ownerId: { eq: actor.agentId } }] },
-    { ...personData, lastCallAt: now.toISOString(), lastCallSummary },
-  );
-
-  if (personWritten.length === 0) {
-    throw new Refusal(409, 'NOT_OWNER', 'You can only call contacts you follow up.');
-  }
+    actor,
+    person,
+    kind,
+    deal,
+    now,
+    answered,
+    nextCallAt,
+    outsidePlanReason,
+    doNotContactReasonId: doNotContactReason?.id ?? null,
+    lastCallSummary,
+    replay: false,
+  });
 
   // The call is saved by now; an activation failure is a Failed row to retry, never an error for the save.
   const activations = await activateCodes(client, platform, {

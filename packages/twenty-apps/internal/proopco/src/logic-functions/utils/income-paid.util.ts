@@ -1,3 +1,5 @@
+import { isString } from '@sniptt/guards';
+import { isNonEmptyArray } from 'twenty-shared/utils';
 import { isDefined } from 'twenty-sdk/utils';
 
 import {
@@ -50,7 +52,7 @@ const setPaid = async (
   direction: Direction,
   { caller, incomeIds, now }: { caller: BulkCaller; incomeIds: unknown; now: Date },
 ): Promise<IncomeResult> => {
-  if (!Array.isArray(incomeIds) || incomeIds.length === 0 || incomeIds.some((id) => typeof id !== 'string')) {
+  if (!isNonEmptyArray(incomeIds) || incomeIds.some((id) => !isString(id))) {
     throw new Refusal(400, 'INVALID_BODY', 'incomeIds is required');
   }
 

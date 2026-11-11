@@ -140,6 +140,22 @@ describe('monthly income (CS2)', () => {
     ]);
   });
 
+  it('recomputes the total of a rolled month on a rerun after a crash between linking and the total', async () => {
+    const agent = await newAgent();
+
+    await updateRecord(client, 'ProopcoSettings', settings.id, { lastRolledUpJalaliMonth: '1404-07' });
+    await newPurchase(agent, '2025-11-15T10:00:00Z', 500, 10);
+    await rollUpMonthlyIncomes(client, FIRST_OF_AZAR);
+
+    const [income] = await incomesOf(agent);
+
+    await updateRecord(client, 'MonthlyIncome', income.id, { totalUsdt: 0 });
+    await updateRecord(client, 'ProopcoSettings', settings.id, { lastRolledUpJalaliMonth: '1404-07' });
+    await rollUpMonthlyIncomes(client, FIRST_OF_AZAR);
+
+    expect(await incomesOf(agent)).toMatchObject([{ jalaliMonth: '1404-08', totalUsdt: 10 }]);
+  });
+
   it('moves a purchase that arrives after its month was rolled up into the next open month', async () => {
     const agent = await newAgent();
 

@@ -1,4 +1,5 @@
 import { recomputeContactEligibility, type EligibilityPlan } from 'src/logic-functions/utils/eligibility.util';
+import { rewriteContactOwner } from 'src/logic-functions/utils/contact-owner.util';
 import { personMirrorFields } from 'src/logic-functions/utils/deal.util';
 import { recountOwnedContacts } from 'src/logic-functions/utils/recount-owned-contacts.util';
 import {
@@ -54,6 +55,7 @@ export const endOwnership = async ({
     return false;
   }
 
+  await rewriteContactOwner(client, personId, agentId, null);
   await recomputeContactEligibility(client, plan, personId);
   await recountOwnedContacts(client, agentId);
 

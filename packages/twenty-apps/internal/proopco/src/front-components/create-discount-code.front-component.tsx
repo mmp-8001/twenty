@@ -2,16 +2,14 @@ import { type CSSProperties, useState } from 'react';
 import { RestApiClient } from 'twenty-client-sdk/rest';
 import { defineFrontComponent } from 'twenty-sdk/define';
 import {
-  closeSidePanel,
   enqueueSnackbar,
   msg,
-  unmountFrontComponent,
   useTranslate,
 } from 'twenty-sdk/front-component';
 
 import { TEHRAN_OFFSET_MS } from 'src/constants/time.constant';
 import { CREATE_DISCOUNT_CODE_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
-import { readServerError } from 'src/front-components/utils/server-error.util';
+import { closeFormPanel, showServerError } from 'src/front-components/utils/server-error.util';
 
 const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
   FULL_ADMIN_ONLY: msg('Only a Full Admin can do this.'),
@@ -79,16 +77,9 @@ const CreateDiscountCode = () => {
         idempotencyKey,
       });
       await enqueueSnackbar({ message: t(msg('Code created.')), variant: 'success' });
-      unmountFrontComponent();
-      closeSidePanel();
+      closeFormPanel();
     } catch (error) {
-      const { code: errorCode, message } = readServerError(error);
-      const descriptor = errorCode === null ? undefined : ERROR_MESSAGES[errorCode];
-
-      await enqueueSnackbar({
-        message: descriptor ? t(descriptor) : (message ?? t(msg('Something went wrong.'))),
-        variant: 'error',
-      });
+      await showServerError(error, ERROR_MESSAGES, t, msg('Something went wrong.'));
       setSubmitting(false);
     }
   };

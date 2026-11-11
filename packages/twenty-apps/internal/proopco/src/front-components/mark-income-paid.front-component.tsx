@@ -10,7 +10,7 @@ import {
 } from 'twenty-sdk/front-component';
 
 import { MARK_INCOME_PAID_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
-import { readServerError } from 'src/front-components/utils/server-error.util';
+import { showServerError } from 'src/front-components/utils/server-error.util';
 
 type IncomeResult = { succeeded: string[]; failed: { incomeId: string; code: string; message: string }[] };
 
@@ -48,13 +48,7 @@ const MarkIncomePaid = () => {
         variant: failed.length === 0 ? 'success' : 'error',
       });
     } catch (error) {
-      const { code, message } = readServerError(error);
-      const descriptor = code === null ? undefined : ERROR_MESSAGES[code];
-
-      await enqueueSnackbar({
-        message: descriptor ? t(descriptor) : (message ?? t(msg('Something went wrong.'))),
-        variant: 'error',
-      });
+      await showServerError(error, ERROR_MESSAGES, t, msg('Something went wrong.'));
     }
   };
 

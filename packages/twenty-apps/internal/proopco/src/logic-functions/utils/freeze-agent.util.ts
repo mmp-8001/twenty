@@ -1,3 +1,4 @@
+import { isString } from '@sniptt/guards';
 import { isDefined } from 'twenty-sdk/utils';
 
 import { DAY_MS } from 'src/constants/time.constant';
@@ -106,38 +107,47 @@ const shiftOpenDeals = async (client: RecordsClient, agentId: string, frozenSinc
   const now = new Date(effectiveAt);
 
   for (const deal of deals) {
-    if (deal.lastFreezeShiftId === auditId) {
-      continue;
-    }
-
     const shiftMs = freezeShiftMs(frozenSince, deal.openedAt, effectiveAt);
     const deadlineAt = new Date(new Date(deal.deadlineAt).getTime() + shiftMs);
     const shifted = { ...deal, frozenMs: (deal.frozenMs ?? 0) + shiftMs, deadlineAt: deadlineAt.toISOString() };
-    const [person] = await listRecords<{ nextCallAt: string | null }>(client, 'people', { id: { eq: deal.pointOfContactId } }, { nextCallAt: true }, 1);
-    const nextCallAt = isDefined(person?.nextCallAt) ? new Date(new Date(person.nextCallAt).getTime() + shiftMs) : null;
+    const [person] = await listRecords<{ nextCallAt: string | null; lastFreezeShiftId: string | null }>(
+      client,
+      'people',
+      { id: { eq: deal.pointOfContactId } },
+      { nextCallAt: true, lastFreezeShiftId: true },
+      1,
+    );
 
-    // The person first: its fields are absolute, so a crash before the deal write is repaired by a rerun.
-    await updateRecordsWhere(
-      client,
-      'People',
-      { and: [{ id: { eq: deal.pointOfContactId } }, person?.nextCallAt ? { nextCallAt: { eq: person.nextCallAt } } : { nextCallAt: { is: 'NULL' } }] },
-      {
-        deadlineAt: shifted.deadlineAt,
-        nextCallAt: nextCallAt?.toISOString() ?? null,
-        ...progressMirrorFields({
-          clock: deal.dealStage === 'REBUY_WINDOW' ? null : clockOfDeal(shifted),
-          rebuyWindowDeadlineAt: deal.dealStage === 'REBUY_WINDOW' ? deadlineAt : null,
-          nextCallAt,
-          now,
-        }),
-      },
-    );
-    await updateRecordsWhere(
-      client,
-      'Opportunities',
-      { and: [{ id: { eq: deal.id } }, { deadlineAt: { eq: deal.deadlineAt } }] },
-      { deadlineAt: shifted.deadlineAt, frozenMs: shifted.frozenMs, lastFreezeShiftId: auditId },
-    );
+    // Person first, each side guarded by its own marker: a crash between the two writes repeats only the missing one.
+    if (person?.lastFreezeShiftId !== auditId) {
+      const nextCallAt = isDefined(person?.nextCallAt) ? new Date(new Date(person.nextCallAt).getTime() + shiftMs) : null;
+
+      await updateRecordsWhere(
+        client,
+        'People',
+        { and: [{ id: { eq: deal.pointOfContactId } }, person?.nextCallAt ? { nextCallAt: { eq: person.nextCallAt } } : { nextCallAt: { is: 'NULL' } }] },
+        {
+          deadlineAt: shifted.deadlineAt,
+          nextCallAt: nextCallAt?.toISOString() ?? null,
+          lastFreezeShiftId: auditId,
+          ...progressMirrorFields({
+            clock: deal.dealStage === 'REBUY_WINDOW' ? null : clockOfDeal(shifted),
+            rebuyWindowDeadlineAt: deal.dealStage === 'REBUY_WINDOW' ? deadlineAt : null,
+            nextCallAt,
+            now,
+          }),
+        },
+      );
+    }
+
+    if (deal.lastFreezeShiftId !== auditId) {
+      await updateRecordsWhere(
+        client,
+        'Opportunities',
+        { and: [{ id: { eq: deal.id } }, { deadlineAt: { eq: deal.deadlineAt } }] },
+        { deadlineAt: shifted.deadlineAt, frozenMs: shifted.frozenMs, lastFreezeShiftId: auditId },
+      );
+    }
   }
 };
 
@@ -186,7 +196,7 @@ const executeUnfreeze: AuditExecutor = async (context, audit) => {
 export const FREEZE_EXECUTORS = { FREEZE: executeFreeze, UNFREEZE: executeUnfreeze };
 
 const requireAgentTarget = async (context: AuditContext, caller: FreezeCaller, agentId: unknown) => {
-  if (typeof agentId !== 'string') {
+  if (!isString(agentId)) {
     throw new Refusal(400, 'INVALID_BODY', 'agentId is required');
   }
 

@@ -1,3 +1,4 @@
+import { isString } from '@sniptt/guards';
 import { defineLogicFunction, type RoutePayload } from 'twenty-sdk/define';
 import { Response } from 'twenty-sdk/logic-function';
 
@@ -14,7 +15,7 @@ export const handleClaimContact = async (routePayload: RoutePayload<unknown>) =>
     const actor = await loadAgentActor(client, await resolveCallerMemberId(routePayload));
     const personId = (routePayload.body as { personId?: unknown } | null)?.personId;
 
-    if (typeof personId !== 'string') {
+    if (!isString(personId)) {
       throw new Refusal(400, 'CONTACT_REQUIRED', 'personId is required');
     }
 

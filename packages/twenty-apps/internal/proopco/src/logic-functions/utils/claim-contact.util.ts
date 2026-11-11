@@ -3,6 +3,7 @@ import { type MetadataApiClient } from 'twenty-client-sdk/metadata';
 
 import { DAY_MS, AWAITING_FIRST_CALL_DAYS } from 'src/constants/time.constant';
 import { type AgentActor } from 'src/logic-functions/utils/agent-actor.util';
+import { rewriteContactOwner } from 'src/logic-functions/utils/contact-owner.util';
 import { personDisplayName } from 'src/logic-functions/utils/call-context.util';
 import {
   clockOfDeal,
@@ -292,6 +293,7 @@ export const claimContact = async ({
     slots: ['PENDING', 'PENDING', 'PENDING', 'PENDING', 'PENDING'],
   };
 
+  await rewriteContactOwner(client, personId, null, { agentId: actor.agentId, memberId: actor.memberId });
   await updateRecord(client, 'Person', personId, personMirrorFields({
     clock,
     dealTypeLabel: 'Campaign',

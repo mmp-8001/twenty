@@ -66,7 +66,7 @@ export const assertInvariants = async (client: CoreApiClient) => {
   const unowned = await listRecords<{ lifecycleStage: string; ownerId: string | null; cooldownUntil: string | null }>(
     client,
     'people',
-    { lifecycleStage: { in: ['FREE', 'COOL_DOWN'] } },
+    { lifecycleStage: { in: ['FREE', 'COOL_DOWN', 'DO_NOT_CONTACT'] } },
     { lifecycleStage: true, ownerId: true, cooldownUntil: true },
   );
 

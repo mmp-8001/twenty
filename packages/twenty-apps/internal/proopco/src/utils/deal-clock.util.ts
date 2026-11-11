@@ -60,7 +60,6 @@ export type AppliedCall = {
   completedSlot: number | null;
 };
 
-// The deal's clock after this call is saved, plus the slot the call falls in and the one it completes.
 export const applyCall = (
   clock: DealClock,
   { now, answered }: { now: Date; answered: boolean },

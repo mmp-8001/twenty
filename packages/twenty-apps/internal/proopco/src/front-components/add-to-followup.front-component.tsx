@@ -9,7 +9,7 @@ import {
 } from 'twenty-sdk/front-component';
 
 import { ADD_TO_FOLLOW_UP_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
-import { readServerError } from 'src/front-components/utils/server-error.util';
+import { showServerError } from 'src/front-components/utils/server-error.util';
 
 type ClaimResponse = { campaignName: string | null; kind: 'CAMPAIGN' | 'REBUY' };
 
@@ -44,13 +44,7 @@ const AddToFollowUp = () => {
         variant: 'success',
       });
     } catch (error) {
-      const { code, message } = readServerError(error);
-      const descriptor = code === null ? undefined : ERROR_MESSAGES[code];
-
-      await enqueueSnackbar({
-        message: descriptor ? t(descriptor) : (message ?? t(msg('Something went wrong.'))),
-        variant: 'error',
-      });
+      await showServerError(error, ERROR_MESSAGES, t, msg('Something went wrong.'));
     }
   };
 

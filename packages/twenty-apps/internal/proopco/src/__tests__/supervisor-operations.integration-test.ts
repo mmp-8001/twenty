@@ -412,6 +412,26 @@ describe('transfer and release (S11)', () => {
     expect((await readPerson(q)).ownerId).toBe(agentA.agentId);
   });
 
+  it('refuses a Do not contact contact: it has no owner to move (spec 9)', async () => {
+    const { country, actors } = await setUpScene([PHIL, SCOTT]);
+    const [agentA, agentB] = actors;
+    const q = await claimedContact(country, agentA);
+    const [reason] = await listRecords<{ id: string }>(client, 'reasons', { kind: { eq: 'DO_NOT_CONTACT' } }, {}, 1);
+    const now = new Date();
+
+    await logCall(client, agentA, { personId: q, idempotencyKey: `dnc-${randomUUID()}`, technicalStatus: 'NO_ANSWER', next: { mode: 'doNotContact', reasonId: reason.id } }, now);
+
+    expect(await readPerson(q)).toMatchObject({ lifecycleStage: 'DO_NOT_CONTACT', ownerId: null });
+    expect((await readAgent(agentA.agentId)).ownedContactCount).toBe(0);
+
+    const moved = await transferContacts(context, { caller: supervisorCaller(), personIds: [q], toAgentId: agentB.agentId, reason: 'x', now });
+    const released = await releaseContacts(context, { caller: supervisorCaller(), personIds: [q], reason: 'x', now });
+
+    expect(moved.failed.map(({ code }) => code)).toEqual(['DO_NOT_CONTACT']);
+    expect(released.failed.map(({ code }) => code)).toEqual(['DO_NOT_CONTACT']);
+    expect((await readPerson(q)).lifecycleStage).toBe('DO_NOT_CONTACT');
+  });
+
   it('releases to Free with no cool-down and voids the deal as Released', async () => {
     const { country, actors } = await setUpScene([PHIL]);
     const [agentA] = actors;
@@ -555,6 +575,15 @@ describe('freeze and unfreeze (S12, S13, S14, AS2)', () => {
     expect(rerun.ok).toBe(true);
     expect((await openDealOf(p)).deadlineAt).toBe(after.deadlineAt);
     expect((await openDealOf(p)).frozenMs).toBe(10 * DAY_MS);
+
+    // A crash between the person and the deal write leaves the person shifted and the deal not.
+    const settled = await readPerson(p);
+
+    await updateRecord(client, 'Opportunity', after.id, { deadlineAt: before.deadlineAt, frozenMs: before.frozenMs ?? 0, lastFreezeShiftId: null });
+    await runAudit(context, await loadAudit(client, unfreezeAudit.id), FREEZE_EXECUTORS.UNFREEZE);
+
+    expect((await openDealOf(p)).deadlineAt).toBe(after.deadlineAt);
+    expect((await readPerson(p)).nextCallAt).toBe(settled.nextCallAt);
 
     const [period] = await listRecords<{ endedAt: string | null; daysFrozen: number }>(
       client,

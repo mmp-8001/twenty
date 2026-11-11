@@ -1,3 +1,4 @@
+import { isString } from '@sniptt/guards';
 import { isDefined } from 'twenty-sdk/utils';
 
 import { type AgentActor } from 'src/logic-functions/utils/agent-actor.util';
@@ -16,7 +17,7 @@ export const editCallNote = async (
   { callId, note }: { callId: unknown; note: unknown },
   now: Date,
 ) => {
-  if (typeof callId !== 'string' || typeof note !== 'string') {
+  if (!isString(callId) || !isString(note)) {
     throw new Refusal(400, 'INVALID_BODY', 'callId and note are required');
   }
 

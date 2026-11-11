@@ -65,11 +65,18 @@ export const rollUpMonthlyIncomes = async (client: RecordsClient, now: Date) => 
       await updateRecord(client, 'Purchase', purchaseId, { monthlyIncomeId: incomeId });
       linked += 1;
     }
-
-    await updateRecord(client, 'MonthlyIncome', incomeId, { totalUsdt: await totalOfLinkedPurchases(client, incomeId) });
   }
 
   if (plan.marker !== settings.lastRolledUpJalaliMonth) {
+    // Totals come from the links of every income in the rolled range, so a crash after linking still ends with the right total.
+    const incomes = await listRecords<{ id: string; jalaliMonth: string }>(client, 'monthlyIncomes', {}, { jalaliMonth: true });
+
+    for (const income of incomes) {
+      if (income.jalaliMonth > (settings.lastRolledUpJalaliMonth ?? '') && income.jalaliMonth <= (plan.marker ?? '')) {
+        await updateRecord(client, 'MonthlyIncome', income.id, { totalUsdt: await totalOfLinkedPurchases(client, income.id) });
+      }
+    }
+
     await updateRecord(client, 'ProopcoSettings', settings.id, { lastRolledUpJalaliMonth: plan.marker });
   }
 

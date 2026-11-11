@@ -12,7 +12,6 @@ export type JalaliParts = { year: number; month: number; day: number };
 
 type JalaliMonth = Pick<JalaliParts, 'year' | 'month'>;
 
-// Shifted by the same fixed Tehran offset as tehran-day.util, so days always agree.
 export const jalaliPartsOf = (at: Date): JalaliParts => {
   const parts = jalaliFormat.formatToParts(
     new Date(at.getTime() + TEHRAN_OFFSET_MS),

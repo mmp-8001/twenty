@@ -33,9 +33,10 @@ import {
   createRecord,
   listRecords,
   updateRecord,
+  updateRecordsWhere,
 } from 'src/logic-functions/utils/records.util';
 import { Refusal } from 'src/logic-functions/utils/refusal.util';
-import { runEligibilityRefresh } from 'src/logic-functions/utils/refresh-eligibility.util';
+import { endCampaignNow, runEligibilityRefresh } from 'src/logic-functions/utils/refresh-eligibility.util';
 
 import { formatJalaliTehranDateTime } from 'src/utils/jalali.util';
 
@@ -225,6 +226,21 @@ const callsOf = (personId: string) =>
     nextCallAt: true,
     otherReasonText: true,
   });
+
+const readAgent = async (agentId: string) =>
+  (await listRecords<{ ownedContactCount: number }>(client, 'agents', { id: { eq: agentId } }, { ownedContactCount: true }, 1))[0];
+
+const contactOwnersOf = async (personId: string) => ({
+  calls: (await listRecords<{ contactOwnerId: string | null }>(client, 'calls', { contactId: { eq: personId } }, { contactOwnerId: true })).map(({ contactOwnerId }) => contactOwnerId || null),
+  deals: (await listRecords<{ contactOwnerId: string | null }>(client, 'opportunities', { pointOfContactId: { eq: personId } }, { contactOwnerId: true })).map(({ contactOwnerId }) => contactOwnerId || null),
+});
+
+// Puts the owner copies back as a crash before the owner rewrite would have left them.
+const updateRecordsWhereContactOwner = async (personId: string, actor: AgentActor) => {
+  for (const [plural, field] of [['Calls', 'contactId'], ['Opportunities', 'pointOfContactId']]) {
+    await updateRecordsWhere(client, plural, { [field]: { eq: personId } }, { contactOwnerId: actor.agentId, contactOwnerMemberId: actor.memberId });
+  }
+};
 
 const claimNow = async (actor: AgentActor, personId: string) => {
   const result = await claimContact({ client, metadata, actor, personId, now: new Date() });
@@ -746,9 +762,11 @@ describe('Log call', () => {
     const person = await readPerson(personId);
 
     expect(closed).toMatchObject({ dealStage: 'LOST', closeReason: 'DO_NOT_CONTACT', openDealKey: '' });
-    expect(person).toMatchObject({ lifecycleStage: 'DO_NOT_CONTACT', nextCallAt: null, eligibleMemberIds: [] });
+    expect(person).toMatchObject({ lifecycleStage: 'DO_NOT_CONTACT', nextCallAt: null, eligibleMemberIds: [], ownerId: null, ownerMemberId: null });
     expect(person.doNotContactAt).toBe(now.toISOString());
-    expect((await refusalOf(log(actor, personId, now, { next: schedule(at(deal, 2)) }))).code).toBe('STAGE_NOT_CALLABLE');
+    expect(await contactOwnersOf(personId)).toEqual({ calls: [null], deals: [null] });
+    expect((await readAgent(actor.agentId)).ownedContactCount).toBe(0);
+    expect((await refusalOf(log(actor, personId, now, { next: schedule(at(deal, 2)) }))).code).toBe('NOT_OWNER');
   });
 
   it('refuses everyone but the owner, rebuy contacts, ended follow-ups and not-callable stages (TS8, S3)', async () => {
@@ -921,8 +939,53 @@ describe('Log call', () => {
     const [deal] = await dealsOf(leaving);
 
     created.push({ singular: 'Opportunity', id: (await listRecords<{ id: string }>(client, 'opportunities', { pointOfContactId: { eq: leaving } }, {}))[0].id });
-    expect(deal).toMatchObject({ dealStage: 'LOST', closeReason: 'DO_NOT_CONTACT', openDealKey: '' });
-    expect((await readPerson(leaving)).lifecycleStage).toBe('DO_NOT_CONTACT');
+    // A Customer DNC history deal must not count as a Rebuy: the Report reads the type, and a campaign-less
+    // Campaign deal lands in the Retention row (calls and revenue only).
+    expect(deal).toMatchObject({ dealStage: 'LOST', closeReason: 'DO_NOT_CONTACT', openDealKey: '', dealType: 'CAMPAIGN', sourceCampaignId: null });
+    expect(await readPerson(leaving)).toMatchObject({ lifecycleStage: 'DO_NOT_CONTACT', ownerId: null, ownerMemberId: null });
+    expect(await contactOwnersOf(leaving)).toEqual({ calls: [null], deals: [null] });
+  });
+
+  it('finishes a saved call on a retry with the same key: deal, contact and owner copies are redone', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const personId = await claimedContact(scene);
+    const deal = await openDealOf(personId);
+    const [reasonId] = await dissatisfactionReasonIds(1);
+    const now = at(deal, 1);
+    const next = at(deal, 2);
+    const input: LogCallInput = {
+      personId,
+      idempotencyKey: `retry-${randomUUID()}`,
+      technicalStatus: 'ANSWERED',
+      reasonIds: [reasonId],
+      next: schedule(next),
+    };
+
+    await logCall(client, actor, input, now);
+
+    const afterSave = await readPerson(personId);
+
+    // A crash after the Call and deal writes leaves the Person untouched.
+    await updateRecord(client, 'Person', personId, { nextCallAt: null, lastCallSummary: null, callUrgency: null });
+
+    const retried = await logCall(client, actor, input, new Date(now.getTime() + 5 * 60_000));
+
+    expect(retried.repeated).toBe(true);
+    expect(await readPerson(personId)).toMatchObject({ nextCallAt: next.toISOString(), lastCallSummary: afterSave.lastCallSummary, callUrgency: afterSave.callUrgency });
+    expect(await callsOf(personId)).toHaveLength(1);
+    expect(await openDealOf(personId)).toMatchObject({ slot1Status: 'DONE', dealStage: 'IN_FOLLOW_UP' });
+
+    const dnc = { ...input, idempotencyKey: `retry-${randomUUID()}`, next: { mode: 'doNotContact' as const, reasonId: await dncReasonId() } };
+
+    await logCall(client, actor, dnc, at(deal, 3));
+    await updateRecord(client, 'Person', personId, { ownerId: actor.agentId, ownerMemberId: actor.memberId, lifecycleStage: 'IN_FOLLOW_UP' });
+    await updateRecordsWhereContactOwner(personId, actor);
+    await logCall(client, actor, dnc, at(deal, 3, 1));
+
+    expect(await readPerson(personId)).toMatchObject({ lifecycleStage: 'DO_NOT_CONTACT', ownerId: null });
+    expect(await contactOwnersOf(personId)).toEqual({ calls: [null, null], deals: [null] });
+    expect(await dealsOf(personId)).toHaveLength(1);
   });
 });
 
@@ -1290,7 +1353,7 @@ describe('rebuy (S5, S6, S7, S10, U2, SL1)', () => {
     const scene = await setUpScene([memberIdOf(PHIL)]);
     const personId = await newContact(scene.country);
 
-    await updateRecord(client, 'Person', personId, { lifecycleStage: 'DO_NOT_CONTACT', eligibleMemberIds: [] });
+    await updateRecord(client, 'Person', personId, { lifecycleStage: 'DO_NOT_CONTACT', eligibleMemberIds: [], ownerId: null, ownerMemberId: null });
     await loseAccount(personId, lostAt());
     await buy(personId, lostAt());
 
@@ -1441,7 +1504,7 @@ describe('Codes and SMS (DS1-DS6, RS2)', () => {
     expect(activate.body).toEqual({ platformUserId: await platformUserIdOf(personId) });
     expect(sms.body).toMatchObject({ platformUserId: await platformUserIdOf(personId) });
     expect(String(sms.body?.text)).toContain(code.code);
-    expect(String(sms.body?.text)).toContain('Reset');
+    expect(String(sms.body?.text)).toContain('بازنشانی');
     expect(String(sms.body?.text)).toContain(formatJalaliTehranDateTime(new Date(code.expiresAt)));
   });
 
@@ -1556,7 +1619,7 @@ describe('Codes and SMS (DS1-DS6, RS2)', () => {
     expect((await activationsOf(personId))[0]).toMatchObject({ status: 'ACTIVE', smsStatus: 'SENT' });
     expect((await refusalOf(retryActivation(client, platform, activation.id, callerOf(actor), now))).code).toBe('NOT_FAILED');
 
-    await updateRecord(client, 'Person', personId, { lifecycleStage: 'DO_NOT_CONTACT' });
+    await updateRecord(client, 'Person', personId, { lifecycleStage: 'DO_NOT_CONTACT', ownerId: null, ownerMemberId: null });
     expect((await refusalOf(resendSms(client, platform, activation.id, callerOf(actor), now))).code).toBe('CONTACT_DO_NOT_CONTACT');
   });
 
@@ -1677,3 +1740,176 @@ describe('Seeds', () => {
   });
 });
 
+
+describe('owner copies follow every owner change (spec 5)', () => {
+  it('writes the owner on earlier purchases at claim and clears it when the follow-up expires', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const personId = await newContact(scene.country);
+
+    await buy(personId, new Date());
+    expect((await purchasesOf(personId))[0].contactOwnerId || null).toBeNull();
+
+    await claimNow(actor, personId);
+    expect((await purchasesOf(personId))[0].contactOwnerId).toBe(actor.agentId);
+
+    const deal = await openDealOf(personId);
+
+    await sweepAt(new Date(new Date(deal.deadlineAt).getTime() + GRACE_MS + 60_000));
+    expect(await readPerson(personId)).toMatchObject({ lifecycleStage: 'FREE', ownerId: null });
+    expect((await purchasesOf(personId))[0].contactOwnerId || null).toBeNull();
+    expect((await contactOwnersOf(personId)).deals).toEqual([null]);
+    expect((await readAgent(actor.agentId)).ownedContactCount).toBe(0);
+  });
+});
+
+describe('segment taken away or campaign ended (S9)', () => {
+  it('drops the free contacts from the list at once and keeps the owned ones with their agent', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const owned = await claimedContact(scene);
+    const free = [await newContact(scene.country), await newContact(scene.country)];
+
+    expect(await eligibleOf(free[0])).toEqual([actor.memberId]);
+
+    const now = new Date();
+
+    await endCampaignNow(client, scene.campaignId, now);
+    await runEligibilityRefresh(now, client, metadata);
+
+    for (const personId of free) {
+      expect(await eligibleOf(personId)).toEqual([]);
+    }
+
+    expect(await readPerson(owned)).toMatchObject({ lifecycleStage: 'AWAITING_FIRST_CALL', ownerId: actor.agentId, ownerMemberId: actor.memberId });
+    expect(await openDealOf(owned)).toMatchObject({ dealStage: 'AWAITING_FIRST_CALL', agentId: actor.agentId });
+    expect((await readAgent(actor.agentId)).ownedContactCount).toBe(1);
+  });
+});
+
+const eligibleOf = async (personId: string) => (await readPerson(personId)).eligibleMemberIds ?? [];
+
+// The My follow-ups, Today and My rebuy list views, as the same filters over the owner's contacts of one scene.
+const queueOf = async (actor: AgentActor, country: string, only: 'ALL' | 'TODAY' = 'ALL') =>
+  (
+    await listRecords<{ id: string; nextCallAt: string | null; callUrgency: string | null; dealTypeLabel: string | null }>(
+      client,
+      'people',
+      {
+        and: [
+          { country: { eq: country } },
+          {
+            or: [
+              { and: [{ ownerMemberId: { eq: actor.memberId } }, { lifecycleStage: { in: ['AWAITING_FIRST_CALL', 'IN_FOLLOW_UP'] } }] },
+              { and: [{ ownerMemberId: { eq: actor.memberId } }, { lifecycleStage: { eq: 'CUSTOMER' } }, { nextCallAt: { is: 'NOT_NULL' } }] },
+            ],
+          },
+          ...(only === 'TODAY' ? [{ callUrgency: { in: ['TODAY', 'DUE', 'OVERDUE'] } }] : []),
+        ],
+      },
+      { nextCallAt: true, callUrgency: true, dealTypeLabel: true },
+    )
+  ).sort((left, right) => (left.nextCallAt ?? '9').localeCompare(right.nextCallAt ?? '9'));
+
+const rebuyListOf = (actor: AgentActor, country: string) =>
+  listRecords<{ id: string }>(client, 'people', { and: [{ country: { eq: country } }, { ownerMemberId: { eq: actor.memberId } }, { lifecycleStage: { eq: 'REBUY_WINDOW' } }] }, {});
+
+const ownedPerson = (actor: AgentActor, country: string, data: Record<string, unknown>) =>
+  track(
+    'Person',
+    createRecord(client, 'Person', {
+      name: { firstName: 'Q', lastName: randomUUID().slice(0, 8) },
+      platformUserId: `u_${randomUUID()}`,
+      country,
+      ownerId: actor.agentId,
+      ownerMemberId: actor.memberId,
+      ...data,
+    }),
+  );
+
+describe('queue (QS3, QS4)', () => {
+  it('queues follow-ups and scheduled Customers, keeps a Customer without a time and the rebuy list out, and adds J as Rebuy (QS3)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const now = new Date();
+    const [reasonId] = await dissatisfactionReasonIds(1);
+    const followUps: string[] = [];
+
+    for (let index = 0; index < 12; index += 1) {
+      followUps.push(await claimedContact(scene));
+    }
+
+    const quiet = await ownedPerson(actor, scene.country, { lifecycleStage: 'CUSTOMER' });
+    const scheduled = await ownedPerson(actor, scene.country, { lifecycleStage: 'CUSTOMER' });
+
+    await log(actor, quiet, now, { technicalStatus: 'ANSWERED', reasonIds: [reasonId], next: { mode: 'none' } });
+    await log(actor, scheduled, now, { technicalStatus: 'ANSWERED', reasonIds: [reasonId], next: schedule(new Date(now.getTime() + HOUR_MS)) });
+
+    const rebuy = await ownedPerson(actor, scene.country, { lifecycleStage: 'REBUY_WINDOW' });
+
+    await track(
+      'Opportunity',
+      createRecord(client, 'Opportunity', {
+        name: 'rebuy',
+        pointOfContactId: rebuy,
+        dealType: 'REBUY',
+        dealStage: 'REBUY_WINDOW',
+        openDealKey: rebuy,
+        openedAt: now.toISOString(),
+        deadlineAt: new Date(now.getTime() + 72 * HOUR_MS).toISOString(),
+        agentId: actor.agentId,
+        agentMemberId: actor.memberId,
+        contactOwnerId: actor.agentId,
+        contactOwnerMemberId: actor.memberId,
+      }),
+    );
+
+    const queue = await queueOf(actor, scene.country);
+
+    expect(queue).toHaveLength(13);
+    expect(queue.filter(({ dealTypeLabel }) => dealTypeLabel === 'Retention')).toHaveLength(1);
+    expect(queue.some(({ id }) => id === quiet)).toBe(false);
+    expect(queue.some(({ id }) => id === scheduled)).toBe(true);
+    expect(await rebuyListOf(actor, scene.country)).toHaveLength(1);
+
+    await claimNow(actor, rebuy);
+
+    const afterAdd = await queueOf(actor, scene.country);
+
+    expect(afterAdd).toHaveLength(14);
+    expect(afterAdd.filter(({ dealTypeLabel }) => dealTypeLabel === 'Rebuy')).toHaveLength(1);
+    expect(await rebuyListOf(actor, scene.country)).toHaveLength(0);
+  });
+
+  it('puts the overdue calls on top of Today and keeps future ones for All (QS4)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const now = new Date();
+
+    for (const [count, urgency, nextCallAt] of [
+      [3, 'OVERDUE', new Date(now.getTime() - 3 * DAY_MS)],
+      [9, 'TODAY', new Date(now.getTime() + 60_000)],
+      [28, 'LATER', new Date(now.getTime() + 5 * DAY_MS)],
+    ] as const) {
+      for (let index = 0; index < count; index += 1) {
+        await ownedPerson(actor, scene.country, {
+          lifecycleStage: 'IN_FOLLOW_UP',
+          callUrgency: urgency,
+          nextCallAt: new Date(nextCallAt.getTime() + index * 60_000).toISOString(),
+        });
+      }
+    }
+
+    for (let index = 0; index < 2; index += 1) {
+      await ownedPerson(actor, scene.country, { lifecycleStage: 'REBUY_WINDOW' });
+    }
+
+    const today = await queueOf(actor, scene.country, 'TODAY');
+
+    expect(today).toHaveLength(12);
+    expect(today.slice(0, 3).map(({ callUrgency }) => callUrgency)).toEqual(['OVERDUE', 'OVERDUE', 'OVERDUE']);
+    expect(today.slice(3).every(({ callUrgency }) => callUrgency === 'TODAY')).toBe(true);
+    expect(await queueOf(actor, scene.country)).toHaveLength(40);
+    expect(await rebuyListOf(actor, scene.country)).toHaveLength(2);
+  });
+});
