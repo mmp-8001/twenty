@@ -14,6 +14,7 @@ import {
   type AuditContext,
   type AuditExecutor,
 } from 'src/logic-functions/utils/audit-log.util';
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { personDisplayName } from 'src/logic-functions/utils/call-context.util';
 import {
   clockOfDeal,
@@ -43,7 +44,7 @@ export const MAX_BULK_CONTACTS = 50;
 export type BulkCaller = { memberId: string; name: string };
 export type BulkResult = {
   succeeded: string[];
-  failed: { personId: string; code: string; message: string }[];
+  failed: { personId: string; code: RefusalCode; message: string }[];
 };
 
 type DealSnapshot = DealRow & {

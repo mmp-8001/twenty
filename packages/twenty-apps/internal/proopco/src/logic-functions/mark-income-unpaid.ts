@@ -9,10 +9,10 @@ import {
 } from 'src/logic-functions/utils/code-caller.util';
 import { applicationClients } from 'src/logic-functions/utils/default-clients.util';
 import { markIncomesUnpaid } from 'src/logic-functions/utils/income-paid.util';
-import { refusalResponse } from 'src/logic-functions/utils/refusal.util';
+import { withRefusals } from 'src/logic-functions/utils/refusal.util';
 
-export const handleMarkIncomeUnpaid = async (routePayload: RoutePayload<unknown>) => {
-  try {
+export const handleMarkIncomeUnpaid = async (routePayload: RoutePayload<unknown>) =>
+  withRefusals(async () => {
     const context = applicationClients();
     const caller = await resolveCodeCaller(context.client, routePayload);
 
@@ -27,10 +27,7 @@ export const handleMarkIncomeUnpaid = async (routePayload: RoutePayload<unknown>
         now: new Date(),
       }),
     );
-  } catch (error) {
-    return refusalResponse(error);
-  }
-};
+  });
 
 export default defineLogicFunction({
   universalIdentifier: MARK_INCOME_UNPAID_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,

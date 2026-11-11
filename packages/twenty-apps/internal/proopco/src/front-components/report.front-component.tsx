@@ -4,6 +4,7 @@ import { defineFrontComponent, PageLayoutType } from 'twenty-sdk/define';
 import { msg, t, useLocale } from 'twenty-sdk/front-component';
 
 import { type ReportPeriodKind } from 'src/utils/report.util';
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { REPORT_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { serverErrorMessage } from 'src/front-components/utils/server-error.util';
 
@@ -36,7 +37,7 @@ const PERIODS: { kind: ReportPeriodKind; label: ReturnType<typeof msg> }[] = [
   { kind: 'ALL', label: msg('All time') },
 ];
 
-const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
+const ERROR_MESSAGES: Partial<Record<RefusalCode, ReturnType<typeof msg>>> = {
   NO_ACCESS: msg('You have no access to reports.'),
   NO_AGENT: msg('You have no agent record.'),
 };

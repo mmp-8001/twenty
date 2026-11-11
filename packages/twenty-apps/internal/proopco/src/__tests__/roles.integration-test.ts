@@ -13,7 +13,20 @@ import {
 
 import { assertInvariants } from './assert-invariants';
 import { createAgent, createCampaign, listMembers, softDelete } from './fixtures';
-import { assignRole, graphqlAs, listRoles, signInAs } from './user-session';
+import {
+  assignRole,
+  graphqlAs,
+  listRoles,
+  serverEnforcesRowRules,
+  signInAs,
+  SKIP_WITHOUT_ENTERPRISE_MESSAGE,
+} from './user-session';
+
+const rowRulesEnforced = await serverEnforcesRowRules();
+
+if (!rowRulesEnforced) {
+  console.warn(`Skipping row-rule tests. ${SKIP_WITHOUT_ENTERPRISE_MESSAGE}`);
+}
 
 const client = new CoreApiClient();
 const SUPERVISOR_EMAIL = 'jony.ive@apple.dev';
@@ -223,7 +236,7 @@ describe('Agent', () => {
   });
 });
 
-describe.skipIf(!process.env.ENTERPRISE_KEY)('row rules (rls)', () => {
+describe.skipIf(!rowRulesEnforced)('row rules (rls)', () => {
   const personIds: string[] = [];
 
   const newPerson = async (data: Record<string, unknown>) => {
@@ -294,5 +307,84 @@ describe.skipIf(!process.env.ENTERPRISE_KEY)('row rules (rls)', () => {
     expect(JSON.stringify(search.data ?? {})).not.toContain(hidden);
     expect(rest.status).toBe(404);
     expect(await idsVisibleToAgent([hidden])).toEqual([]);
+  });
+  const idsOf = async (connection: string, ids: string[], extraNode = '') => {
+    const result = await graphqlAs(
+      agentToken,
+      `query ($ids: [UUID!]) { ${connection}(filter: { id: { in: $ids } }) { edges { node { id ${extraNode} } } } }`,
+      { ids },
+    );
+
+    return {
+      errors: result.errors,
+      ids: (
+        (result.data?.[connection] as { edges: { node: { id: string } }[] } | undefined)?.edges ?? []
+      ).map(({ node }) => node.id),
+    };
+  };
+
+  const createdByCollection: [string, string][] = [];
+
+  const newRow = async (singular: string, data: Record<string, unknown>) => {
+    const id = await createRecord(client, singular, {
+      name: `rls ${randomUUID()}`,
+      ...data,
+    });
+
+    createdByCollection.push([singular, id]);
+
+    return id;
+  };
+
+  afterAll(async () => {
+    for (const [singular, id] of createdByCollection) {
+      await softDelete(client, singular, id);
+    }
+  });
+
+  it('shows an Agent only the Code activations they ran or whose contact they own', async () => {
+    const activation = (member: Record<string, string>) =>
+      newRow('CodeActivation', {
+        activationKey: randomUUID(),
+        status: 'PENDING',
+        ...member,
+      });
+    const ran = await activation({ agentMemberId });
+    const ownsContact = await activation({ contactOwnerMemberId: agentMemberId });
+    const other = await activation({ agentMemberId: supervisorMemberId });
+
+    expect((await idsOf('codeActivations', [ran, ownsContact, other])).ids.sort()).toEqual([ran, ownsContact].sort());
+  });
+
+  it('shows an Agent only their Purchases and hides commissionUsdt', async () => {
+    const purchase = (member: Record<string, string>) =>
+      newRow('Purchase', {
+        platformPurchaseId: `p_${randomUUID()}`,
+        occurredAt: new Date().toISOString(),
+        amountUsdt: 10,
+        commissionUsdt: 1,
+        ...member,
+      });
+    const credited = await purchase({ creditedAgentMemberId: agentMemberId });
+    const ownsContact = await purchase({ contactOwnerMemberId: agentMemberId });
+    const other = await purchase({ creditedAgentMemberId: supervisorMemberId });
+
+    expect((await idsOf('purchases', [credited, ownsContact, other])).ids.sort()).toEqual([credited, ownsContact].sort());
+    expect((await idsOf('purchases', [credited], 'commissionUsdt')).errors?.length).toBeGreaterThan(0);
+  });
+
+  it('shows an Agent only their own Monthly income', async () => {
+    const income = (member: Record<string, string>) =>
+      newRow('MonthlyIncome', {
+        incomeKey: randomUUID(),
+        jalaliMonth: '1404-08',
+        status: 'AWAITING_PAYMENT',
+        totalUsdt: 1,
+        ...member,
+      });
+    const mine = await income({ agentMemberId });
+    const theirs = await income({ agentMemberId: supervisorMemberId });
+
+    expect((await idsOf('monthlyIncomes', [mine, theirs])).ids).toEqual([mine]);
   });
 });

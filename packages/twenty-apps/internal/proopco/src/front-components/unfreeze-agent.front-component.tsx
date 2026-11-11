@@ -9,10 +9,11 @@ import {
   useSelectedRecordIds,
 } from 'twenty-sdk/front-component';
 
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { UNFREEZE_AGENT_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { showServerError } from 'src/front-components/utils/server-error.util';
 
-const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
+const ERROR_MESSAGES: Partial<Record<RefusalCode, ReturnType<typeof msg>>> = {
   STAFF_ONLY: msg('Only a Supervisor or Full Admin can do this.'),
   FULL_ADMIN_ONLY: msg('Only a Full Admin can do this.'),
   SELF_FREEZE: msg('You cannot freeze yourself.'),

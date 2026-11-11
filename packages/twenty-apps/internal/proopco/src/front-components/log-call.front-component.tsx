@@ -9,6 +9,7 @@ import {
 } from 'twenty-sdk/front-component';
 
 import { TEHRAN_OFFSET_MS } from 'src/constants/time.constant';
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { LOG_CALL_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { closeFormPanel, showServerError } from 'src/front-components/utils/server-error.util';
 
@@ -38,7 +39,7 @@ const NO_ANSWER_STATUSES = [
   { value: 'INVALID_NUMBER', label: msg('Invalid number') },
 ];
 
-const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
+const ERROR_MESSAGES: Partial<Record<RefusalCode, ReturnType<typeof msg>>> = {
   NOT_OWNER: msg('You can only call contacts you follow up.'),
   REBUY_ADD_FIRST: msg('Add this contact to your follow-ups first.'),
   FOLLOW_UP_ENDED: msg('This follow-up has ended.'),

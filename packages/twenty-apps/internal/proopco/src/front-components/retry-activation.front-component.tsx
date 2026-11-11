@@ -8,10 +8,11 @@ import {
   useSelectedRecordIds,
 } from 'twenty-sdk/front-component';
 
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { RETRY_ACTIVATION_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { showServerError } from 'src/front-components/utils/server-error.util';
 
-const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
+const ERROR_MESSAGES: Partial<Record<RefusalCode, ReturnType<typeof msg>>> = {
   NOT_ALLOWED: msg('Only the owner, the activating agent or an admin can do this.'),
   CODE_DEACTIVATED: msg('This code was deactivated.'),
   CODE_EXPIRED: msg('This code has expired.'),

@@ -9,11 +9,12 @@ import {
   useTranslate,
 } from 'twenty-sdk/front-component';
 
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { EDIT_CALL_NOTE_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { formStyles as styles } from 'src/front-components/utils/form-styles.util';
 import { closeFormPanel, showServerError } from 'src/front-components/utils/server-error.util';
 
-const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
+const ERROR_MESSAGES: Partial<Record<RefusalCode, ReturnType<typeof msg>>> = {
   NOT_AUTHOR: msg('Only the author can edit this note.'),
   NO_ACTIVE_AGENT: msg('This user has no active agent.'),
   AGENT_FROZEN: msg('This agent is frozen.'),

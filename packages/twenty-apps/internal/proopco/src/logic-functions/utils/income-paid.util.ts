@@ -10,13 +10,14 @@ import {
   type AuditContext,
   type AuditExecutor,
 } from 'src/logic-functions/utils/audit-log.util';
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { MAX_BULK_CONTACTS, type BulkCaller } from 'src/logic-functions/utils/transfer-contacts.util';
 import { listRecords, updateRecordsWhere } from 'src/logic-functions/utils/records.util';
 import { Refusal } from 'src/logic-functions/utils/refusal.util';
 
-type IncomeResult = { succeeded: string[]; failed: { incomeId: string; code: string; message: string }[] };
+type IncomeResult = { succeeded: string[]; failed: { incomeId: string; code: RefusalCode; message: string }[] };
 
-type Direction = { action: AuditAction; from: string; to: string; verb: string; refusal: { code: string; message: string } };
+type Direction = { action: AuditAction; from: string; to: string; verb: string; refusal: { code: RefusalCode; message: string } };
 
 const PAID: Direction = {
   action: 'INCOME_PAID',

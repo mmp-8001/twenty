@@ -6,11 +6,11 @@ import { CLAIM_CONTACT_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER } from 'src/constants
 import { loadAgentActor } from 'src/logic-functions/utils/agent-actor.util';
 import { claimContact } from 'src/logic-functions/utils/claim-contact.util';
 import { applicationClients } from 'src/logic-functions/utils/default-clients.util';
-import { Refusal, refusalResponse } from 'src/logic-functions/utils/refusal.util';
+import { Refusal, withRefusals } from 'src/logic-functions/utils/refusal.util';
 import { resolveCallerMemberId } from 'src/logic-functions/utils/resolve-caller.util';
 
-export const handleClaimContact = async (routePayload: RoutePayload<unknown>) => {
-  try {
+export const handleClaimContact = async (routePayload: RoutePayload<unknown>) =>
+  withRefusals(async () => {
     const { client, metadata } = applicationClients();
     const actor = await loadAgentActor(client, await resolveCallerMemberId(routePayload));
     const personId = (routePayload.body as { personId?: unknown } | null)?.personId;
@@ -20,10 +20,7 @@ export const handleClaimContact = async (routePayload: RoutePayload<unknown>) =>
     }
 
     return new Response(await claimContact({ client, metadata, actor, personId, now: new Date() }));
-  } catch (error) {
-    return refusalResponse(error);
-  }
-};
+  });
 
 export default defineLogicFunction({
   universalIdentifier: CLAIM_CONTACT_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,

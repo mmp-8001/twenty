@@ -4,11 +4,11 @@ import { Response } from 'twenty-sdk/logic-function';
 import { REPORT_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { resolveCodeCaller } from 'src/logic-functions/utils/code-caller.util';
 import { applicationClients } from 'src/logic-functions/utils/default-clients.util';
-import { refusalResponse } from 'src/logic-functions/utils/refusal.util';
+import { withRefusals } from 'src/logic-functions/utils/refusal.util';
 import { loadReport } from 'src/logic-functions/utils/report.util';
 
-export const handleReport = async (routePayload: RoutePayload<unknown>) => {
-  try {
+export const handleReport = async (routePayload: RoutePayload<unknown>) =>
+  withRefusals(async () => {
     const { client } = applicationClients();
     const { roles, member } = await resolveCodeCaller(client, routePayload);
 
@@ -19,10 +19,7 @@ export const handleReport = async (routePayload: RoutePayload<unknown>) => {
         now: new Date(),
       }),
     );
-  } catch (error) {
-    return refusalResponse(error);
-  }
-};
+  });
 
 export default defineLogicFunction({
   universalIdentifier: REPORT_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,

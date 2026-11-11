@@ -7,10 +7,10 @@ import { resendSms } from 'src/logic-functions/utils/code-activation.util';
 import { activationCallerOf, resolveCodeCaller } from 'src/logic-functions/utils/code-caller.util';
 import { applicationClients } from 'src/logic-functions/utils/default-clients.util';
 import { createPlatformClient } from 'src/logic-functions/utils/platform-client.util';
-import { Refusal, refusalResponse } from 'src/logic-functions/utils/refusal.util';
+import { Refusal, withRefusals } from 'src/logic-functions/utils/refusal.util';
 
-export const handleResendSms = async (routePayload: RoutePayload<unknown>) => {
-  try {
+export const handleResendSms = async (routePayload: RoutePayload<unknown>) =>
+  withRefusals(async () => {
     const { client } = applicationClients();
     const caller = await resolveCodeCaller(client, routePayload);
     const activationId = (routePayload.body as { activationId?: unknown } | null)?.activationId;
@@ -22,10 +22,7 @@ export const handleResendSms = async (routePayload: RoutePayload<unknown>) => {
     return new Response(
       await resendSms(client, createPlatformClient(), activationId, activationCallerOf(caller), new Date()),
     );
-  } catch (error) {
-    return refusalResponse(error);
-  }
-};
+  });
 
 export default defineLogicFunction({
   universalIdentifier: RESEND_SMS_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,

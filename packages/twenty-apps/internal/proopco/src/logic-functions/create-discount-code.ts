@@ -9,10 +9,10 @@ import {
   type CreateDiscountCodeInput,
 } from 'src/logic-functions/utils/discount-code.util';
 import { createPlatformClient } from 'src/logic-functions/utils/platform-client.util';
-import { refusalResponse } from 'src/logic-functions/utils/refusal.util';
+import { withRefusals } from 'src/logic-functions/utils/refusal.util';
 
-export const handleCreateDiscountCode = async (routePayload: RoutePayload<unknown>) => {
-  try {
+export const handleCreateDiscountCode = async (routePayload: RoutePayload<unknown>) =>
+  withRefusals(async () => {
     const { client } = applicationClients();
 
     requireFullAdmin(await resolveCodeCaller(client, routePayload));
@@ -25,10 +25,7 @@ export const handleCreateDiscountCode = async (routePayload: RoutePayload<unknow
         new Date(),
       ),
     );
-  } catch (error) {
-    return refusalResponse(error);
-  }
-};
+  });
 
 export default defineLogicFunction({
   universalIdentifier: CREATE_DISCOUNT_CODE_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
