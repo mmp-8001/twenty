@@ -15,6 +15,8 @@ import { LOG_CALL_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/uni
 import { readServerError } from 'src/front-components/utils/server-error.util';
 
 type ReasonOption = { id: string; kind: string; name: string };
+type OfferedCode = { id: string; code: string; capability: string; expiresAt: string; activated: boolean };
+type ActivationOutcome = { code: string; status: 'ACTIVE' | 'FAILED'; smsStatus: 'SENT' | 'FAILED' | 'NOT_SENT' };
 type Variant = {
   defaultNextCallAt: string | null;
   deadlineAt: string | null;
@@ -24,6 +26,7 @@ type Preparation = {
   kind: 'FOLLOW_UP' | 'RETENTION';
   allowsNoNextCall: boolean;
   reasons: ReasonOption[];
+  codes: OfferedCode[];
   answered: Variant;
   unanswered: Variant;
 };
@@ -46,6 +49,8 @@ const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
   OUTSIDE_PLAN_REASON_REQUIRED: msg('A time outside the plan needs a reason.'),
   NO_ACTIVE_AGENT: msg('This user has no active agent.'),
   AGENT_FROZEN: msg('This agent is frozen.'),
+  CODE_NOT_AVAILABLE: msg('Choose codes that are offered and not yet activated for this contact.'),
+  CODES_NOT_ALLOWED: msg('Codes are offered only after an answered call that continues.'),
 };
 
 // shortcut: fixed +03:30 like the server helpers; revisit if Iran reintroduces DST.
@@ -122,6 +127,7 @@ const LogCallForm = () => {
   const [outsidePlanReason, setOutsidePlanReason] = useState('USER_REQUEST');
   const [doNotContactReasonId, setDoNotContactReasonId] = useState('');
   const [note, setNote] = useState('');
+  const [codeIds, setCodeIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const showError = (error: unknown) => {
@@ -159,7 +165,8 @@ const LogCallForm = () => {
   }
 
   const variant = answered ? preparation.answered : preparation.unanswered;
-  const stepOrder = answered ? [0, 1, 2] : [0, 2];
+  const showCodes = answered === true && mode !== 'doNotContact' && preparation.codes.length > 0;
+  const stepOrder = answered ? [0, 1, 2, ...(showCodes ? [3] : [])] : [0, 2];
   const lastStep = stepOrder[stepOrder.length - 1];
   const reasonsOfKind = (kind: string) => preparation.reasons.filter((reason) => reason.kind === kind);
   const reasonsValid = !answered || reasonIds.length > 0 || (otherChecked && otherText.trim() !== '');
@@ -175,7 +182,7 @@ const LogCallForm = () => {
           nextAt > new Date() &&
           (variant.deadlineAt === null || nextAt <= new Date(variant.deadlineAt));
   const stepValid =
-    step === 0 ? answered !== null : step === 1 ? reasonsValid : nextValid && (!answered || reasonsValid);
+    step === 0 ? answered !== null : step === 1 ? reasonsValid : step === 3 ? true : nextValid && (!answered || reasonsValid);
 
   const chooseAnswered = (value: boolean) => {
     const nextVariant = value ? preparation.answered : preparation.unanswered;
@@ -190,13 +197,14 @@ const LogCallForm = () => {
     setSubmitting(true);
 
     try {
-      await new RestApiClient().post('/s/calls/log', {
+      const result = await new RestApiClient().post<{ activations: ActivationOutcome[] }>('/s/calls/log', {
         personId,
         idempotencyKey,
         technicalStatus,
         reasonIds: answered ? reasonIds : [],
         otherReasonText: answered && otherChecked ? otherText : null,
         note,
+        codeIds: showCodes ? codeIds : [],
         next:
           mode === 'doNotContact'
             ? { mode, reasonId: doNotContactReasonId }
@@ -209,6 +217,15 @@ const LogCallForm = () => {
                 },
       });
       await enqueueSnackbar({ message: t(msg('Call saved.')), variant: 'success' });
+
+      for (const { code, status, smsStatus } of result.activations ?? []) {
+        if (status === 'FAILED') {
+          await enqueueSnackbar({ message: t(msg('Code {code} could not be activated. Retry it from its activation.'), { code }), variant: 'error' });
+        } else if (smsStatus === 'FAILED') {
+          await enqueueSnackbar({ message: t(msg('Code {code} is active but the SMS failed. Resend it from its activation.'), { code }), variant: 'error' });
+        }
+      }
+
       close();
     } catch (error) {
       await showError(error);
@@ -338,6 +355,28 @@ const LogCallForm = () => {
               onChange={(event) => setNote(event.target.value)}
               placeholder={t(msg('Note (optional)'))}
             />
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <div style={styles.hint}>{t(msg('Offer a code?'))}</div>
+            {preparation.codes.map((offered) => (
+              <label key={offered.id} style={styles.row}>
+                <input
+                  type="checkbox"
+                  disabled={offered.activated}
+                  checked={codeIds.includes(offered.id)}
+                  onChange={() => setCodeIds(toggle(codeIds, offered.id))}
+                />
+                {offered.code}
+                {offered.activated && (
+                  <span style={styles.hint}>
+                    {t(msg('Activated for this user, until {expiry}'), { expiry: jalaliLine(offered.expiresAt, locale) })}
+                  </span>
+                )}
+              </label>
+            ))}
           </>
         )}
       </div>

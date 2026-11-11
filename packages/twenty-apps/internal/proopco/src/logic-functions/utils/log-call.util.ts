@@ -2,6 +2,11 @@ import { isDefined } from 'twenty-sdk/utils';
 
 import { type AgentActor } from 'src/logic-functions/utils/agent-actor.util';
 import {
+  activateCodes,
+  loadOfferedCodes,
+  type ActivationOutcome,
+} from 'src/logic-functions/utils/code-activation.util';
+import {
   loadCallContext,
   personDisplayName,
 } from 'src/logic-functions/utils/call-context.util';
@@ -10,6 +15,10 @@ import {
   dealClockFields,
   personMirrorFields,
 } from 'src/logic-functions/utils/deal.util';
+import {
+  createPlatformClient,
+  type PlatformClient,
+} from 'src/logic-functions/utils/platform-client.util';
 import {
   createRecord,
   listRecords,
@@ -45,9 +54,10 @@ export type LogCallInput = {
     | { mode: 'none' }
     | { mode: 'doNotContact'; reasonId: string };
   note?: string | null;
+  codeIds?: string[];
 };
 
-export type LogCallResult = { callId: string; repeated: boolean };
+export type LogCallResult = { callId: string; repeated: boolean; activations: ActivationOutcome[] };
 
 type ReasonRow = { id: string; kind: string; name: string; isActive: boolean; requiresText: boolean };
 
@@ -74,6 +84,7 @@ export const logCall = async (
   actor: AgentActor,
   input: LogCallInput,
   now: Date,
+  platform: PlatformClient = createPlatformClient(),
 ): Promise<LogCallResult> => {
   if (!isDefined(input.idempotencyKey) || input.idempotencyKey.trim() === '') {
     throw invalid('IDEMPOTENCY_KEY_REQUIRED', 'An idempotency key is required.');
@@ -87,7 +98,7 @@ export const logCall = async (
       throw new Refusal(409, 'IDEMPOTENCY_KEY_TAKEN', 'This key belongs to another call.');
     }
 
-    return { callId: existing.id, repeated: true };
+    return { callId: existing.id, repeated: true, activations: [] };
   }
 
   const { person, kind, deal, clock } = await loadCallContext(client, actor, input.personId, now);
@@ -158,6 +169,20 @@ export const logCall = async (
     }
   }
 
+  const codeIds = [...new Set(input.codeIds ?? [])];
+
+  if (codeIds.length > 0) {
+    if (!answered || isDefined(doNotContactReason)) {
+      throw invalid('CODES_NOT_ALLOWED', 'Codes are offered only after an answered call that continues.');
+    }
+
+    const offered = await loadOfferedCodes(client, { kind, deal, personId: person.id, now });
+
+    if (codeIds.some((codeId) => !offered.some(({ id, activated }) => id === codeId && !activated))) {
+      throw invalid('CODE_NOT_AVAILABLE', 'Choose codes that are offered and not yet activated for this contact.');
+    }
+  }
+
   const note = (input.note ?? '').trim();
   const reasonNames = [...reasons.map(({ name }) => name), ...(otherText === '' ? [] : [otherText])];
   const lastCallSummary = [STATUS_LABELS[input.technicalStatus], reasonNames.join(', ')]
@@ -198,7 +223,7 @@ export const logCall = async (
     const landed = await callByKey(client, input.idempotencyKey);
 
     if (isDefined(landed)) {
-      return { callId: landed.id, repeated: true };
+      return { callId: landed.id, repeated: true, activations: [] };
     }
 
     throw error;
@@ -282,5 +307,15 @@ export const logCall = async (
     throw new Refusal(409, 'NOT_OWNER', 'You can only call contacts you follow up.');
   }
 
-  return { callId, repeated: false };
+  // The call is saved by now; an activation failure is a Failed row to retry, never an error for the save.
+  const activations = await activateCodes(client, platform, {
+    actor,
+    person: { id: person.id, displayName: personDisplayName(person.name) },
+    callId,
+    dealId: deal?.id ?? null,
+    codeIds,
+    now,
+  });
+
+  return { callId, repeated: false, activations };
 };

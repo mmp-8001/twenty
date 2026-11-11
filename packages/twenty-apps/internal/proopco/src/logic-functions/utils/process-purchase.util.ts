@@ -4,6 +4,7 @@ import { isDefined } from 'twenty-sdk/utils';
 
 import { commissionOf } from 'src/utils/commission.util';
 import { personDisplayName } from 'src/logic-functions/utils/call-context.util';
+import { linkUsedCode } from 'src/logic-functions/utils/code-activation.util';
 import { closeDeal } from 'src/logic-functions/utils/close-deal.util';
 import { readMoney } from 'src/logic-functions/utils/contact-upserted.util';
 import {
@@ -165,6 +166,8 @@ export const processPurchase = async (
   const ownerId = contact.ownerId;
   const ownerMemberId = contact.ownerMemberId;
 
+  const codeId = isNonEmptyString(codeUsed) ? await linkUsedCode(client, codeUsed, contact.id, occurredAt) : null;
+
   await createRecord(client, 'Purchase', {
     name: `${personDisplayName(contact.name)} · ${amountUsdt}`,
     platformPurchaseId,
@@ -172,6 +175,7 @@ export const processPurchase = async (
     occurredAt: occurredAt.toISOString(),
     amountUsdt,
     codeText: isNonEmptyString(codeUsed) ? codeUsed : null,
+    codeId,
     dealId: 'deal' in attribution ? attribution.deal.id : null,
     creditedAgentId: credited ? ownerId : null,
     creditedAgentMemberId: credited ? ownerMemberId : null,

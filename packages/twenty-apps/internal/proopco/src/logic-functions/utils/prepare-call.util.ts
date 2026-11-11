@@ -1,4 +1,5 @@
 import { type AgentActor } from 'src/logic-functions/utils/agent-actor.util';
+import { loadOfferedCodes } from 'src/logic-functions/utils/code-activation.util';
 import { loadCallContext } from 'src/logic-functions/utils/call-context.util';
 import {
   listRecords,
@@ -13,7 +14,7 @@ export const prepareCall = async (
   personId: string,
   now: Date,
 ) => {
-  const { kind, clock } = await loadCallContext(client, actor, personId, now);
+  const { person, kind, deal, clock } = await loadCallContext(client, actor, personId, now);
   const reasons = await listRecords<{ id: string; kind: string; name: string; requiresText: boolean }>(
     client,
     'reasons',
@@ -38,6 +39,7 @@ export const prepareCall = async (
     now: now.toISOString(),
     allowsNoNextCall: kind === 'RETENTION',
     reasons,
+    codes: await loadOfferedCodes(client, { kind, deal, personId: person.id, now }),
     answered: afterCall(true),
     unanswered: afterCall(false),
   };

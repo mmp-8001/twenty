@@ -6,7 +6,7 @@ export type StubRequest<TBody> = {
   body: TBody;
 };
 
-export type StubResponse = { status: number; body: unknown };
+export type StubResponse = { status: number; body: unknown; delayMs?: number };
 
 // External HTTP (proopco, the SMS app) is the only thing the suite stubs.
 export const startStubServer = async <TBody>(
@@ -26,10 +26,12 @@ export const startStubServer = async <TBody>(
 
       requests.push(request);
 
-      const { status, body } = respond(request);
+      const { status, body, delayMs = 0 } = respond(request);
 
-      outgoing.writeHead(status, { 'content-type': 'application/json' });
-      outgoing.end(JSON.stringify(body));
+      setTimeout(() => {
+        outgoing.writeHead(status, { 'content-type': 'application/json' });
+        outgoing.end(JSON.stringify(body));
+      }, delayMs);
     });
   });
 

@@ -65,3 +65,12 @@ export const formatJalaliMonth = ({ year, month }: JalaliMonth): string =>
 
 export const isFirstJalaliDay = (at: Date): boolean =>
   jalaliPartsOf(at).day === 1;
+
+// "1405/09/30 23:59" in Tehran time; digits are Latin so the SMS reads the same on every device.
+export const formatJalaliTehranDateTime = (at: Date): string => {
+  const { year, month, day } = jalaliPartsOf(at);
+  const clock = new Date(at.getTime() + TEHRAN_OFFSET_MS).toISOString().slice(11, 16);
+  const pad = (value: number) => String(value).padStart(2, '0');
+
+  return `${year}/${pad(month)}/${pad(day)} ${clock}`;
+};

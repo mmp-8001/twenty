@@ -13,6 +13,17 @@ import {
   loadEligibilityPlan,
   recomputeContactEligibility,
 } from 'src/logic-functions/utils/eligibility.util';
+import {
+  failStalePendingActivations,
+  loadOfferedCodes,
+  resendSms,
+  retryActivation,
+} from 'src/logic-functions/utils/code-activation.util';
+import {
+  createDiscountCode,
+  deactivateDiscountCode,
+} from 'src/logic-functions/utils/discount-code.util';
+import { createPlatformClient } from 'src/logic-functions/utils/platform-client.util';
 import { logCall, type LogCallInput } from 'src/logic-functions/utils/log-call.util';
 import { processAccountLastLost } from 'src/logic-functions/utils/process-last-lost.util';
 import { processPurchase } from 'src/logic-functions/utils/process-purchase.util';
@@ -25,6 +36,8 @@ import {
 } from 'src/logic-functions/utils/records.util';
 import { Refusal } from 'src/logic-functions/utils/refusal.util';
 import { runEligibilityRefresh } from 'src/logic-functions/utils/refresh-eligibility.util';
+
+import { formatJalaliTehranDateTime } from 'src/utils/jalali.util';
 
 import { assertInvariants } from './assert-invariants';
 import {
@@ -39,6 +52,8 @@ import {
   listMembers,
   softDelete,
 } from './fixtures';
+import { startStubServer, type StubRequest, type StubResponse } from './stub-server';
+import { TEST_PLATFORM_TOKEN } from './test-constants';
 import { assignRole, graphqlAs, listRoles, signInAs } from './user-session';
 
 const client = new CoreApiClient();
@@ -285,6 +300,7 @@ afterEach(async () => {
     for (const child of [
       ...(await listRecords<{ id: string }>(client, 'opportunities', { pointOfContactId: { eq: id } }, {})).map((row) => ({ singular: 'Opportunity', id: row.id })),
       ...(await listRecords<{ id: string }>(client, 'purchases', { contactId: { eq: id } }, {})).map((row) => ({ singular: 'Purchase', id: row.id })),
+      ...(await listRecords<{ id: string }>(client, 'codeActivations', { contactId: { eq: id } }, {})).map((row) => ({ singular: 'CodeActivation', id: row.id })),
     ]) {
       created.push(child);
     }
@@ -1270,6 +1286,374 @@ describe('rebuy (S5, S6, S7, S10, U2, SL1)', () => {
 
     expect(await dealsOf(personId)).toEqual([]);
     expect((await readPerson(personId)).lifecycleStage).toBe('DO_NOT_CONTACT');
+  });
+});
+
+describe('Codes and SMS (DS1-DS6, RS2)', () => {
+  type PlatformBody = Record<string, unknown> | undefined;
+  type Script = (request: StubRequest<PlatformBody>) => StubResponse;
+
+  const okScript: Script = ({ url }) =>
+    url === '/codes'
+      ? { status: 201, body: { platformCodeId: `c_${randomUUID()}` } }
+      : url.endsWith('/activations')
+        ? { status: 200, body: { activatedAt: new Date().toISOString() } }
+        : url === '/sms'
+          ? { status: 202, body: { messageId: 'm_1' } }
+          : { status: 200, body: { deactivatedAt: new Date().toISOString() } };
+  let script: Script = okScript;
+  let stub: Awaited<ReturnType<typeof startStubServer<PlatformBody>>>;
+  let platform: ReturnType<typeof createPlatformClient>;
+
+  beforeAll(async () => {
+    stub = await startStubServer<PlatformBody>((request) => script(request));
+    platform = createPlatformClient({ baseUrl: stub.url, token: TEST_PLATFORM_TOKEN, timeoutMs: 400 });
+  });
+
+  afterAll(() => stub.stop());
+
+  afterEach(() => {
+    script = okScript;
+    stub.requests.length = 0;
+  });
+
+  const inDays = (days: number) => new Date(Date.now() + days * DAY_MS);
+
+  const newCode = async (options: { capability?: string; inRebuySet?: boolean; inRetentionSet?: boolean; campaignId?: string } = {}) => {
+    const { id } = await createDiscountCode(
+      client,
+      platform,
+      {
+        code: `T${randomUUID().slice(0, 8).toUpperCase()}`,
+        capability: options.capability ?? 'RESET',
+        expiresAt: inDays(30).toISOString(),
+        inRebuySet: options.inRebuySet,
+        inRetentionSet: options.inRetentionSet,
+      },
+      new Date(),
+    );
+
+    await track('DiscountCode', id);
+
+    if (options.campaignId) {
+      await track('CampaignCode', createRecord(client, 'CampaignCode', { name: 'link', campaignId: options.campaignId, codeId: id }));
+    }
+
+    return id;
+  };
+
+  const codeOf = async (id: string) =>
+    (await listRecords<{ code: string; isActive: boolean; deactivatedAt: string | null; expiresAt: string; platformCodeId: string }>(
+      client,
+      'discountCodes',
+      { id: { eq: id } },
+      { code: true, isActive: true, deactivatedAt: true, expiresAt: true, platformCodeId: true },
+    ))[0];
+
+  const activationsOf = (personId: string) =>
+    listRecords<{
+      id: string;
+      status: string;
+      smsStatus: string;
+      lastError: string | null;
+      activatingAgentId: string;
+      contactOwnerId: string | null;
+      callId: string | null;
+      dealId: string | null;
+      codeId: string;
+      usedAt: string | null;
+    }>(client, 'codeActivations', { contactId: { eq: personId } }, {
+      status: true,
+      smsStatus: true,
+      lastError: true,
+      activatingAgentId: true,
+      contactOwnerId: true,
+      callId: true,
+      dealId: true,
+      codeId: true,
+      usedAt: true,
+    });
+
+  // An answered call that continues, with the given codes ticked.
+  const answerWithCodes = async (actor: AgentActor, personId: string, now: Date, codeIds: string[]) => {
+    const [reasonId] = await dissatisfactionReasonIds(1);
+
+    return logCall(
+      client,
+      actor,
+      {
+        personId,
+        idempotencyKey: `test-${(callCounter += 1)}-${randomUUID()}`,
+        technicalStatus: 'ANSWERED',
+        reasonIds: [reasonId],
+        next: schedule(new Date(now.getTime() + DAY_MS)),
+        codeIds,
+      },
+      now,
+      platform,
+    );
+  };
+
+  const callsTo = (suffix: string) => stub.requests.filter(({ url }) => url.endsWith(suffix));
+
+  const callerOf = (actor: AgentActor) => ({ isStaff: false, agentId: actor.agentId });
+
+  it('activates a ticked code on save and sends the SMS from the template (DS1)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const personId = await claimedContact(scene);
+    const deal = await openDealOf(personId);
+    const codeId = await newCode({ campaignId: scene.campaignId });
+    const code = await codeOf(codeId);
+    const now = at(deal, 0, 2);
+
+    expect((await prepareCall(client, actor, personId, now)).codes).toMatchObject([{ id: codeId, activated: false }]);
+
+    const result = await answerWithCodes(actor, personId, now, [codeId]);
+    const [activation] = await activationsOf(personId);
+
+    expect(result.activations).toMatchObject([{ codeId, status: 'ACTIVE', smsStatus: 'SENT' }]);
+    expect(activation).toMatchObject({
+      status: 'ACTIVE',
+      smsStatus: 'SENT',
+      activatingAgentId: actor.agentId,
+      contactOwnerId: actor.agentId,
+      callId: result.callId,
+      dealId: deal.id,
+    });
+
+    const [activate] = callsTo('/activations');
+    const [sms] = callsTo('/sms');
+
+    expect(activate.url).toBe(`/codes/${code.platformCodeId}/activations`);
+    expect(activate.headers['idempotency-key']).toBe(activation.id);
+    expect(activate.headers.authorization).toBe(`Bearer ${TEST_PLATFORM_TOKEN}`);
+    expect(activate.body).toEqual({ platformUserId: await platformUserIdOf(personId) });
+    expect(sms.body).toMatchObject({ platformUserId: await platformUserIdOf(personId) });
+    expect(String(sms.body?.text)).toContain(code.code);
+    expect(String(sms.body?.text)).toContain('Reset');
+    expect(String(sms.body?.text)).toContain(formatJalaliTehranDateTime(new Date(code.expiresAt)));
+  });
+
+  it('shows an activated code as taken, hides expired ones and refuses a second activation (DS2)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const personId = await claimedContact(scene);
+    const deal = await openDealOf(personId);
+    const reset = await newCode({ campaignId: scene.campaignId });
+    const expired = await newCode({ campaignId: scene.campaignId });
+    const now = at(deal, 0, 2);
+
+    await updateRecord(client, 'DiscountCode', expired, { expiresAt: new Date(Date.now() - HOUR_MS).toISOString() });
+    await answerWithCodes(actor, personId, now, [reset]);
+
+    const prepared = await prepareCall(client, actor, personId, at(deal, 1));
+
+    expect(prepared.codes).toMatchObject([{ id: reset, activated: true }]);
+    expect((await refusalOf(answerWithCodes(actor, personId, at(deal, 1), [reset]))).code).toBe('CODE_NOT_AVAILABLE');
+    expect((await refusalOf(answerWithCodes(actor, personId, at(deal, 1), [expired]))).code).toBe('CODE_NOT_AVAILABLE');
+    expect(await activationsOf(personId)).toHaveLength(1);
+    expect(callsTo('/activations')).toHaveLength(1);
+  });
+
+  it('offers the set of the deal type and hides the step when the set is empty (DS3)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const campaignCode = await newCode({ campaignId: scene.campaignId });
+    const rebuyCode = await newCode({ inRebuySet: true });
+    const retentionCode = await newCode({ inRetentionSet: true });
+    const idsOf = (offered: { id: string }[]) => offered.map(({ id }) => id).filter((id) => [campaignCode, rebuyCode, retentionCode].includes(id));
+    const campaignContact = await claimedContact(scene);
+    const customer = await newCustomerOf(actor);
+    const now = new Date();
+
+    expect(idsOf((await prepareCall(client, actor, campaignContact, now)).codes)).toEqual([campaignCode]);
+    expect(idsOf((await prepareCall(client, actor, customer, now)).codes)).toEqual([retentionCode]);
+    expect(
+      idsOf(await loadOfferedCodes(client, { kind: 'FOLLOW_UP', deal: { dealType: 'REBUY', sourceCampaignId: null }, personId: customer, now })),
+    ).toEqual([rebuyCode]);
+
+    const emptyScene = await setUpScene([memberIdOf(SCOTT)]);
+    const emptyContact = await claimedContact(emptyScene);
+
+    expect((await prepareCall(client, emptyScene.actors[0], emptyContact, now)).codes).toEqual([]);
+  });
+
+  it('keeps the call when the platform fails or times out and retries the same row with the same key (DS4a)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const personId = await claimedContact(scene);
+    const deal = await openDealOf(personId);
+    const codeId = await newCode({ campaignId: scene.campaignId });
+    const now = at(deal, 0, 2);
+
+    script = ({ url }) =>
+      url.endsWith('/activations') ? { status: 200, body: {}, delayMs: 1_500 } : okScript({ url } as StubRequest<PlatformBody>);
+
+    const result = await answerWithCodes(actor, personId, now, [codeId]);
+    const [failed] = await activationsOf(personId);
+
+    expect(result.activations[0]).toMatchObject({ status: 'FAILED', smsStatus: 'NOT_SENT' });
+    expect(await callsOf(personId)).toHaveLength(1);
+    expect(failed).toMatchObject({ status: 'FAILED', smsStatus: 'NOT_SENT' });
+    expect(failed.lastError).toBeTruthy();
+    expect(callsTo('/sms')).toHaveLength(0);
+
+    script = okScript;
+
+    const retried = await retryActivation(client, platform, failed.id, callerOf(actor), now);
+    const [after] = await activationsOf(personId);
+
+    expect(retried).toMatchObject({ status: 'ACTIVE', smsStatus: 'SENT' });
+    expect(after).toMatchObject({ id: failed.id, status: 'ACTIVE', smsStatus: 'SENT' });
+    expect(after.lastError ?? '').toBe('');
+    expect(callsTo('/activations').map(({ headers }) => headers['idempotency-key'])).toEqual([failed.id, failed.id]);
+    expect((await refusalOf(retryActivation(client, platform, failed.id, callerOf(actor), now))).code).toBe('NOT_FAILED');
+  });
+
+  it('refuses to create a code when the platform create fails (DS4a)', async () => {
+    script = () => ({ status: 409, body: { error: { code: 'CODE_TAKEN', message: 'taken' } } });
+
+    const code = `T${randomUUID().slice(0, 8)}`;
+    const refusal = await refusalOf(
+      createDiscountCode(client, platform, { code, capability: 'DISCOUNT', expiresAt: inDays(5).toISOString() }, new Date()),
+    );
+
+    expect(refusal.status).toBe(409);
+    expect(await listRecords(client, 'discountCodes', { code: { eq: code } }, {})).toEqual([]);
+  });
+
+  it('keeps the code active when only the SMS fails and resends it with the right permissions (DS4b)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL), memberIdOf(SCOTT)]);
+    const [actor, other] = scene.actors;
+    const personId = await claimedContact(scene);
+    const deal = await openDealOf(personId);
+    const codeId = await newCode({ campaignId: scene.campaignId });
+    const now = at(deal, 0, 2);
+
+    script = ({ url }) => (url === '/sms' ? { status: 422, body: { error: { code: 'NO_PHONE', message: 'no phone' } } } : okScript({ url } as StubRequest<PlatformBody>));
+
+    const result = await answerWithCodes(actor, personId, now, [codeId]);
+    const [activation] = await activationsOf(personId);
+
+    expect(result.activations[0]).toMatchObject({ status: 'ACTIVE', smsStatus: 'FAILED' });
+    expect(activation).toMatchObject({ status: 'ACTIVE', smsStatus: 'FAILED' });
+
+    script = okScript;
+
+    expect((await refusalOf(resendSms(client, platform, activation.id, callerOf(other), now))).code).toBe('NOT_ALLOWED');
+    expect(await resendSms(client, platform, activation.id, { isStaff: true, agentId: null }, now)).toEqual({ smsStatus: 'SENT' });
+    expect((await activationsOf(personId))[0]).toMatchObject({ status: 'ACTIVE', smsStatus: 'SENT' });
+    expect((await refusalOf(retryActivation(client, platform, activation.id, callerOf(actor), now))).code).toBe('NOT_FAILED');
+
+    await updateRecord(client, 'Person', personId, { lifecycleStage: 'DO_NOT_CONTACT' });
+    expect((await refusalOf(resendSms(client, platform, activation.id, callerOf(actor), now))).code).toBe('CONTACT_DO_NOT_CONTACT');
+  });
+
+  it('deactivates a code on the platform first, then for every activated user, with an audit row and no SMS (DS5, DS6)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const codeId = await newCode({ campaignId: scene.campaignId });
+    const contacts = [await claimedContact(scene), await claimedContact(scene), await claimedContact(scene)];
+
+    for (const personId of contacts) {
+      await answerWithCodes(actor, personId, at(await openDealOf(personId), 0, 2), [codeId]);
+    }
+
+    const smsBefore = callsTo('/sms').length;
+
+    script = ({ url }) => (url.endsWith('/deactivate') ? { status: 500, body: { error: { code: 'DOWN', message: 'down' } } } : okScript({ url } as StubRequest<PlatformBody>));
+    await refusalOf(deactivateDiscountCode(client, platform, { codeId, actorName: 'Admin' }, new Date()));
+
+    expect(await codeOf(codeId)).toMatchObject({ isActive: true, deactivatedAt: null });
+    expect((await Promise.all(contacts.map(activationsOf))).flat().map(({ status }) => status)).toEqual(['ACTIVE', 'ACTIVE', 'ACTIVE']);
+    expect(await listRecords(client, 'auditLogs', { discountCodeId: { eq: codeId } }, {})).toEqual([]);
+
+    script = okScript;
+
+    expect(await deactivateDiscountCode(client, platform, { codeId, actorName: 'Admin' }, new Date())).toEqual({ deactivatedActivations: 3 });
+
+    const code = await codeOf(codeId);
+    const audits = await listRecords<{ id: string; action: string; status: string; actorName: string }>(
+      client,
+      'auditLogs',
+      { discountCodeId: { eq: codeId } },
+      { action: true, status: true, actorName: true },
+    );
+
+    for (const audit of audits) {
+      created.push({ singular: 'AuditLog', id: audit.id });
+    }
+
+    expect(code.isActive).toBe(false);
+    expect(code.deactivatedAt).toBeTruthy();
+    expect(audits).toMatchObject([{ action: 'CODE_DEACTIVATED', status: 'DONE', actorName: 'Admin' }]);
+    expect((await Promise.all(contacts.map(activationsOf))).flat().map(({ status }) => status)).toEqual(['DEACTIVATED', 'DEACTIVATED', 'DEACTIVATED']);
+    expect(callsTo('/sms')).toHaveLength(smsBefore);
+    expect((await readPerson(contacts[0])).lifecycleStage).toBe('IN_FOLLOW_UP');
+    expect((await prepareCall(client, actor, contacts[0], new Date())).codes).toEqual([]);
+    expect((await refusalOf(deactivateDiscountCode(client, platform, { codeId, actorName: 'Admin' }, new Date()))).code).toBe('ALREADY_DEACTIVATED');
+  });
+
+  it('credits the owner at purchase and the activating agent for the code used (RS2)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL), memberIdOf(SCOTT)]);
+    const [agentA, agentB] = scene.actors;
+    const personId = await claimedContact(scene, agentA);
+    const deal = await openDealOf(personId);
+    const codeId = await newCode({ campaignId: scene.campaignId });
+    const code = await codeOf(codeId);
+
+    await answerWithCodes(agentA, personId, at(deal, 0, 2), [codeId]);
+    // A transfer (built in a later ticket) moves the contact and its open deal to B.
+    await updateRecord(client, 'Person', personId, { ownerId: agentB.agentId, ownerMemberId: agentB.memberId });
+    await updateRecord(client, 'Opportunity', deal.id, { agentId: agentB.agentId });
+
+    const occurredAt = at(deal, 2);
+
+    await processPurchase(
+      client,
+      platformEvent('purchase.settled', occurredAt, {
+        platformPurchaseId: `p_${randomUUID()}`,
+        platformUserId: await platformUserIdOf(personId),
+        amountUsdt: '200.00',
+        codeUsed: code.code,
+      }),
+      occurredAt,
+    );
+
+    const [purchase] = await listRecords<{ creditedAgentId: string | null; codeId: string | null; codeText: string | null; commissionUsdt: number }>(
+      client,
+      'purchases',
+      { contactId: { eq: personId } },
+      { creditedAgentId: true, codeId: true, codeText: true, commissionUsdt: true },
+    );
+    const [activation] = await activationsOf(personId);
+
+    expect(purchase).toMatchObject({ creditedAgentId: agentB.agentId, codeId, codeText: code.code, commissionUsdt: 4 });
+    expect(activation).toMatchObject({ status: 'USED', activatingAgentId: agentA.agentId });
+    expect(activation.usedAt).toBe(occurredAt.toISOString());
+  });
+
+  it('fails an activation stuck in Pending for more than five minutes in the sweeper', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const personId = await claimedContact(scene);
+    const codeId = await newCode({ campaignId: scene.campaignId });
+    const id = await createRecord(client, 'CodeActivation', {
+      name: 'stuck',
+      activationKey: `${codeId}:${personId}`,
+      codeId,
+      contactId: personId,
+      activatingAgentId: actor.agentId,
+      status: 'PENDING',
+    });
+
+    expect(await failStalePendingActivations(client, new Date(Date.now() + 4 * 60_000))).toBe(0);
+    expect((await activationsOf(personId))[0].status).toBe('PENDING');
+    expect((await sweepAt(new Date(Date.now() + 6 * 60_000))).failedActivations).toBe(1);
+    expect((await activationsOf(personId))[0]).toMatchObject({ status: 'FAILED' });
+    expect((await activationsOf(personId))[0].lastError).toBeTruthy();
+    expect(id).toBeTruthy();
   });
 });
 
