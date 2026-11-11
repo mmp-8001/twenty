@@ -108,4 +108,38 @@ export const assertInvariants = async (client: CoreApiClient) => {
       expect(activation.activatedAt, 'An Active activation has a time').toBeTruthy();
     }
   }
+
+  // Invariant 9: a deactivated agent owns nothing.
+  const inactiveAgents = await listRecords<{ id: string; name: string }>(client, 'agents', { isActive: { eq: false } }, { name: true });
+
+  for (const agent of inactiveAgents) {
+    const owned = await listRecords<{ id: string }>(
+      client,
+      'people',
+      { and: [{ ownerId: { eq: agent.id } }, { deletedAt: { is: 'NULL' } }] },
+      {},
+      1,
+    );
+
+    expect(owned, `Inactive agent ${agent.name} owns no contacts`).toEqual([]);
+  }
+
+  // Invariant 5: a transfer or release closes the old deal as Void with its reason; a closed deal holds no key.
+  const voided = await listRecords<{ closeReason: string | null; openDealKey: string | null }>(
+    client,
+    'opportunities',
+    { dealStage: { eq: 'VOID' } },
+    { closeReason: true, openDealKey: true },
+  );
+
+  for (const deal of voided) {
+    expect(deal.closeReason, 'A Void deal says why').toBeTruthy();
+    expect(deal.openDealKey || null).toBeNull();
+  }
+
+  const failedAudits = await listRecords<{ lastError: string | null }>(client, 'auditLogs', { status: { eq: 'FAILED' } }, { lastError: true });
+
+  for (const audit of failedAudits) {
+    expect(audit.lastError, 'A Failed operation has a reason').toBeTruthy();
+  }
 };

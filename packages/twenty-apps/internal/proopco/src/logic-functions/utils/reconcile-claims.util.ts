@@ -15,7 +15,6 @@ import {
 // A claim that died between taking the contact and creating its deal; the grace keeps a claim still in flight safe.
 const CLAIM_GRACE_MS = 2 * 60 * 1000;
 
-// shortcut: no In progress Audit row check, the Audit log lands in #92; add it there so a transfer in flight is never released.
 export const reconcileClaims = async (
   client: RecordsClient,
   now: Date,
@@ -46,7 +45,18 @@ export const reconcileClaims = async (
     { openDealKey: true },
   );
   const withDeal = new Set(openDeals.map(({ openDealKey }) => openDealKey));
-  const orphans = stale.filter(({ id }) => !withDeal.has(id));
+  // A transfer between closing the old deal and creating the new one looks like an orphan.
+  const inFlight = new Set(
+    (
+      await listRecords<{ contactId: string }>(
+        client,
+        'auditLogs',
+        { and: [{ status: { eq: 'IN_PROGRESS' } }, { contactId: { in: stale.map(({ id }) => id) } }] },
+        { contactId: true },
+      )
+    ).map(({ contactId }) => contactId),
+  );
+  const orphans = stale.filter(({ id }) => !withDeal.has(id) && !inFlight.has(id));
 
   if (orphans.length === 0) {
     return 0;
