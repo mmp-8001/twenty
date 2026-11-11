@@ -6,13 +6,14 @@ import {
   type AuditRow,
 } from 'src/logic-functions/utils/audit-log.util';
 import { FREEZE_EXECUTORS } from 'src/logic-functions/utils/freeze-agent.util';
+import { INCOME_EXECUTORS } from 'src/logic-functions/utils/income-paid.util';
 import { listRecords, updateRecord } from 'src/logic-functions/utils/records.util';
 import { EXECUTORS_BY_ACTION } from 'src/logic-functions/utils/transfer-contacts.util';
 
 // Long enough that an operation still running in its own request is never resumed under it.
 export const RESUME_AFTER_MS = 2 * 60 * 1000;
 
-const EXECUTORS = { ...EXECUTORS_BY_ACTION, ...FREEZE_EXECUTORS };
+const EXECUTORS = { ...EXECUTORS_BY_ACTION, ...FREEZE_EXECUTORS, ...INCOME_EXECUTORS };
 
 // Step 7: finish operations that died halfway; five failed attempts end in Failed + needsReview.
 export const resumeAudits = async (context: AuditContext, now: Date): Promise<number> => {

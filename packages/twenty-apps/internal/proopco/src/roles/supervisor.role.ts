@@ -2,6 +2,7 @@ import { defineRole, SystemPermissionFlag } from 'twenty-sdk/define';
 
 import {
   CAMPAIGN_AGENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_CODE_OBJECT_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_SEGMENT_OBJECT_UNIVERSAL_IDENTIFIER,
@@ -54,6 +55,10 @@ export default defineRole({
     {
       objectUniversalIdentifier: CAMPAIGN_CODE_OBJECT_UNIVERSAL_IDENTIFIER,
       ...READ_WRITE_SOFT_DELETE_GRANT,
+    },
+    {
+      objectUniversalIdentifier: MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
+      ...NO_ACCESS_GRANT,
     },
     {
       objectUniversalIdentifier:

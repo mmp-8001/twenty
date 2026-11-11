@@ -17,10 +17,11 @@ import {
 import { Refusal } from 'src/logic-functions/utils/refusal.util';
 import { formatJalaliTehranDateTime } from 'src/utils/jalali.util';
 
+// The SMS goes to Persian-speaking customers, so the labels are seed data, not UI strings.
 export const CAPABILITY_LABELS: Record<string, string> = {
-  DISCOUNT: 'Discount',
-  RESET: 'Reset',
-  TWO_STEP_PAYMENT: 'Two-step payment',
+  DISCOUNT: 'تخفیف',
+  RESET: 'بازنشانی',
+  TWO_STEP_PAYMENT: 'پرداخت دو مرحله‌ای',
 };
 
 export const STALE_PENDING_MS = 5 * 60_000;
