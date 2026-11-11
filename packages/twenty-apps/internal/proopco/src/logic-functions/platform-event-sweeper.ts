@@ -1,25 +1,41 @@
 import { CoreApiClient } from 'twenty-client-sdk/core';
+import { MetadataApiClient } from 'twenty-client-sdk/metadata';
 import { defineLogicFunction } from 'twenty-sdk/define';
 
 import { PLATFORM_EVENT_SWEEPER_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
+import { closeExpiredDeals } from 'src/logic-functions/utils/close-expired-deals.util';
+import { loadEligibilityPlan } from 'src/logic-functions/utils/eligibility.util';
 import { processPendingInbox } from 'src/logic-functions/utils/process-pending-inbox.util';
+import {
+  markMissedSlots,
+  refreshDealMirrors,
+  releaseCooldowns,
+} from 'src/logic-functions/utils/refresh-deal-state.util';
 import { reconcileClaims } from 'src/logic-functions/utils/reconcile-claims.util';
 import { type RecordsClient } from 'src/logic-functions/utils/records.util';
 
-// Steps for later tickets (deadlines, rollups) join here; each takes `now`.
+// Steps 6 and 7 (codes, audit rows) join here in later tickets; each takes `now`.
 export const runSweeper = async (
   now: Date,
   client: RecordsClient = new CoreApiClient({ runAs: 'application' }),
-) => ({
-  processedInboxRows: await processPendingInbox(client, now),
-  releasedClaims: await reconcileClaims(client, now),
-});
+) => {
+  const plan = await loadEligibilityPlan(client, new MetadataApiClient({ runAs: 'application' }));
+
+  return {
+    closedDeals: await closeExpiredDeals(client, plan, now),
+    missedSlots: await markMissedSlots(client, now),
+    releasedCooldowns: await releaseCooldowns(client, plan, now),
+    rewrittenMirrors: await refreshDealMirrors(client, now),
+    processedInboxRows: await processPendingInbox(client, now),
+    releasedClaims: await reconcileClaims(client, now),
+  };
+};
 
 export default defineLogicFunction({
   universalIdentifier:
     PLATFORM_EVENT_SWEEPER_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'platform-event-sweeper',
-  description: 'Every minute: retries Failed and Waiting platform events and releases claims that lost their deal.',
+  description: 'Every minute: closes expired deals, marks missed slots, releases cool-downs, refreshes urgency, retries platform events and releases orphaned claims.',
   timeoutSeconds: 55,
   handler: () => runSweeper(new Date()),
   cronTriggerSettings: { pattern: '* * * * *' },

@@ -1,16 +1,23 @@
 import {
   defineView,
   STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS,
+  ViewFilterGroupLogicalOperator,
   ViewFilterOperand,
   ViewSortDirection,
   ViewType,
 } from 'twenty-sdk/define';
 
 import {
+  MY_FOLLOW_UPS_CUSTOMER_GROUP_UNIVERSAL_IDENTIFIER,
+  MY_FOLLOW_UPS_CUSTOMER_NEXT_CALL_FILTER_UNIVERSAL_IDENTIFIER,
+  MY_FOLLOW_UPS_CUSTOMER_OWNER_FILTER_UNIVERSAL_IDENTIFIER,
+  MY_FOLLOW_UPS_CUSTOMER_STAGE_FILTER_UNIVERSAL_IDENTIFIER,
   MY_FOLLOW_UPS_NAME_FIELD_UNIVERSAL_IDENTIFIER,
+  MY_FOLLOW_UPS_OPEN_GROUP_UNIVERSAL_IDENTIFIER,
+  MY_FOLLOW_UPS_OPEN_OWNER_FILTER_UNIVERSAL_IDENTIFIER,
+  MY_FOLLOW_UPS_ROOT_GROUP_UNIVERSAL_IDENTIFIER,
   MY_FOLLOW_UPS_NEXT_CALL_FIELD_UNIVERSAL_IDENTIFIER,
   MY_FOLLOW_UPS_NEXT_CALL_SORT_UNIVERSAL_IDENTIFIER,
-  MY_FOLLOW_UPS_OWNER_FILTER_UNIVERSAL_IDENTIFIER,
   MY_FOLLOW_UPS_PROGRESS_FIELD_UNIVERSAL_IDENTIFIER,
   MY_FOLLOW_UPS_STAGE_FILTER_UNIVERSAL_IDENTIFIER,
   MY_FOLLOW_UPS_URGENCY_FIELD_UNIVERSAL_IDENTIFIER,
@@ -24,7 +31,7 @@ import {
   followUpColumns,
 } from 'src/views/follow-up-view.util';
 
-// Customers with a next call join in #93 with the other record lists.
+// Open deals, plus Customers who have a scheduled retention call.
 export default defineView({
   universalIdentifier: MY_FOLLOW_UPS_VIEW_UNIVERSAL_IDENTIFIER,
   name: 'My follow-ups',
@@ -39,18 +46,64 @@ export default defineView({
     MY_FOLLOW_UPS_URGENCY_FIELD_UNIVERSAL_IDENTIFIER,
     MY_FOLLOW_UPS_PROGRESS_FIELD_UNIVERSAL_IDENTIFIER,
   ]),
+  filterGroups: [
+    {
+      universalIdentifier: MY_FOLLOW_UPS_ROOT_GROUP_UNIVERSAL_IDENTIFIER,
+      logicalOperator: ViewFilterGroupLogicalOperator.OR,
+    },
+    {
+      universalIdentifier: MY_FOLLOW_UPS_OPEN_GROUP_UNIVERSAL_IDENTIFIER,
+      logicalOperator: ViewFilterGroupLogicalOperator.AND,
+      parentViewFilterGroupUniversalIdentifier: MY_FOLLOW_UPS_ROOT_GROUP_UNIVERSAL_IDENTIFIER,
+      positionInViewFilterGroup: 0,
+    },
+    {
+      universalIdentifier: MY_FOLLOW_UPS_CUSTOMER_GROUP_UNIVERSAL_IDENTIFIER,
+      logicalOperator: ViewFilterGroupLogicalOperator.AND,
+      parentViewFilterGroupUniversalIdentifier: MY_FOLLOW_UPS_ROOT_GROUP_UNIVERSAL_IDENTIFIER,
+      positionInViewFilterGroup: 1,
+    },
+  ],
   filters: [
     {
-      universalIdentifier: MY_FOLLOW_UPS_OWNER_FILTER_UNIVERSAL_IDENTIFIER,
+      universalIdentifier: MY_FOLLOW_UPS_OPEN_OWNER_FILTER_UNIVERSAL_IDENTIFIER,
       fieldMetadataUniversalIdentifier: PERSON_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER,
       operand: ViewFilterOperand.IS,
       value: CURRENT_MEMBER_FILTER_VALUE,
+      viewFilterGroupUniversalIdentifier: MY_FOLLOW_UPS_OPEN_GROUP_UNIVERSAL_IDENTIFIER,
+      positionInViewFilterGroup: 0,
     },
     {
       universalIdentifier: MY_FOLLOW_UPS_STAGE_FILTER_UNIVERSAL_IDENTIFIER,
       fieldMetadataUniversalIdentifier: PERSON_LIFECYCLE_STAGE_FIELD_UNIVERSAL_IDENTIFIER,
       operand: ViewFilterOperand.IS,
       value: ['AWAITING_FIRST_CALL', 'IN_FOLLOW_UP'],
+      viewFilterGroupUniversalIdentifier: MY_FOLLOW_UPS_OPEN_GROUP_UNIVERSAL_IDENTIFIER,
+      positionInViewFilterGroup: 1,
+    },
+    {
+      universalIdentifier: MY_FOLLOW_UPS_CUSTOMER_OWNER_FILTER_UNIVERSAL_IDENTIFIER,
+      fieldMetadataUniversalIdentifier: PERSON_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: ViewFilterOperand.IS,
+      value: CURRENT_MEMBER_FILTER_VALUE,
+      viewFilterGroupUniversalIdentifier: MY_FOLLOW_UPS_CUSTOMER_GROUP_UNIVERSAL_IDENTIFIER,
+      positionInViewFilterGroup: 0,
+    },
+    {
+      universalIdentifier: MY_FOLLOW_UPS_CUSTOMER_STAGE_FILTER_UNIVERSAL_IDENTIFIER,
+      fieldMetadataUniversalIdentifier: PERSON_LIFECYCLE_STAGE_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: ViewFilterOperand.IS,
+      value: ['CUSTOMER'],
+      viewFilterGroupUniversalIdentifier: MY_FOLLOW_UPS_CUSTOMER_GROUP_UNIVERSAL_IDENTIFIER,
+      positionInViewFilterGroup: 1,
+    },
+    {
+      universalIdentifier: MY_FOLLOW_UPS_CUSTOMER_NEXT_CALL_FILTER_UNIVERSAL_IDENTIFIER,
+      fieldMetadataUniversalIdentifier: PERSON_NEXT_CALL_AT_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: ViewFilterOperand.IS_NOT_EMPTY,
+      value: '',
+      viewFilterGroupUniversalIdentifier: MY_FOLLOW_UPS_CUSTOMER_GROUP_UNIVERSAL_IDENTIFIER,
+      positionInViewFilterGroup: 2,
     },
   ],
   sorts: [

@@ -32,3 +32,14 @@ export const readOnlyField = (
   canReadFieldValue: true,
   canUpdateFieldValue: false,
 });
+
+// Commission is read by Full Admin only; agents see their payout through Monthly income.
+export const hiddenField = (
+  objectUniversalIdentifier: string,
+  fieldUniversalIdentifier: string,
+) => ({
+  objectUniversalIdentifier,
+  fieldUniversalIdentifier,
+  canReadFieldValue: false,
+  canUpdateFieldValue: false,
+});

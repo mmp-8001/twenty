@@ -3,6 +3,7 @@ import { isDefined } from 'twenty-sdk/utils';
 import {
   urgencyOf,
   planProgressOf,
+  rebuyWindowProgressOf,
   type DealClock,
   type SlotStatus,
 } from 'src/utils/deal-clock.util';
@@ -54,6 +55,20 @@ export const loadOpenDeal = async (
   return deal ?? null;
 };
 
+export const loadOpenDealsByPerson = async (
+  client: RecordsClient,
+  personIds: string[],
+): Promise<Map<string, DealRow>> => {
+  const deals = await listRecords<DealRow & { openDealKey: string }>(
+    client,
+    'opportunities',
+    { openDealKey: { in: personIds } },
+    { ...DEAL_SELECTION, openDealKey: true },
+  );
+
+  return new Map(deals.map((deal) => [deal.openDealKey, deal]));
+};
+
 export const clockOfDeal = (deal: DealRow): DealClock => ({
   stage: deal.dealStage === 'AWAITING_FIRST_CALL' ? 'AWAITING_FIRST_CALL' : 'IN_FOLLOW_UP',
   openedAt: new Date(deal.openedAt),
@@ -73,12 +88,31 @@ export const dealClockFields = (clock: DealClock, currentSlot: number | null) =>
   ...(isDefined(currentSlot) ? { currentSlot } : {}),
 });
 
-type MirrorInput = {
+type ProgressInput = {
   clock: DealClock | null;
-  dealTypeLabel: 'Campaign' | 'Rebuy' | 'Retention';
-  sourceCampaignId?: string | null;
+  rebuyWindowDeadlineAt?: Date | null;
   nextCallAt: Date | null;
   now: Date;
+};
+
+// The two mirrors that drift with time; the sweeper rewrites only these.
+export const progressMirrorFields = ({
+  clock,
+  rebuyWindowDeadlineAt,
+  nextCallAt,
+  now,
+}: ProgressInput) => ({
+  callUrgency: urgencyOf(nextCallAt, now),
+  planProgress: isDefined(rebuyWindowDeadlineAt)
+    ? rebuyWindowProgressOf(rebuyWindowDeadlineAt, now)
+    : clock === null
+      ? null
+      : planProgressOf(clock, now),
+});
+
+type MirrorInput = ProgressInput & {
+  dealTypeLabel: 'Campaign' | 'Rebuy' | 'Retention' | null;
+  sourceCampaignId?: string | null;
 };
 
 // Views cannot show related fields, so every clock or next-call change rewrites these on the Person.
@@ -87,12 +121,12 @@ export const personMirrorFields = ({
   dealTypeLabel,
   sourceCampaignId,
   nextCallAt,
+  rebuyWindowDeadlineAt,
   now,
 }: MirrorInput) => ({
   nextCallAt: nextCallAt?.toISOString() ?? null,
   dealTypeLabel,
   ...(sourceCampaignId === undefined ? {} : { sourceCampaignId }),
-  deadlineAt: clock?.deadlineAt.toISOString() ?? null,
-  callUrgency: urgencyOf(nextCallAt, now),
-  planProgress: clock === null ? null : planProgressOf(clock, now),
+  deadlineAt: (rebuyWindowDeadlineAt ?? clock?.deadlineAt)?.toISOString() ?? null,
+  ...progressMirrorFields({ clock, rebuyWindowDeadlineAt, nextCallAt, now }),
 });

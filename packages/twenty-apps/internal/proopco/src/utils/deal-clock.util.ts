@@ -210,3 +210,6 @@ export const planProgressOf = (clock: DealClock, now: Date): string => {
 
   return `Day ${dayOf(clock.openedAt, now, total || AWAITING_FIRST_CALL_DAYS)} of ${total || AWAITING_FIRST_CALL_DAYS}`;
 };
+
+export const rebuyWindowProgressOf = (deadlineAt: Date, now: Date): string =>
+  `${Math.max(0, Math.ceil((deadlineAt.getTime() - now.getTime()) / HOUR_MS))}h left`;

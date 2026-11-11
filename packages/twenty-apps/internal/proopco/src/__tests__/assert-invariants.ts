@@ -62,4 +62,19 @@ export const assertInvariants = async (client: CoreApiClient) => {
     ).toContain(deal.dealStage);
     expect(deal.openDealKey, 'The open deal key is the contact id').toBe(deal.pointOfContactId);
   }
+
+  const unowned = await listRecords<{ lifecycleStage: string; ownerId: string | null; cooldownUntil: string | null }>(
+    client,
+    'people',
+    { lifecycleStage: { in: ['FREE', 'COOL_DOWN'] } },
+    { lifecycleStage: true, ownerId: true, cooldownUntil: true },
+  );
+
+  for (const person of unowned) {
+    expect(person.ownerId, `A ${person.lifecycleStage} contact has no owner`).toBeNull();
+  }
+
+  for (const person of unowned.filter(({ lifecycleStage }) => lifecycleStage === 'COOL_DOWN')) {
+    expect(person.cooldownUntil, 'A Cool-down contact has an end').toBeTruthy();
+  }
 };
