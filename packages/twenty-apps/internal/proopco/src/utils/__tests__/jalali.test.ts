@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   formatJalaliMonth,
+  formatJalaliTehranDateTime,
   isFirstJalaliDay,
   jalaliMonthBounds,
   jalaliPartsOf,
@@ -55,5 +56,12 @@ describe('formatJalaliMonth', () => {
   it('pads the month', () => {
     expect(formatJalaliMonth({ year: 1405, month: 8 })).toBe('1405-08');
     expect(formatJalaliMonth(previousJalaliMonth(new Date('2024-03-19T20:30:00Z')))).toBe('1402-12');
+  });
+});
+
+describe('formatJalaliTehranDateTime', () => {
+  it('writes the Tehran Jalali date and time with Latin digits', () => {
+    expect(formatJalaliTehranDateTime(new Date('2026-12-21T20:29:59Z'))).toBe('1405/09/30 23:59');
+    expect(formatJalaliTehranDateTime(new Date('2024-03-19T20:30:00Z'))).toBe('1403/01/01 00:00');
   });
 });

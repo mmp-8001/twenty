@@ -87,7 +87,24 @@ afterAll(async () => {
   await assertInvariants(client);
 });
 
+const CREATE_CODE_URL = `${process.env.TWENTY_API_URL}/s/codes/create`;
+
 describe('Supervisor (AS1)', () => {
+  it('cannot create or deactivate codes: only a Full Admin can', async () => {
+    for (const token of [supervisorToken, agentToken]) {
+      const response = await fetch(CREATE_CODE_URL, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+        body: JSON.stringify({ code: 'NOPE', capability: 'DISCOUNT', expiresAt: '2099-01-01T00:00:00Z' }),
+      });
+
+      expect(response.status).toBe(403);
+      expect(await response.json()).toMatchObject({ error: { code: 'FULL_ADMIN_ONLY' } });
+    }
+
+    expect(await listRecords(client, 'discountCodes', { code: { eq: 'NOPE' } }, {})).toEqual([]);
+  });
+
   it('creates and edits campaigns and segments but never writes the app-owned status', async () => {
     const created = await createCampaignAs(supervisorToken, {});
     const campaign = created.data?.createCampaign as { id: string } | undefined;

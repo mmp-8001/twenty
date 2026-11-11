@@ -77,4 +77,35 @@ export const assertInvariants = async (client: CoreApiClient) => {
   for (const person of unowned.filter(({ lifecycleStage }) => lifecycleStage === 'COOL_DOWN')) {
     expect(person.cooldownUntil, 'A Cool-down contact has an end').toBeTruthy();
   }
+
+  // Invariant 8: a code is never activated twice for one contact and activations are never deleted.
+  const activations = await listRecords<{
+    activationKey: string;
+    codeId: string;
+    contactId: string;
+    status: string;
+    lastError: string | null;
+    activatedAt: string | null;
+  }>(
+    client,
+    'codeActivations',
+    {},
+    { activationKey: true, codeId: true, contactId: true, status: true, lastError: true, activatedAt: true },
+  );
+
+  expect(new Set(activations.map(({ activationKey }) => activationKey)).size, 'One activation per code and contact').toBe(
+    activations.length,
+  );
+
+  for (const activation of activations) {
+    expect(activation.activationKey).toBe(`${activation.codeId}:${activation.contactId}`);
+
+    if (activation.status === 'FAILED') {
+      expect(activation.lastError, 'A Failed activation has a reason').toBeTruthy();
+    }
+
+    if (activation.status === 'ACTIVE') {
+      expect(activation.activatedAt, 'An Active activation has a time').toBeTruthy();
+    }
+  }
 };
