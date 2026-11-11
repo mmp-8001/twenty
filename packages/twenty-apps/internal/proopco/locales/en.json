@@ -1,0 +1,57 @@
+{
+  "fieldMetadata.description": {
+    "Name": "Name"
+  },
+  "fieldMetadata.label": {
+    "Active accounts": "Active accounts",
+    "Attempts": "Attempts",
+    "Birth date": "Birth date",
+    "Country": "Country",
+    "Current stage": "Current stage",
+    "Event ID": "Event ID",
+    "Event type": "Event type",
+    "Failed challenges": "Failed challenges",
+    "Has phone": "Has phone",
+    "Has profit withdrawal": "Has profit withdrawal",
+    "Is referred": "Is referred",
+    "KYC status": "KYC status",
+    "Last challenge failed at": "Last challenge failed at",
+    "Last error": "Last error",
+    "Last login at": "Last login at",
+    "Last purchase at": "Last purchase at",
+    "Last rolled-up Jalali month": "Last rolled-up Jalali month",
+    "Late event grace (minutes)": "Late event grace (minutes)",
+    "Name": "Name",
+    "Needs review": "Needs review",
+    "Occurred at": "Occurred at",
+    "Payload": "Payload",
+    "Platform updated at": "Platform updated at",
+    "Platform user ID": "Platform user ID",
+    "Processed at": "Processed at",
+    "Purchases": "Purchases",
+    "Rebuy cool-down (days)": "Rebuy cool-down (days)",
+    "Rebuy follow-up (days)": "Rebuy follow-up (days)",
+    "Rebuy window (hours)": "Rebuy window (hours)",
+    "Registration source": "Registration source",
+    "Signed up at": "Signed up at",
+    "SMS template": "SMS template",
+    "Status": "Status",
+    "Total paid (USDT)": "Total paid (USDT)"
+  },
+  "objectMetadata.description": {
+    "Every message received from the platform, kept until processed": "Every message received from the platform, kept until processed",
+    "The single settings record of the Proopco app": "The single settings record of the Proopco app"
+  },
+  "objectMetadata.labelPlural": {
+    "Platform event inbox": "Platform event inbox",
+    "Proopco settings": "Proopco settings"
+  },
+  "objectMetadata.labelSingular": {
+    "Platform event": "Platform event",
+    "Proopco settings": "Proopco settings"
+  },
+  "view.name": {
+    "Contact list": "Contact list",
+    "Failed platform events": "Failed platform events"
+  }
+}

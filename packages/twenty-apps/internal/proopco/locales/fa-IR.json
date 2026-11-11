@@ -1,0 +1,57 @@
+{
+  "fieldMetadata.description": {
+    "Name": "نام"
+  },
+  "fieldMetadata.label": {
+    "Active accounts": "حساب‌های فعال",
+    "Attempts": "تعداد تلاش",
+    "Birth date": "تاریخ تولد",
+    "Country": "کشور",
+    "Current stage": "مرحله فعلی",
+    "Event ID": "شناسه رویداد",
+    "Event type": "نوع رویداد",
+    "Failed challenges": "چالش‌های ناموفق",
+    "Has phone": "شماره تلفن دارد",
+    "Has profit withdrawal": "برداشت سود داشته",
+    "Is referred": "معرفی‌شده",
+    "KYC status": "وضعیت احراز هویت",
+    "Last challenge failed at": "آخرین شکست چالش",
+    "Last error": "آخرین خطا",
+    "Last login at": "آخرین ورود",
+    "Last purchase at": "آخرین خرید",
+    "Last rolled-up Jalali month": "آخرین ماه جلالی تجمیع‌شده",
+    "Late event grace (minutes)": "مهلت رویداد دیرهنگام (دقیقه)",
+    "Name": "نام",
+    "Needs review": "نیازمند بررسی",
+    "Occurred at": "زمان رخداد",
+    "Payload": "محتوای پیام",
+    "Platform updated at": "آخرین به‌روزرسانی در پلتفرم",
+    "Platform user ID": "شناسه کاربر در پلتفرم",
+    "Processed at": "زمان پردازش",
+    "Purchases": "تعداد خرید",
+    "Rebuy cool-down (days)": "دوره استراحت خرید مجدد (روز)",
+    "Rebuy follow-up (days)": "مدت پیگیری خرید مجدد (روز)",
+    "Rebuy window (hours)": "بازه خرید مجدد (ساعت)",
+    "Registration source": "منبع ثبت‌نام",
+    "Signed up at": "زمان ثبت‌نام",
+    "SMS template": "قالب پیامک",
+    "Status": "وضعیت",
+    "Total paid (USDT)": "مجموع پرداخت (تتر)"
+  },
+  "objectMetadata.description": {
+    "Every message received from the platform, kept until processed": "هر پیامی که از پلتفرم دریافت می‌شود، تا زمان پردازش نگهداری می‌شود",
+    "The single settings record of the Proopco app": "رکورد تنظیمات یکتای برنامه پروپکو"
+  },
+  "objectMetadata.labelPlural": {
+    "Platform event inbox": "صندوق رویدادهای پلتفرم",
+    "Proopco settings": "تنظیمات پروپکو"
+  },
+  "objectMetadata.labelSingular": {
+    "Platform event": "رویداد پلتفرم",
+    "Proopco settings": "تنظیمات پروپکو"
+  },
+  "view.name": {
+    "Contact list": "فهرست مخاطبان",
+    "Failed platform events": "رویدادهای ناموفق پلتفرم"
+  }
+}
