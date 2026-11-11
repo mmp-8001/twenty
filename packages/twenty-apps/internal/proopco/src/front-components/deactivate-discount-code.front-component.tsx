@@ -10,7 +10,7 @@ import {
 } from 'twenty-sdk/front-component';
 
 import { DEACTIVATE_DISCOUNT_CODE_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
-import { readServerError } from 'src/front-components/utils/server-error.util';
+import { showServerError } from 'src/front-components/utils/server-error.util';
 
 const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
   FULL_ADMIN_ONLY: msg('Only a Full Admin can do this.'),
@@ -36,13 +36,7 @@ const DeactivateDiscountCode = () => {
       await new RestApiClient().post('/s/codes/deactivate', { codeId: recordIds[0] });
       await enqueueSnackbar({ message: t(msg('Code deactivated.')), variant: 'success' });
     } catch (error) {
-      const { code, message } = readServerError(error);
-      const descriptor = code === null ? undefined : ERROR_MESSAGES[code];
-
-      await enqueueSnackbar({
-        message: descriptor ? t(descriptor) : (message ?? t(msg('Something went wrong.'))),
-        variant: 'error',
-      });
+      await showServerError(error, ERROR_MESSAGES, t, msg('Something went wrong.'));
     }
   };
 

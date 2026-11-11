@@ -3,17 +3,15 @@ import { CoreApiClient } from 'twenty-client-sdk/core';
 import { RestApiClient } from 'twenty-client-sdk/rest';
 import { defineFrontComponent } from 'twenty-sdk/define';
 import {
-  closeSidePanel,
   enqueueSnackbar,
   msg,
-  unmountFrontComponent,
   useSelectedRecordIds,
   useTranslate,
 } from 'twenty-sdk/front-component';
 
 import { EDIT_CALL_NOTE_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { formStyles as styles } from 'src/front-components/utils/form-styles.util';
-import { readServerError } from 'src/front-components/utils/server-error.util';
+import { closeFormPanel, showServerError } from 'src/front-components/utils/server-error.util';
 
 const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
   NOT_AUTHOR: msg('Only the author can edit this note.'),
@@ -27,11 +25,6 @@ const EditCallNote = () => {
   const [note, setNote] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const close = () => {
-    unmountFrontComponent();
-    closeSidePanel();
-  };
-
   useEffect(() => {
     new CoreApiClient()
       .query({ calls: { __args: { filter: { id: { eq: callId } } }, edges: { node: { note: true } } } })
@@ -40,7 +33,6 @@ const EditCallNote = () => {
 
         setNote(edges?.[0]?.node.note ?? '');
       });
-    // Runs once per opened form.
   }, [callId]);
 
   const save = async () => {
@@ -49,15 +41,9 @@ const EditCallNote = () => {
     try {
       await new RestApiClient().post('/s/calls/edit-note', { callId, note });
       await enqueueSnackbar({ message: t(msg('Note saved.')), variant: 'success' });
-      close();
+      closeFormPanel();
     } catch (error) {
-      const { code, message } = readServerError(error);
-      const descriptor = code === null ? undefined : ERROR_MESSAGES[code];
-
-      await enqueueSnackbar({
-        message: descriptor ? t(descriptor) : (message ?? t(msg('Something went wrong.'))),
-        variant: 'error',
-      });
+      await showServerError(error, ERROR_MESSAGES, t, msg('Something went wrong.'));
       setSubmitting(false);
     }
   };
@@ -69,7 +55,7 @@ const EditCallNote = () => {
         <textarea style={styles.input} value={note ?? ''} disabled={note === null} onChange={(event) => setNote(event.target.value)} />
       </div>
       <div style={styles.footer}>
-        <button type="button" style={styles.button} onClick={close} disabled={submitting}>
+        <button type="button" style={styles.button} onClick={closeFormPanel} disabled={submitting}>
           {t(msg('Cancel'))}
         </button>
         <button

@@ -52,7 +52,7 @@ import { PURCHASE_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fi
 import { PURCHASE_CREDITED_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/purchase-credited-agent-member.field';
 import { hiddenField, READ_ONLY_GRANT } from 'src/roles/role-grants.util';
 
-const { person, opportunity, workspaceMember } = STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS;
+const { person, opportunity, workspaceMember, dashboard } = STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS;
 
 // Objects the Agent reads outright; Person, Opportunity, Call and Purchase are scoped by the row rules below.
 const READABLE_OBJECT_UNIVERSAL_IDENTIFIERS = [
@@ -73,6 +73,7 @@ const READABLE_OBJECT_UNIVERSAL_IDENTIFIERS = [
   DISCOUNT_CODE_OBJECT_UNIVERSAL_IDENTIFIER,
   CODE_ACTIVATION_OBJECT_UNIVERSAL_IDENTIFIER,
   SETTINGS_OBJECT_UNIVERSAL_IDENTIFIER,
+  dashboard.universalIdentifier,
 ];
 
 export default defineRole({

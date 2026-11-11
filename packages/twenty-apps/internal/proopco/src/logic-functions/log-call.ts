@@ -1,3 +1,4 @@
+import { isObject, isString } from '@sniptt/guards';
 import { defineLogicFunction, type RoutePayload } from 'twenty-sdk/define';
 import { Response } from 'twenty-sdk/logic-function';
 
@@ -14,7 +15,7 @@ export const handleLogCall = async (routePayload: RoutePayload<unknown>) => {
     const actor = await loadAgentActor(client, await resolveCallerMemberId(routePayload));
     const input = routePayload.body as Partial<LogCallInput> | null;
 
-    if (typeof input?.personId !== 'string' || typeof input.next !== 'object' || input.next === null) {
+    if (!isString(input?.personId) || !isObject(input.next)) {
       throw new Refusal(400, 'INVALID_BODY', 'personId and next are required');
     }
 

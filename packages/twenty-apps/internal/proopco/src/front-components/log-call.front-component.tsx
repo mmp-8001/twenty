@@ -2,17 +2,15 @@ import { type CSSProperties, useEffect, useState } from 'react';
 import { RestApiClient } from 'twenty-client-sdk/rest';
 import { defineFrontComponent } from 'twenty-sdk/define';
 import {
-  closeSidePanel,
   enqueueSnackbar,
   msg,
-  unmountFrontComponent,
   useSelectedRecordIds,
   useTranslate,
 } from 'twenty-sdk/front-component';
 
 import { TEHRAN_OFFSET_MS } from 'src/constants/time.constant';
 import { LOG_CALL_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
-import { readServerError } from 'src/front-components/utils/server-error.util';
+import { closeFormPanel, showServerError } from 'src/front-components/utils/server-error.util';
 
 type ReasonOption = { id: string; kind: string; name: string };
 type OfferedCode = { id: string; code: string; capability: string; expiresAt: string; activated: boolean };
@@ -53,7 +51,6 @@ const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
   CODES_NOT_ALLOWED: msg('Codes are offered only after an answered call that continues.'),
 };
 
-// shortcut: fixed +03:30 like the server helpers; revisit if Iran reintroduces DST.
 const toTehranInput = (iso: string | null) =>
   iso === null ? '' : new Date(new Date(iso).getTime() + TEHRAN_OFFSET_MS).toISOString().slice(0, 16);
 const fromTehranInput = (value: string) => new Date(Date.parse(`${value}:00Z`) - TEHRAN_OFFSET_MS);
@@ -131,18 +128,7 @@ const LogCallForm = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const showError = (error: unknown) => {
-    const { code, message } = readServerError(error);
-    const descriptor = code === null ? undefined : ERROR_MESSAGES[code];
-
-    return enqueueSnackbar({
-      message: descriptor ? t(descriptor) : (message ?? t(msg('Something went wrong.'))),
-      variant: 'error',
-    });
-  };
-
-  const close = () => {
-    unmountFrontComponent();
-    closeSidePanel();
+    return showServerError(error, ERROR_MESSAGES, t, msg('Something went wrong.'));
   };
 
   useEffect(() => {
@@ -155,9 +141,8 @@ const LogCallForm = () => {
       .then(setPreparation)
       .catch(async (error) => {
         await showError(error);
-        close();
+        closeFormPanel();
       });
-    // Runs once per opened form.
   }, [personId]);
 
   if (preparation === null) {
@@ -226,7 +211,7 @@ const LogCallForm = () => {
         }
       }
 
-      close();
+      closeFormPanel();
     } catch (error) {
       await showError(error);
       setSubmitting(false);
@@ -382,7 +367,7 @@ const LogCallForm = () => {
       </div>
 
       <div style={styles.footer}>
-        <button type="button" style={styles.button} onClick={step === 0 ? close : () => setStep(stepOrder[stepOrder.indexOf(step) - 1])} disabled={submitting}>
+        <button type="button" style={styles.button} onClick={step === 0 ? closeFormPanel : () => setStep(stepOrder[stepOrder.indexOf(step) - 1])} disabled={submitting}>
           {step === 0 ? t(msg('Cancel')) : t(msg('Back'))}
         </button>
         <button

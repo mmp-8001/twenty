@@ -3,8 +3,9 @@ import { RestApiClient } from 'twenty-client-sdk/rest';
 import { defineFrontComponent, PageLayoutType } from 'twenty-sdk/define';
 import { msg, t, useLocale } from 'twenty-sdk/front-component';
 
+import { type ReportPeriodKind } from 'src/utils/report.util';
 import { REPORT_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
-import { readServerError } from 'src/front-components/utils/server-error.util';
+import { serverErrorMessage } from 'src/front-components/utils/server-error.util';
 
 type Summary = {
   calls: { total: number; answered: number; unanswered: number; answerRate: number | null; followUp: number; retention: number; reds: number; perWorkingDay: number | null };
@@ -28,7 +29,7 @@ type ReportResponse = {
   failedEvents: number | null;
 };
 
-const PERIODS = [
+const PERIODS: { kind: ReportPeriodKind; label: ReturnType<typeof msg> }[] = [
   { kind: 'DAY', label: msg('Day') },
   { kind: 'WEEK', label: msg('Week') },
   { kind: 'MONTH', label: msg('Month') },
@@ -74,7 +75,7 @@ const styles: Record<string, CSSProperties> = {
 
 const Report = () => {
   const locale = useLocale();
-  const [period, setPeriod] = useState('MONTH');
+  const [period, setPeriod] = useState<ReportPeriodKind>('MONTH');
   const [offset, setOffset] = useState(0);
   const [agentId, setAgentId] = useState('ALL');
   const [sortKey, setSortKey] = useState<string | null>(null);
@@ -89,10 +90,7 @@ const Report = () => {
       .post<ReportResponse>('/s/reports', { period, offset, agentId })
       .then((response) => current && setReport(response))
       .catch((caught) => {
-        const { code, message } = readServerError(caught);
-        const descriptor = code === null ? undefined : ERROR_MESSAGES[code];
-
-        current && setError(descriptor ? t(descriptor) : (message ?? t(msg('Something went wrong.'))));
+        current && setError(serverErrorMessage(caught, ERROR_MESSAGES, t, msg('Something went wrong.')));
       });
 
     return () => {

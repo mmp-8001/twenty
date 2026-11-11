@@ -10,7 +10,7 @@ import {
 } from 'twenty-sdk/front-component';
 
 import { FREEZE_AGENT_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
-import { readServerError } from 'src/front-components/utils/server-error.util';
+import { showServerError } from 'src/front-components/utils/server-error.util';
 
 const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
   STAFF_ONLY: msg('Only a Supervisor or Full Admin can do this.'),
@@ -42,13 +42,7 @@ const FreezeAgent = () => {
       await new RestApiClient().post('/s/agents/freeze', { agentId: recordIds[0] });
       await enqueueSnackbar({ message: t(msg('Agent frozen.')), variant: 'success' });
     } catch (error) {
-      const { code, message } = readServerError(error);
-      const descriptor = code === null ? undefined : ERROR_MESSAGES[code];
-
-      await enqueueSnackbar({
-        message: descriptor ? t(descriptor) : (message ?? t(msg('Something went wrong.'))),
-        variant: 'error',
-      });
+      await showServerError(error, ERROR_MESSAGES, t, msg('Something went wrong.'));
     }
   };
 

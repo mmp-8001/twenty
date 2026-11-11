@@ -153,9 +153,10 @@ export const processPurchase = async (
   let attribution: Attribution = { kind: 'NONE' };
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
-    attribution = await attribute(client, contact, occurredAt);
+    const attempted = await attribute(client, contact, occurredAt);
 
-    if (await applyAttribution(client, contact, attribution, amountUsdt, now)) {
+    if (await applyAttribution(client, contact, attempted, amountUsdt, now)) {
+      attribution = attempted;
       break;
     }
 
@@ -165,6 +166,8 @@ export const processPurchase = async (
   const credited = attribution.kind === 'WON' || attribution.kind === 'RETENTION';
   const ownerId = contact.ownerId;
   const ownerMemberId = contact.ownerMemberId;
+  // A Void ended the ownership just now, so the purchase must not copy the old owner.
+  const ownerless = attribution.kind === 'NONE' || attribution.kind === 'VOID';
 
   const codeId = isNonEmptyString(codeUsed) ? await linkUsedCode(client, codeUsed, contact.id, occurredAt) : null;
 
@@ -180,8 +183,8 @@ export const processPurchase = async (
     creditedAgentId: credited ? ownerId : null,
     creditedAgentMemberId: credited ? ownerMemberId : null,
     commissionUsdt: credited ? commissionOf(amountUsdt) : null,
-    contactOwnerId: attribution.kind === 'NONE' ? null : ownerId,
-    contactOwnerMemberId: attribution.kind === 'NONE' ? null : ownerMemberId,
+    contactOwnerId: ownerless ? null : ownerId,
+    contactOwnerMemberId: ownerless ? null : ownerMemberId,
   });
 
   return attribution.kind === 'NONE' && (await happenedInClosedDeal(client, contact.id, event.occurredAt))

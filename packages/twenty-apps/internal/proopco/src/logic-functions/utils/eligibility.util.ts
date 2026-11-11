@@ -197,7 +197,6 @@ export const recomputeAllEligibility = async (
   return changed;
 };
 
-// Per contact, right after a lifecycle change or an upsert.
 export const recomputeContactEligibility = async (
   client: RecordsClient,
   plan: EligibilityPlan,

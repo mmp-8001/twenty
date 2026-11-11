@@ -1,3 +1,4 @@
+import { isString } from '@sniptt/guards';
 import { defineLogicFunction, type RoutePayload } from 'twenty-sdk/define';
 import { Response } from 'twenty-sdk/logic-function';
 
@@ -33,7 +34,7 @@ export const handleEndCampaign = async (routePayload: RoutePayload<unknown>) => 
 
   const campaignId = (routePayload.body as { campaignId?: unknown } | null)?.campaignId;
 
-  if (typeof campaignId !== 'string') {
+  if (!isString(campaignId)) {
     return failure(400, 'campaignId is required');
   }
 

@@ -12,7 +12,7 @@ import {
 } from 'src/logic-functions/utils/records.util';
 
 import { assertInvariants } from './assert-invariants';
-import { createCampaign, listMembers, softDelete } from './fixtures';
+import { createAgent, createCampaign, listMembers, softDelete } from './fixtures';
 import { assignRole, graphqlAs, listRoles, signInAs } from './user-session';
 
 const client = new CoreApiClient();
@@ -152,6 +152,29 @@ describe('Supervisor (AS1)', () => {
     expect(result.errors?.length).toBeGreaterThan(0);
   });
 
+  it('reads Monthly income but never writes it', async () => {
+    const agentId = await createAgent(client, `Agent ${randomUUID()}`);
+    const incomeId = await createRecord(client, 'MonthlyIncome', {
+      name: `income ${randomUUID()}`,
+      incomeKey: randomUUID(),
+      jalaliMonth: '1404-08',
+      agentId,
+      status: 'AWAITING_PAYMENT',
+      totalUsdt: 1,
+    });
+
+    try {
+      const read = await graphqlAs(supervisorToken, `query ($id: UUID!) { monthlyIncomes(filter: { id: { eq: $id } }) { edges { node { id } } } }`, { id: incomeId });
+      const written = await graphqlAs(supervisorToken, `mutation ($id: UUID!) { updateMonthlyIncome(id: $id, data: { totalUsdt: 2 }) { id } }`, { id: incomeId });
+
+      expect(read.errors).toBeUndefined();
+      expect(written.errors?.length).toBeGreaterThan(0);
+    } finally {
+      await softDelete(client, 'MonthlyIncome', incomeId);
+      await softDelete(client, 'Agent', agentId);
+    }
+  });
+
   it('ends a campaign now through the route', async () => {
     const campaignId = await createCampaign(client, { startsAt: '2030-01-01' });
 
@@ -187,6 +210,12 @@ describe('Agent', () => {
     expect(created.errors?.length).toBeGreaterThan(0);
     expect(read.errors).toBeUndefined();
     expect(ended.status).toBe(403);
+  });
+
+  it('reads the Dashboard that holds the Report widget', async () => {
+    const read = await graphqlAs(agentToken, `{ dashboards(first: 1) { edges { node { id } } } }`);
+
+    expect(read.errors).toBeUndefined();
   });
 
   it('is refused by the End now route without a session', async () => {

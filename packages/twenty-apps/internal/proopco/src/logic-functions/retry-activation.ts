@@ -1,3 +1,4 @@
+import { isString } from '@sniptt/guards';
 import { defineLogicFunction, type RoutePayload } from 'twenty-sdk/define';
 import { Response } from 'twenty-sdk/logic-function';
 
@@ -14,7 +15,7 @@ export const handleRetryActivation = async (routePayload: RoutePayload<unknown>)
     const caller = await resolveCodeCaller(client, routePayload);
     const activationId = (routePayload.body as { activationId?: unknown } | null)?.activationId;
 
-    if (typeof activationId !== 'string') {
+    if (!isString(activationId)) {
       throw new Refusal(400, 'INVALID_BODY', 'activationId is required');
     }
 

@@ -16,7 +16,6 @@ import { reconcileClaims } from 'src/logic-functions/utils/reconcile-claims.util
 import { type RecordsClient } from 'src/logic-functions/utils/records.util';
 import { resumeAudits } from 'src/logic-functions/utils/resume-audits.util';
 
-// Each step takes `now`.
 export const runSweeper = async (
   now: Date,
   client: RecordsClient = new CoreApiClient({ runAs: 'application' }),

@@ -1,3 +1,4 @@
+import { isString } from '@sniptt/guards';
 import { isDefined } from 'twenty-sdk/utils';
 
 import { DEACTIVATED_ROLE_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
@@ -22,7 +23,7 @@ import { type BulkCaller } from 'src/logic-functions/utils/transfer-contacts.uti
 type LifecycleCaller = BulkCaller & { roles: string[]; agentId: string | null };
 
 const loadAgent = async ({ client }: AuditContext, agentId: unknown) => {
-  if (typeof agentId !== 'string') {
+  if (!isString(agentId)) {
     throw new Refusal(400, 'INVALID_BODY', 'agentId is required');
   }
 

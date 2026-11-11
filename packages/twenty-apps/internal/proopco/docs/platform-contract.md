@@ -307,6 +307,7 @@ The CRM writes the text from its template. The platform picks the phone number f
 - [ ] Each outbound endpoint passes against the platform's staging, including a timeout followed by a retry with the same key.
 - [ ] Initial replay runs and the CRM's Failed platform events view is empty.
 - [ ] The nightly resend runs at 23:30 UTC.
+- [ ] Add the Reports navigation item by hand: Reports is a hand-made dashboard, and the app manifest cannot target it, so it is not installed with the app.
 
 ## 7. Open questions for the platform team
 

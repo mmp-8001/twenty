@@ -9,7 +9,7 @@ import {
 } from 'twenty-sdk/front-component';
 
 import { RETRY_ACTIVATION_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
-import { readServerError } from 'src/front-components/utils/server-error.util';
+import { showServerError } from 'src/front-components/utils/server-error.util';
 
 const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
   NOT_ALLOWED: msg('Only the owner, the activating agent or an admin can do this.'),
@@ -34,13 +34,7 @@ const RetryActivation = () => {
           : { message: t(msg('Done.')), variant: 'success' },
       );
     } catch (error) {
-      const { code, message } = readServerError(error);
-      const descriptor = code === null ? undefined : ERROR_MESSAGES[code];
-
-      await enqueueSnackbar({
-        message: descriptor ? t(descriptor) : (message ?? t(msg('Something went wrong.'))),
-        variant: 'error',
-      });
+      await showServerError(error, ERROR_MESSAGES, t, msg('Something went wrong.'));
     }
   };
 

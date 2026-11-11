@@ -1,3 +1,4 @@
+import { isString } from '@sniptt/guards';
 import { defineLogicFunction, type RoutePayload } from 'twenty-sdk/define';
 import { Response } from 'twenty-sdk/logic-function';
 
@@ -20,7 +21,7 @@ export const handleDeactivateDiscountCode = async (routePayload: RoutePayload<un
 
     requireFullAdmin(caller);
 
-    if (typeof codeId !== 'string') {
+    if (!isString(codeId)) {
       throw new Refusal(400, 'INVALID_BODY', 'codeId is required');
     }
 

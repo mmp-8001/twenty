@@ -18,6 +18,7 @@ import {
   hiddenField,
   NO_ACCESS_GRANT,
   readOnlyField,
+  READ_ONLY_GRANT,
   READ_WRITE_GRANT,
   READ_WRITE_SOFT_DELETE_GRANT,
 } from 'src/roles/role-grants.util';
@@ -58,7 +59,7 @@ export default defineRole({
     },
     {
       objectUniversalIdentifier: MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
-      ...NO_ACCESS_GRANT,
+      ...READ_ONLY_GRANT,
     },
     {
       objectUniversalIdentifier:

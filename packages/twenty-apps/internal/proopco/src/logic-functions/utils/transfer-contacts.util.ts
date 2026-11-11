@@ -1,3 +1,5 @@
+import { isNonEmptyString, isString } from '@sniptt/guards';
+import { isNonEmptyArray } from 'twenty-shared/utils';
 import { isDefined } from 'twenty-sdk/utils';
 
 import {
@@ -24,6 +26,7 @@ import {
   loadEligibilityPlan,
   recomputeContactEligibility,
 } from 'src/logic-functions/utils/eligibility.util';
+import { rewriteContactOwner } from 'src/logic-functions/utils/contact-owner.util';
 import { loadMemberRoleIdentifiers } from 'src/logic-functions/utils/member-roles.util';
 import { recountOwnedContacts } from 'src/logic-functions/utils/recount-owned-contacts.util';
 import {
@@ -77,30 +80,6 @@ const DEAL_FIELDS = {
 
 export const OPEN_DEAL_SELECTION = DEAL_FIELDS;
 
-// Collections that carry a contactOwner copy; every owner change rewrites all four (spec 5).
-const OWNER_COPIES = [
-  { plural: 'Calls', contactField: 'contactId' },
-  { plural: 'Opportunities', contactField: 'pointOfContactId' },
-  { plural: 'CodeActivations', contactField: 'contactId' },
-  { plural: 'Purchases', contactField: 'contactId' },
-];
-
-const rewriteContactOwner = async (
-  client: RecordsClient,
-  personId: string,
-  fromAgentId: string,
-  to: { agentId: string; memberId: string | null } | null,
-) => {
-  for (const { plural, contactField } of OWNER_COPIES) {
-    await updateRecordsWhere(
-      client,
-      plural,
-      { and: [{ [contactField]: { eq: personId } }, { contactOwnerId: { eq: fromAgentId } }] },
-      { contactOwnerId: to?.agentId ?? null, contactOwnerMemberId: to?.memberId ?? null },
-    );
-  }
-};
-
 // Time the deal would have gained had the frozen owner been unfrozen at `effectiveAt`.
 export const freezeShiftMs = (
   frozenSince: string | null,
@@ -115,13 +94,32 @@ export const freezeShiftMs = (
           Math.max(new Date(frozenSince).getTime(), new Date(openedAt).getTime()),
       );
 
-const closeOldDeal = (client: RecordsClient, dealId: string, closeReason: string, effectiveAt: string) =>
+const closeOldDeal = (client: RecordsClient, deal: DealSnapshot, closeReason: string, effectiveAt: string) =>
   updateRecordsWhere(
     client,
     'Opportunities',
-    { and: [{ id: { eq: dealId } }, { openDealKey: { is: 'NOT_NULL' } }] },
+    { and: [{ id: { eq: deal.id } }, { openDealKey: { is: 'NOT_NULL' } }, { deadlineAt: { eq: deal.deadlineAt } }] },
     { dealStage: 'VOID', closeReason, closeDate: effectiveAt, openDealKey: null },
   );
+
+// Before any write: a deal that moved on since the snapshot (a call, a freeze shift) would be voided stale.
+const assertDealUnchanged = async (client: RecordsClient, deal: DealSnapshot | null) => {
+  if (deal === null) {
+    return;
+  }
+
+  const [current] = await listRecords<{ openDealKey: string | null; deadlineAt: string }>(
+    client,
+    'opportunities',
+    { id: { eq: deal.id } },
+    { openDealKey: true, deadlineAt: true },
+    1,
+  );
+
+  if (isDefined(current?.openDealKey) && new Date(current.deadlineAt).getTime() !== new Date(deal.deadlineAt).getTime()) {
+    throw new AuditAbort('The deal changed since the operation was requested.');
+  }
+};
 
 const personStillOwnedBy = async (client: RecordsClient, personId: string, agentId: string | null) => {
   const [person] = await listRecords<{ ownerId: string | null }>(
@@ -143,6 +141,8 @@ const executeTransfer: AuditExecutor = async ({ client }, audit) => {
   const { deal } = details;
   const shiftMs = deal === null ? 0 : freezeShiftMs(details.fromFrozenSince, deal.openedAt, audit.effectiveAt);
 
+  await assertDealUnchanged(client, deal);
+
   const moved = await updateRecordsWhere(
     client,
     'People',
@@ -155,7 +155,7 @@ const executeTransfer: AuditExecutor = async ({ client }, audit) => {
   }
 
   if (deal !== null) {
-    await closeOldDeal(client, deal.id, 'TRANSFERRED', audit.effectiveAt);
+    await closeOldDeal(client, deal, 'TRANSFERRED', audit.effectiveAt);
 
     if (!isDefined(audit.newDealId)) {
       const deadlineAt = new Date(new Date(deal.deadlineAt).getTime() + shiftMs);
@@ -218,6 +218,9 @@ const executeRelease: AuditExecutor = async ({ client, metadata }, audit) => {
   const personId = audit.contactId as string;
   const fromAgentId = audit.fromAgentId as string;
   const now = new Date(audit.effectiveAt);
+
+  await assertDealUnchanged(client, details.deal);
+
   const released = await updateRecordsWhere(
     client,
     'People',
@@ -237,7 +240,7 @@ const executeRelease: AuditExecutor = async ({ client, metadata }, audit) => {
   }
 
   if (details.deal !== null) {
-    await closeOldDeal(client, details.deal.id, 'RELEASED', audit.effectiveAt);
+    await closeOldDeal(client, details.deal, 'RELEASED', audit.effectiveAt);
     await updateRecord(client, 'AuditLog', audit.id, { closedDealId: details.deal.id });
   }
 
@@ -276,6 +279,10 @@ const prepareContact = async (
     throw new Refusal(404, 'CONTACT_NOT_FOUND', 'Contact not found.');
   }
 
+  if (person.lifecycleStage === 'DO_NOT_CONTACT') {
+    throw new Refusal(409, 'DO_NOT_CONTACT', 'This contact is marked Do not contact.');
+  }
+
   if (!isDefined(person.ownerId)) {
     throw new Refusal(409, 'NOT_OWNED', 'This contact has no owner.');
   }
@@ -312,13 +319,13 @@ const prepareContact = async (
 };
 
 const validateBulk = (personIds: unknown, reason: unknown) => {
-  const ids = Array.isArray(personIds) ? [...new Set(personIds.filter((id): id is string => typeof id === 'string'))] : [];
+  const ids = isNonEmptyArray(personIds) ? [...new Set(personIds.filter(isString))] : [];
 
-  if (ids.length === 0 || ids.length > MAX_BULK_CONTACTS) {
+  if (!isNonEmptyArray(ids) || ids.length > MAX_BULK_CONTACTS) {
     throw new Refusal(422, 'INVALID_SELECTION', `Choose between 1 and ${MAX_BULK_CONTACTS} contacts.`);
   }
 
-  if (typeof reason !== 'string' || reason.trim() === '') {
+  if (!isString(reason) || !isNonEmptyString(reason.trim())) {
     throw new Refusal(422, 'REASON_REQUIRED', 'A reason is required.');
   }
 
@@ -326,7 +333,7 @@ const validateBulk = (personIds: unknown, reason: unknown) => {
 };
 
 const loadTarget = async (context: AuditContext, toAgentId: unknown) => {
-  if (typeof toAgentId !== 'string') {
+  if (!isString(toAgentId)) {
     throw new Refusal(400, 'INVALID_BODY', 'toAgentId is required');
   }
 

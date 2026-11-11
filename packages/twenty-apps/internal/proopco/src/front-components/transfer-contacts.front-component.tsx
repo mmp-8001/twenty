@@ -3,17 +3,15 @@ import { CoreApiClient } from 'twenty-client-sdk/core';
 import { RestApiClient } from 'twenty-client-sdk/rest';
 import { defineFrontComponent } from 'twenty-sdk/define';
 import {
-  closeSidePanel,
   enqueueSnackbar,
   msg,
-  unmountFrontComponent,
   useSelectedRecordIds,
   useTranslate,
 } from 'twenty-sdk/front-component';
 
 import { TRANSFER_CONTACTS_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { formStyles as styles } from 'src/front-components/utils/form-styles.util';
-import { readServerError } from 'src/front-components/utils/server-error.util';
+import { closeFormPanel, showServerError } from 'src/front-components/utils/server-error.util';
 
 type Result = { succeeded: string[]; failed: { personId: string; message: string }[] };
 type AgentOption = { id: string; name: string };
@@ -39,11 +37,6 @@ const TransferContacts = () => {
   const [failures, setFailures] = useState<Result['failed']>([]);
   const isTransfer = mode === 'TRANSFER';
 
-  const close = () => {
-    unmountFrontComponent();
-    closeSidePanel();
-  };
-
   useEffect(() => {
     new CoreApiClient()
       .query({
@@ -57,7 +50,6 @@ const TransferContacts = () => {
 
         setAgents((connection?.edges ?? []).map(({ node }) => node));
       });
-    // Runs once per opened form.
   }, []);
 
   const valid = reason.trim() !== '' && personIds.length > 0 && (!isTransfer || toAgentId !== '');
@@ -79,19 +71,13 @@ const TransferContacts = () => {
       });
 
       if (result.failed.length === 0) {
-        close();
+        closeFormPanel();
       } else {
         setFailures(result.failed);
         setSubmitting(false);
       }
     } catch (error) {
-      const { code, message } = readServerError(error);
-      const descriptor = code === null ? undefined : ERROR_MESSAGES[code];
-
-      await enqueueSnackbar({
-        message: descriptor ? t(descriptor) : (message ?? t(msg('Something went wrong.'))),
-        variant: 'error',
-      });
+      await showServerError(error, ERROR_MESSAGES, t, msg('Something went wrong.'));
       setSubmitting(false);
     }
   };
@@ -132,7 +118,7 @@ const TransferContacts = () => {
         ))}
       </div>
       <div style={styles.footer}>
-        <button type="button" style={styles.button} onClick={close} disabled={submitting}>
+        <button type="button" style={styles.button} onClick={closeFormPanel} disabled={submitting}>
           {t(msg('Cancel'))}
         </button>
         <button
