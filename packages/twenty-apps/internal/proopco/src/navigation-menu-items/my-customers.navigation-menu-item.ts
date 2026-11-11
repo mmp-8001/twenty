@@ -10,7 +10,7 @@ import {
 
 export default defineNavigationMenuItem({
   universalIdentifier: MY_CUSTOMERS_NAV_UNIVERSAL_IDENTIFIER,
-  position: 8,
+  position: 3,
   type: NavigationMenuItemType.VIEW,
   viewUniversalIdentifier: MY_CUSTOMERS_VIEW_UNIVERSAL_IDENTIFIER,
 });

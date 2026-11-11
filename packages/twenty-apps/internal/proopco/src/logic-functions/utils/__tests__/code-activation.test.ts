@@ -13,7 +13,7 @@ describe('renderSmsTemplate', () => {
         capability: 'TWO_STEP_PAYMENT',
         expiresAt: new Date('2026-12-21T20:29:59Z'),
       }),
-    ).toBe('RESET50 (Two-step payment) until 1405/09/30 23:59; RESET50');
+    ).toBe('RESET50 (پرداخت دو مرحله‌ای) until 1405/09/30 23:59; RESET50');
   });
 });
 

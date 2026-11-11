@@ -16,7 +16,9 @@ export type AuditAction =
   | 'UNFREEZE'
   | 'AGENT_DEACTIVATED'
   | 'AGENT_REACTIVATED'
-  | 'NOTE_EDITED';
+  | 'NOTE_EDITED'
+  | 'INCOME_PAID'
+  | 'INCOME_UNPAID';
 
 export type AuditRow = {
   id: string;
@@ -60,7 +62,7 @@ export type AuditInput = {
   actor: { memberId: string | null; name: string };
   reason?: string | null;
   effectiveAt: Date;
-  links?: Partial<Record<'contactId' | 'subjectAgentId' | 'fromAgentId' | 'toAgentId' | 'callId', string | null>>;
+  links?: Partial<Record<'contactId' | 'subjectAgentId' | 'fromAgentId' | 'toAgentId' | 'callId' | 'monthlyIncomeId', string | null>>;
   details?: Record<string, unknown>;
 };
 

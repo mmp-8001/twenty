@@ -10,7 +10,7 @@ import {
 
 export default defineNavigationMenuItem({
   universalIdentifier: MY_REBUY_LIST_NAV_UNIVERSAL_IDENTIFIER,
-  position: 7,
+  position: 2,
   type: NavigationMenuItemType.VIEW,
   viewUniversalIdentifier: MY_REBUY_LIST_VIEW_UNIVERSAL_IDENTIFIER,
 });

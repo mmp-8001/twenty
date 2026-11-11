@@ -10,7 +10,7 @@ import {
 
 export default defineNavigationMenuItem({
   universalIdentifier: MY_FOLLOW_UPS_NAV_UNIVERSAL_IDENTIFIER,
-  position: 5,
+  position: 1,
   type: NavigationMenuItemType.VIEW,
   viewUniversalIdentifier: MY_FOLLOW_UPS_VIEW_UNIVERSAL_IDENTIFIER,
 });

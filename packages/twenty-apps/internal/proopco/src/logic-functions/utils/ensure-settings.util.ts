@@ -11,7 +11,7 @@ export const SETTINGS_DEFAULTS = {
   rebuyCooldownDays: 30,
   lateEventGraceMinutes: 60,
   smsTemplate:
-    'Your code {code} ({capability}) is valid until {expiry} (Tehran time).',
+    'کد {code} ({capability}) تا {expiry} (به وقت تهران) معتبر است.',
 };
 
 export const ensureSettings = async (client: RecordsClient): Promise<void> => {
