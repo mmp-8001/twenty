@@ -42,3 +42,6 @@ yarn-error.log*
 *.tsbuildinfo
 *.d.ts
 .twenty-test-variant
+
+# playwright
+/e2e/.results
