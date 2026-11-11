@@ -1,0 +1,45 @@
+import { type CSSProperties } from 'react';
+
+export const formStyles: Record<string, CSSProperties> = {
+  container: {
+    fontFamily: 'var(--t-font-family)',
+    fontSize: 'var(--t-font-size-sm)',
+    color: 'var(--t-font-color-primary)',
+    background: 'var(--t-background-primary)',
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    boxSizing: 'border-box',
+  },
+  body: { flex: 1, padding: 'var(--t-spacing-4)', display: 'flex', flexDirection: 'column', gap: 'var(--t-spacing-3)' },
+  title: { margin: 0, fontSize: 'var(--t-font-size-md)', fontWeight: 'var(--t-font-weight-semi-bold)' },
+  hint: { color: 'var(--t-font-color-tertiary)', fontSize: 'var(--t-font-size-xs)' },
+  input: {
+    border: '1px solid var(--t-border-color-medium)',
+    borderRadius: 'var(--t-border-radius-sm)',
+    padding: 'var(--t-spacing-2)',
+    background: 'var(--t-background-secondary)',
+    color: 'var(--t-font-color-primary)',
+    fontFamily: 'var(--t-font-family)',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  footer: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: 'var(--t-spacing-2)',
+    padding: 'var(--t-spacing-3)',
+    borderTop: '1px solid var(--t-border-color-light)',
+  },
+  button: {
+    height: 'var(--t-spacing-8)',
+    padding: '0 var(--t-spacing-3)',
+    borderRadius: 'var(--t-border-radius-sm)',
+    border: '1px solid var(--t-border-color-medium)',
+    background: 'var(--t-background-secondary)',
+    color: 'var(--t-font-color-secondary)',
+    cursor: 'pointer',
+  },
+  primary: { background: 'var(--t-color-blue)', color: 'var(--t-font-color-inverted)', border: '1px solid transparent' },
+  disabled: { opacity: 0.5, cursor: 'not-allowed' },
+};

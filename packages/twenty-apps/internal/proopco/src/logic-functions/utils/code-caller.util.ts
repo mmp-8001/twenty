@@ -6,6 +6,7 @@ import {
   SUPERVISOR_ROLE_UNIVERSAL_IDENTIFIER,
 } from 'src/constants/universal-identifiers';
 import { type ActivationCaller } from 'src/logic-functions/utils/code-activation.util';
+import { applicationClients } from 'src/logic-functions/utils/default-clients.util';
 import {
   listRecords,
   type RecordsClient,
@@ -65,3 +66,26 @@ export const activationCallerOf = ({
 
 export const memberDisplayName = ({ member }: { member: CallerMember }) =>
   `${member.name?.firstName ?? ''} ${member.name?.lastName ?? ''}`.trim();
+
+export const requireStaff = (caller: { roles: string[]; member: CallerMember }) => {
+  if (!activationCallerOf(caller).isStaff) {
+    throw new Refusal(403, 'STAFF_ONLY', 'Only a Supervisor or Full Admin can do this.');
+  }
+};
+
+export const resolveStaffCaller = async (routePayload: RoutePayload<unknown>) => {
+  const { client, metadata } = applicationClients();
+  const caller = await resolveCodeCaller(client, routePayload);
+
+  requireStaff(caller);
+
+  return {
+    context: { client, metadata },
+    caller: {
+      memberId: caller.member.id,
+      name: memberDisplayName(caller),
+      roles: caller.roles,
+      agentId: caller.member.agentId,
+    },
+  };
+};

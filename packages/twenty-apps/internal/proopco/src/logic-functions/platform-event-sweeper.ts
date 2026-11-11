@@ -14,13 +14,15 @@ import {
 } from 'src/logic-functions/utils/refresh-deal-state.util';
 import { reconcileClaims } from 'src/logic-functions/utils/reconcile-claims.util';
 import { type RecordsClient } from 'src/logic-functions/utils/records.util';
+import { resumeAudits } from 'src/logic-functions/utils/resume-audits.util';
 
-// Step 7 (audit rows) joins here in a later ticket; each step takes `now`.
+// Each step takes `now`.
 export const runSweeper = async (
   now: Date,
   client: RecordsClient = new CoreApiClient({ runAs: 'application' }),
 ) => {
-  const plan = await loadEligibilityPlan(client, new MetadataApiClient({ runAs: 'application' }));
+  const metadata = new MetadataApiClient({ runAs: 'application' });
+  const plan = await loadEligibilityPlan(client, metadata);
 
   return {
     closedDeals: await closeExpiredDeals(client, plan, now),
@@ -28,6 +30,7 @@ export const runSweeper = async (
     releasedCooldowns: await releaseCooldowns(client, plan, now),
     rewrittenMirrors: await refreshDealMirrors(client, now),
     processedInboxRows: await processPendingInbox(client, now),
+    resumedAudits: await resumeAudits({ client, metadata }, now),
     releasedClaims: await reconcileClaims(client, now),
     failedActivations: await failStalePendingActivations(client, now),
   };
@@ -37,7 +40,7 @@ export default defineLogicFunction({
   universalIdentifier:
     PLATFORM_EVENT_SWEEPER_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
   name: 'platform-event-sweeper',
-  description: 'Every minute: closes expired deals, marks missed slots, releases cool-downs, refreshes urgency, retries platform events, releases orphaned claims and fails stuck code activations.',
+  description: 'Every minute: closes expired deals, marks missed slots, releases cool-downs, refreshes urgency, retries platform events, resumes stuck audit operations, releases orphaned claims and fails stuck code activations.',
   timeoutSeconds: 55,
   handler: () => runSweeper(new Date()),
   cronTriggerSettings: { pattern: '* * * * *' },

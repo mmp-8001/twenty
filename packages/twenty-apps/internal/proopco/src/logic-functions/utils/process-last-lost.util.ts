@@ -93,5 +93,12 @@ export const processAccountLastLost = async (
     },
   );
 
+  // A frozen owner's rebuy window is paused like the rest of their work; the unfreeze shift restarts its 72 hours.
+  const [owner] = await listRecords<{ frozenSince: string | null }>(client, 'agents', { id: { eq: contact.ownerId } }, { frozenSince: true }, 1);
+
+  if (isDefined(owner?.frozenSince)) {
+    await updateRecordsWhere(client, 'People', { id: { eq: contact.id } }, { planProgress: 'Frozen' });
+  }
+
   return 'processed';
 };
