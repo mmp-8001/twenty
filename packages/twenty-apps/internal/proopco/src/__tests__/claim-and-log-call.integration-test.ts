@@ -588,14 +588,18 @@ const RACE_AGENTS = 20;
 const RACE_RUNS = 50;
 const PG_URL = process.env.PG_DATABASE_URL;
 
-// Extra workspace members cannot be created through any API, so the test inserts them next to the seeded ones.
-const ensureRaceMembers = async (count: number) => {
-  const psql = (sql: string) => execFileSync('psql', [PG_URL!, '-At', '-c', sql], { encoding: 'utf8' }).trim();
-  const schema = psql(
+const psql = (sql: string) => execFileSync('psql', [PG_URL!, '-At', '-c', sql], { encoding: 'utf8' }).trim();
+
+const workspaceSchema = () =>
+  psql(
     `select table_schema from information_schema.tables where table_name = 'workspaceMember' and table_schema like 'workspace_%'`,
   )
     .split('\n')
     .find((candidate) => psql(`select 1 from ${candidate}."workspaceMember" where "userEmail" = 'tim@apple.dev'`) === '1')!;
+
+// Extra workspace members cannot be created through any API, so the test inserts them next to the seeded ones.
+const ensureRaceMembers = async (count: number) => {
+  const schema = workspaceSchema();
 
   for (let index = 1; index <= count; index += 1) {
     psql(
@@ -606,7 +610,13 @@ const ensureRaceMembers = async (count: number) => {
   return (await listMembers(client)).filter(({ userEmail }) => userEmail.startsWith('race')).slice(0, count);
 };
 
+// They have no userWorkspace row, and currentUser fails for the whole workspace while any of them exist.
+const removeRaceMembers = () =>
+  psql(`delete from ${workspaceSchema()}."workspaceMember" where "userEmail" like 'race%@apple.dev'`);
+
 describe.skipIf(!PG_URL)('claim race (S4)', () => {
+  afterAll(removeRaceMembers);
+
   it(`gives one owner, one open deal and ${RACE_AGENTS - 1} errors for ${RACE_AGENTS} agents racing ${RACE_RUNS} times`, async () => {
     const raceMembers = await ensureRaceMembers(RACE_AGENTS);
     const scene = await setUpScene(raceMembers.map(({ id }) => id));

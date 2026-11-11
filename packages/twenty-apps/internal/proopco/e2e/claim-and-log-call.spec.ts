@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
 
 test('Add to follow-up takes a free contact for the signed-in agent', async ({ page }) => {
   await page.goto(`/object/person/${scene.personId}`);
-  await page.getByRole('button', { name: /Add( to follow-up)?/ }).first().click();
+  await page.getByRole('button', { name: /^Add( to follow-up)?$/ }).first().click();
   await expect(page.getByText('Added to your follow-ups')).toBeVisible();
 
   const [person] = await listRecords<{ ownerId: string | null }>(client, 'people', { id: { eq: scene.personId } }, { ownerId: true }, 1);
@@ -36,11 +36,11 @@ test('Log call saves a call through the form', async ({ page }) => {
   await page.getByRole('button', { name: 'Log call' }).first().click();
   await page.getByText('No answer').first().click();
 
-  for (let step = 0; step < 6 && !(await page.getByRole('button', { name: 'Save' }).isVisible()); step += 1) {
-    await page.getByRole('button', { name: 'Next' }).click();
+  for (let step = 0; step < 6 && !(await page.getByRole('button', { name: 'Save', exact: true }).isVisible()); step += 1) {
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
   }
 
-  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.getByText('Call saved.')).toBeVisible();
 
   const calls = await listRecords<{ id: string }>(client, 'calls', { contactId: { eq: scene.personId } }, {});
