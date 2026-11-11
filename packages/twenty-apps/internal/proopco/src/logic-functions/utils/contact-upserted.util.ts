@@ -43,7 +43,7 @@ const readNumber = (data: Record<string, unknown>, key: string) => {
   return value;
 };
 
-const readMoney = (data: Record<string, unknown>, key: string) => {
+export const readMoney = (data: Record<string, unknown>, key: string) => {
   const value = Number(data[key]);
 
   if (!Number.isFinite(value)) {

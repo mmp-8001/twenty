@@ -4,7 +4,7 @@ import { CoreApiClient } from 'twenty-client-sdk/core';
 import { MetadataApiClient } from 'twenty-client-sdk/metadata';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
-import { DAY_MS, HOUR_MS } from 'src/constants/time.constant';
+import { DAY_MS, HOUR_MS, TEHRAN_OFFSET_MS } from 'src/constants/time.constant';
 import { AGENT_ROLE_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { runSweeper } from 'src/logic-functions/platform-event-sweeper';
 import { type AgentActor } from 'src/logic-functions/utils/agent-actor.util';
@@ -14,6 +14,9 @@ import {
   recomputeContactEligibility,
 } from 'src/logic-functions/utils/eligibility.util';
 import { logCall, type LogCallInput } from 'src/logic-functions/utils/log-call.util';
+import { processAccountLastLost } from 'src/logic-functions/utils/process-last-lost.util';
+import { processPurchase } from 'src/logic-functions/utils/process-purchase.util';
+import { type PlatformEvent } from 'src/logic-functions/utils/parse-platform-envelope.util';
 import { prepareCall } from 'src/logic-functions/utils/prepare-call.util';
 import {
   createRecord,
@@ -276,6 +279,15 @@ afterEach(async () => {
 
   for (const id of linkedMemberIds.splice(0)) {
     await linkMemberToAgent(client, id, null);
+  }
+
+  for (const { id } of created.filter(({ singular }) => singular === 'Person')) {
+    for (const child of [
+      ...(await listRecords<{ id: string }>(client, 'opportunities', { pointOfContactId: { eq: id } }, {})).map((row) => ({ singular: 'Opportunity', id: row.id })),
+      ...(await listRecords<{ id: string }>(client, 'purchases', { contactId: { eq: id } }, {})).map((row) => ({ singular: 'Purchase', id: row.id })),
+    ]) {
+      created.push(child);
+    }
   }
 
   for (const { singular, id } of [...new Map(created.splice(0).map((entry) => [entry.id, entry])).values()].reverse()) {
@@ -734,6 +746,7 @@ describe('Log call', () => {
     expect((await refusalOf(log(owner, personId, at(deal, 1), { next: schedule(at(deal, 2)) }))).code).toBe('REBUY_ADD_FIRST');
     await updateRecord(client, 'Person', personId, { lifecycleStage: 'COOL_DOWN' });
     expect((await refusalOf(log(owner, personId, at(deal, 1), { next: schedule(at(deal, 2)) }))).code).toBe('STAGE_NOT_CALLABLE');
+    await updateRecord(client, 'Person', personId, { lifecycleStage: 'IN_FOLLOW_UP' });
   });
 
   it('saves a call once however often the form is submitted', async () => {
@@ -884,6 +897,379 @@ describe('Log call', () => {
     created.push({ singular: 'Opportunity', id: (await listRecords<{ id: string }>(client, 'opportunities', { pointOfContactId: { eq: leaving } }, {}))[0].id });
     expect(deal).toMatchObject({ dealStage: 'LOST', closeReason: 'DO_NOT_CONTACT', openDealKey: '' });
     expect((await readPerson(leaving)).lifecycleStage).toBe('DO_NOT_CONTACT');
+  });
+});
+
+const GRACE_MS = HOUR_MS;
+
+const sweepAt = (now: Date) => runSweeper(now, client);
+
+const platformUserIdOf = async (personId: string) =>
+  (await listRecords<{ platformUserId: string }>(client, 'people', { id: { eq: personId } }, { platformUserId: true }, 1))[0].platformUserId;
+
+const platformEvent = (type: PlatformEvent['type'], occurredAt: Date, data: Record<string, unknown>): PlatformEvent => ({
+  eventId: randomUUID(),
+  type,
+  schemaVersion: '1.0',
+  occurredAt: occurredAt.toISOString(),
+  data,
+});
+
+const buy = async (personId: string, occurredAt: Date, amountUsdt = '500.00', now = occurredAt) =>
+  processPurchase(
+    client,
+    platformEvent('purchase.settled', occurredAt, {
+      platformPurchaseId: `p_${randomUUID()}`,
+      platformUserId: await platformUserIdOf(personId),
+      amountUsdt,
+      codeUsed: null,
+    }),
+    now,
+  );
+
+const loseAccount = async (personId: string, occurredAt: Date, now = occurredAt) =>
+  processAccountLastLost(
+    client,
+    platformEvent('account.last_lost', occurredAt, { platformUserId: await platformUserIdOf(personId) }),
+    now,
+  );
+
+const purchasesOf = (personId: string) =>
+  listRecords<{
+    amountUsdt: number;
+    commissionUsdt: number | null;
+    creditedAgentId: string | null;
+    dealId: string | null;
+    contactOwnerId: string | null;
+  }>(client, 'purchases', { contactId: { eq: personId } }, {
+    amountUsdt: true,
+    commissionUsdt: true,
+    creditedAgentId: true,
+    dealId: true,
+    contactOwnerId: true,
+  });
+
+const answered = async (scene: Scene, personId: string, when: Date) => {
+  const [reasonId] = await dissatisfactionReasonIds(1);
+
+  await log(scene.actors[0], personId, when, {
+    technicalStatus: 'ANSWERED',
+    reasonIds: [reasonId],
+    next: schedule(new Date(when.getTime() + DAY_MS)),
+  });
+
+  return openDealOf(personId);
+};
+
+const newCustomerOf = async (actor: AgentActor) => {
+  const personId = await track(
+    'Person',
+    createRecord(client, 'Person', {
+      name: { firstName: 'Cus', lastName: randomUUID().slice(0, 8) },
+      platformUserId: `u_${randomUUID()}`,
+      lifecycleStage: 'CUSTOMER',
+      ownerId: actor.agentId,
+      ownerMemberId: actor.memberId,
+    }),
+  );
+
+  return personId;
+};
+
+describe('sweeper deadlines (TS1)', () => {
+  it('closes an unanswered first-call deal only after the deadline and the grace, and frees the contact', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const personId = await claimedContact(scene);
+    const deal = await openDealOf(personId);
+    const deadline = new Date(deal.deadlineAt).getTime();
+
+    for (const offset of [-60_000, 60_000, GRACE_MS - 60_000]) {
+      await sweepAt(new Date(deadline + offset));
+
+      expect(await openDealOf(personId)).toMatchObject({ dealStage: 'AWAITING_FIRST_CALL' });
+    }
+
+    const closedAt = new Date(deadline + GRACE_MS + 60_000);
+
+    await sweepAt(closedAt);
+
+    const [closed] = await dealsOf(personId);
+
+    expect(closed).toMatchObject({ dealStage: 'LOST', closeReason: 'UNANSWERED_AT_FIRST_CALL' });
+    expect(closed.openDealKey ?? '').toBe('');
+    expect(await readPerson(personId)).toMatchObject({ lifecycleStage: 'FREE', ownerId: null, ownerMemberId: null, nextCallAt: null, planProgress: '' });
+    expect(await sweepAt(closedAt)).toMatchObject({ closedDeals: 0, missedSlots: 0, releasedCooldowns: 0 });
+  });
+
+  it('expires a follow-up into the campaign cool-down and frees the contact when it ends', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+
+    await updateRecord(client, 'Campaign', scene.campaignId, { cooldownDays: 60 });
+
+    const personId = await claimedContact(scene);
+    const started = at(await openDealOf(personId), 1);
+    const deal = await answered(scene, personId, started);
+    const deadline = new Date(deal.deadlineAt).getTime();
+
+    await sweepAt(new Date(deadline + GRACE_MS - 60_000));
+    expect((await openDealOf(personId)).dealStage).toBe('IN_FOLLOW_UP');
+
+    const closedAt = new Date(deadline + GRACE_MS + 60_000);
+
+    await sweepAt(closedAt);
+
+    const [closed] = await dealsOf(personId);
+    const coolingDown = (await readPerson(personId)) as { lifecycleStage: string; ownerId: string | null };
+    const [{ cooldownUntil }] = await listRecords<{ cooldownUntil: string }>(client, 'people', { id: { eq: personId } }, { cooldownUntil: true });
+
+    expect(closed).toMatchObject({ dealStage: 'LOST', closeReason: 'EXPIRED' });
+    expect(coolingDown).toMatchObject({ lifecycleStage: 'COOL_DOWN', ownerId: null });
+    expect(cooldownUntil).toBe(new Date(closedAt.getTime() + 60 * DAY_MS).toISOString());
+
+    await sweepAt(new Date(new Date(cooldownUntil).getTime() - 60_000));
+    expect((await readPerson(personId)).lifecycleStage).toBe('COOL_DOWN');
+
+    await sweepAt(new Date(new Date(cooldownUntil).getTime() + 60_000));
+    expect(await readPerson(personId)).toMatchObject({ lifecycleStage: 'FREE' });
+  });
+
+  it('marks ended slot windows Missed and never touches a done or moved slot', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const personId = await claimedContact(scene);
+    const first = at(await openDealOf(personId), 1);
+    const deal = await answered(scene, personId, first);
+    const anchor = new Date(deal.firstAnsweredCallAt!).getTime();
+
+    await sweepAt(new Date(anchor + 4 * DAY_MS - 60_000));
+    expect(await openDealOf(personId)).toMatchObject({ slot2Status: 'PENDING' });
+
+    await sweepAt(new Date(anchor + 4 * DAY_MS + 60_000));
+    expect(await openDealOf(personId)).toMatchObject({ slot1Status: 'DONE', slot2Status: 'MISSED', slot3Status: 'PENDING' });
+
+    await sweepAt(new Date(anchor + 8 * DAY_MS + 60_000));
+    expect(await openDealOf(personId)).toMatchObject({ slot3Status: 'MISSED', slot4Status: 'PENDING' });
+  });
+
+  it('moves urgency across the Tehran midnight and the two-hour mark', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const personId = await claimedContact(scene);
+    const deal = await openDealOf(personId);
+    // 04:30 Tehran the day after opening: the whole Due window stays inside that Tehran day.
+    const opened = new Date(deal.openedAt);
+    const nextCallAt = new Date(Math.floor((opened.getTime() + TEHRAN_OFFSET_MS) / DAY_MS) * DAY_MS + DAY_MS + 4.5 * HOUR_MS - TEHRAN_OFFSET_MS);
+
+    await log(scene.actors[0], personId, opened, { next: schedule(nextCallAt) });
+
+    await sweepAt(new Date(nextCallAt.getTime() - HOUR_MS));
+    expect((await readPerson(personId)).callUrgency).toBe('TODAY');
+
+    await sweepAt(new Date(nextCallAt.getTime() + HOUR_MS));
+    expect((await readPerson(personId)).callUrgency).toBe('DUE');
+
+    await sweepAt(new Date(nextCallAt.getTime() + 2 * HOUR_MS + 60_000));
+    expect((await readPerson(personId)).callUrgency).toBe('OVERDUE');
+  });
+});
+
+describe('purchases', () => {
+  it('wins a follow-up deal and credits 2% to the owner (CS1)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const personId = await claimedContact(scene);
+    const deal = await answered(scene, personId, at(await openDealOf(personId), 1));
+
+    expect(await buy(personId, at(deal, 3), '250.25')).toBe('processed');
+
+    const [won] = await dealsOf(personId);
+    const [purchase] = await purchasesOf(personId);
+
+    expect(won).toMatchObject({ dealStage: 'WON' });
+    expect(won.openDealKey ?? '').toBe('');
+    expect(purchase).toMatchObject({ amountUsdt: 250.25, commissionUsdt: 5.01, creditedAgentId: actor.agentId, dealId: won.id });
+    expect(await readPerson(personId)).toMatchObject({ lifecycleStage: 'CUSTOMER', ownerId: actor.agentId, nextCallAt: null, dealTypeLabel: 'Retention' });
+  });
+
+  it('voids the deal when the user bought before the first call (RS1)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const personId = await claimedContact(scene);
+    const deal = await openDealOf(personId);
+
+    await buy(personId, at(deal, 1));
+
+    const [voided] = await dealsOf(personId);
+    const [purchase] = await purchasesOf(personId);
+
+    expect(voided).toMatchObject({ dealStage: 'VOID', closeReason: 'PURCHASED_BEFORE_CALL' });
+    expect(purchase).toMatchObject({ creditedAgentId: null, commissionUsdt: null });
+    expect(await readPerson(personId)).toMatchObject({ lifecycleStage: 'FREE', ownerId: null });
+
+    await loseAccount(personId, at(deal, 2));
+    expect(await dealsOf(personId)).toHaveLength(1);
+    expect((await readPerson(personId)).lifecycleStage).toBe('FREE');
+  });
+
+  it('attributes a Customer purchase to the owner without a deal, and ignores unowned stages', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const customer = await newCustomerOf(actor);
+    const free = await newContact(scene.country);
+
+    await buy(customer, new Date(), '100.00');
+    await buy(free, new Date(), '100.00');
+
+    expect(await purchasesOf(customer)).toMatchObject([{ creditedAgentId: actor.agentId, commissionUsdt: 2, dealId: null }]);
+    expect(await purchasesOf(free)).toMatchObject([{ creditedAgentId: null, commissionUsdt: null }]);
+    expect(await dealsOf(customer)).toEqual([]);
+    expect((await readPerson(customer)).lifecycleStage).toBe('CUSTOMER');
+    expect((await readPerson(free)).lifecycleStage).toBe('FREE');
+  });
+
+  it('stores a purchase at the deadline unattributed and lets the sweeper close the deal', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const personId = await claimedContact(scene);
+    const deal = await answered(scene, personId, at(await openDealOf(personId), 1));
+
+    await buy(personId, new Date(deal.deadlineAt));
+
+    expect(await purchasesOf(personId)).toMatchObject([{ creditedAgentId: null, dealId: null }]);
+    expect((await openDealOf(personId)).dealStage).toBe('IN_FOLLOW_UP');
+
+    await sweepAt(new Date(new Date(deal.deadlineAt).getTime() + GRACE_MS + 60_000));
+    expect((await dealsOf(personId))[0]).toMatchObject({ dealStage: 'LOST', closeReason: 'EXPIRED' });
+  });
+
+  it('applies a late purchase against current state and flags its inbox row', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const personId = await claimedContact(scene);
+    const deal = await answered(scene, personId, at(await openDealOf(personId), 1));
+    const deadline = new Date(deal.deadlineAt);
+
+    await sweepAt(new Date(deadline.getTime() + GRACE_MS + 60_000));
+
+    const event = platformEvent('purchase.settled', new Date(deadline.getTime() - 60_000), {
+      platformPurchaseId: `p_${randomUUID()}`,
+      platformUserId: await platformUserIdOf(personId),
+      amountUsdt: '80.00',
+      codeUsed: null,
+    });
+    const inboxId = await track(
+      'PlatformEventInbox',
+      createRecord(client, 'PlatformEventInbox', {
+        eventId: event.eventId,
+        eventType: event.type,
+        platformUserId: String(event.data.platformUserId),
+        occurredAt: event.occurredAt,
+        payload: event,
+        status: 'RECEIVED',
+        attempts: 0,
+      }),
+    );
+
+    await sweepAt(new Date(deadline.getTime() + GRACE_MS + 2 * 60_000));
+
+    const [row] = await listRecords<{ status: string; needsReview: boolean }>(client, 'platformEventInboxes', { id: { eq: inboxId } }, { status: true, needsReview: true });
+
+    expect(row).toMatchObject({ status: 'PROCESSED', needsReview: true });
+    expect((await dealsOf(personId))[0].dealStage).toBe('LOST');
+    expect(await purchasesOf(personId)).toMatchObject([{ creditedAgentId: null }]);
+  });
+
+  it('waits for an unknown contact', async () => {
+    const event = platformEvent('purchase.settled', new Date(), {
+      platformPurchaseId: `p_${randomUUID()}`,
+      platformUserId: `u_${randomUUID()}`,
+      amountUsdt: '10.00',
+      codeUsed: null,
+    });
+
+    expect(await processPurchase(client, event, new Date())).toBe('waiting');
+  });
+});
+
+describe('rebuy (S5, S6, S7, S10, U2, SL1)', () => {
+  const lostAt = () => new Date(Date.now() - HOUR_MS);
+
+  it('opens a 72h rebuy window for a Customer, hides it from the pool, and abandons it unanswered (S5)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const customer = await newCustomerOf(actor);
+    const occurredAt = lostAt();
+
+    expect(await loseAccount(customer, occurredAt)).toBe('processed');
+    expect(await loseAccount(customer, occurredAt)).toBe('processed');
+
+    const [deal] = await dealsOf(customer);
+
+    expect(deal).toMatchObject({ dealType: 'REBUY', dealStage: 'REBUY_WINDOW', openDealKey: customer, agentId: actor.agentId, sourceCampaignId: null });
+    expect(deal.deadlineAt).toBe(new Date(occurredAt.getTime() + 72 * HOUR_MS).toISOString());
+    expect(await dealsOf(customer)).toHaveLength(1);
+    expect(await readPerson(customer)).toMatchObject({ lifecycleStage: 'REBUY_WINDOW', ownerId: actor.agentId, dealTypeLabel: 'Rebuy', planProgress: '72h left' });
+
+    await sweepAt(new Date(new Date(deal.deadlineAt).getTime() + GRACE_MS + 60_000));
+
+    expect((await dealsOf(customer))[0]).toMatchObject({ dealStage: 'LOST', closeReason: 'ABANDONED_IN_72H' });
+    expect(await readPerson(customer)).toMatchObject({ lifecycleStage: 'FREE', ownerId: null });
+  });
+
+  it('wins the rebuy deal when the owner has not added it yet and returns the user to Customer (U2)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+    const customer = await newCustomerOf(actor);
+    const occurredAt = lostAt();
+
+    await loseAccount(customer, occurredAt);
+    await buy(customer, new Date(occurredAt.getTime() + HOUR_MS), '300.00');
+
+    expect((await dealsOf(customer))[0]).toMatchObject({ dealType: 'REBUY', dealStage: 'WON' });
+    expect(await purchasesOf(customer)).toMatchObject([{ commissionUsdt: 6, creditedAgentId: actor.agentId }]);
+    expect(await readPerson(customer)).toMatchObject({ lifecycleStage: 'CUSTOMER', ownerId: actor.agentId });
+  });
+
+  it('cools a rebuy follow-up down for the global rebuy days, not the campaign days (S10, SL1)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const [actor] = scene.actors;
+
+    await updateRecord(client, 'Campaign', scene.campaignId, { cooldownDays: 60 });
+
+    const [settings] = await listRecords<{ id: string; rebuyFollowUpDays: number }>(client, 'proopcoSettingsRecords', {}, { rebuyFollowUpDays: true }, 1);
+
+    await updateRecord(client, 'ProopcoSettings', settings.id, { rebuyFollowUpDays: 45 });
+
+    try {
+      const customer = await newCustomerOf(actor);
+
+      await loseAccount(customer, lostAt());
+      await claimNow(actor, customer);
+
+      const deal = await openDealOf(customer);
+      const added = new Date(deal.deadlineAt).getTime() - 45 * DAY_MS;
+
+      expect(deal).toMatchObject({ dealType: 'REBUY', dealStage: 'IN_FOLLOW_UP' });
+      expect(added).toBeGreaterThan(Date.now() - DAY_MS);
+
+      const closedAt = new Date(new Date(deal.deadlineAt).getTime() + GRACE_MS + 60_000);
+
+      await sweepAt(closedAt);
+
+      const [{ cooldownUntil }] = await listRecords<{ cooldownUntil: string }>(client, 'people', { id: { eq: customer } }, { cooldownUntil: true });
+
+      expect((await dealsOf(customer))[0]).toMatchObject({ dealStage: 'LOST', closeReason: 'EXPIRED' });
+      expect(cooldownUntil).toBe(new Date(closedAt.getTime() + 30 * DAY_MS).toISOString());
+    } finally {
+      await updateRecord(client, 'ProopcoSettings', settings.id, { rebuyFollowUpDays: settings.rebuyFollowUpDays });
+    }
+  });
+
+  it('ignores a lost account for users who are not Customers (S7)', async () => {
+    const scene = await setUpScene([memberIdOf(PHIL)]);
+    const personId = await newContact(scene.country);
+
+    await updateRecord(client, 'Person', personId, { lifecycleStage: 'DO_NOT_CONTACT', eligibleMemberIds: [] });
+    await loseAccount(personId, lostAt());
+    await buy(personId, lostAt());
+
+    expect(await dealsOf(personId)).toEqual([]);
+    expect((await readPerson(personId)).lifecycleStage).toBe('DO_NOT_CONTACT');
   });
 });
 

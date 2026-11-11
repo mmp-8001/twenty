@@ -9,6 +9,8 @@ import {
   loadEligibilityPlan,
   recomputeContactEligibility,
 } from 'src/logic-functions/utils/eligibility.util';
+import { processAccountLastLost } from 'src/logic-functions/utils/process-last-lost.util';
+import { processPurchase } from 'src/logic-functions/utils/process-purchase.util';
 import { type PlatformEvent } from 'src/logic-functions/utils/parse-platform-envelope.util';
 import {
   updateRecord,
@@ -21,9 +23,11 @@ export type InboxRow = {
   payload: PlatformEvent;
 };
 
-type EventHandler = (client: RecordsClient, event: PlatformEvent) => Promise<'processed' | 'waiting'>;
+export type EventOutcome = 'processed' | 'waiting' | 'needsReview';
 
-// Types without a handler stay Received; the sweeper skips them until their ticket registers one.
+type EventHandler = (client: RecordsClient, event: PlatformEvent, now: Date) => Promise<EventOutcome>;
+
+// Types without a handler stay Received; the sweeper skips them.
 const EVENT_HANDLERS: Partial<Record<PlatformEventType, EventHandler>> = {
   'contact.upserted': async (client, event) => {
     const personId = await upsertContact(client, event);
@@ -36,6 +40,8 @@ const EVENT_HANDLERS: Partial<Record<PlatformEventType, EventHandler>> = {
 
     return 'processed';
   },
+  'purchase.settled': processPurchase,
+  'account.last_lost': processAccountLastLost,
 };
 
 export const HANDLED_EVENT_TYPES = Object.keys(EVENT_HANDLERS);
@@ -52,15 +58,21 @@ export const processInboxRow = async (
   }
 
   try {
-    const outcome = await handler(client, row.payload);
+    const outcome = await handler(client, row.payload, now);
 
     await updateRecord(
       client,
       'PlatformEventInbox',
       row.id,
-      outcome === 'processed'
-        ? { status: 'PROCESSED', attempts: row.attempts + 1, processedAt: now.toISOString(), lastError: null }
-        : { status: 'WAITING_FOR_CONTACT' },
+      outcome === 'waiting'
+        ? { status: 'WAITING_FOR_CONTACT' }
+        : {
+            status: 'PROCESSED',
+            attempts: row.attempts + 1,
+            processedAt: now.toISOString(),
+            lastError: null,
+            needsReview: outcome === 'needsReview',
+          },
     );
   } catch (error) {
     const attempts = row.attempts + 1;
