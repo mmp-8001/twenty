@@ -1,4 +1,4 @@
-import { cpSync, existsSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'fs';
+import { cpSync, existsSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'fs';
 import { join, resolve } from 'path';
 
 import { APPLICATION_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
@@ -46,9 +46,23 @@ export const buildTestVariant = (): string => {
     [APPLICATION_UNIVERSAL_IDENTIFIER, TEST_APPLICATION_UNIVERSAL_IDENTIFIER],
     ["'Proopco CRM'", "'Proopco CRM (test variant)'"],
   ]);
-  rewrite(join(variantRoot, 'src/logic-functions/platform-event-sweeper.ts'), [
-    [/\n\s*cronTriggerSettings: \{[^}]*\},/, ''],
-  ]);
+  // Cron and database triggers fire on their own clock and on every write; tests call the handlers instead.
+  const logicFunctionsDirectory = join(variantRoot, 'src/logic-functions');
+
+  const logicFunctionFiles = readdirSync(logicFunctionsDirectory).filter((entry) => entry.endsWith('.ts'));
+
+  for (const file of logicFunctionFiles) {
+    const path = join(logicFunctionsDirectory, file);
+    const source = readFileSync(path, 'utf8');
+    const stripped = source.replace(
+      /\n\s*(?:cron|databaseEvent)TriggerSettings: \{[^}]*\},/g,
+      '',
+    );
+
+    if (stripped !== source) {
+      writeFileSync(path, stripped);
+    }
+  }
 
   return variantRoot;
 };

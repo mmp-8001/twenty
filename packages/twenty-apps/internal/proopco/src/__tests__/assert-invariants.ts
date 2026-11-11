@@ -28,4 +28,19 @@ export const assertInvariants = async (client: CoreApiClient) => {
       expect(row.needsReview, `Failed event ${row.eventId} is flagged for review`).toBe(true);
     }
   }
+
+  const eligiblePeople = await listRecords<{
+    lifecycleStage: string | null;
+    ownerId: string | null;
+  }>(
+    client,
+    'people',
+    { eligibleMemberIds: { isEmptyArray: false } },
+    { lifecycleStage: true, ownerId: true },
+  );
+
+  for (const person of eligiblePeople) {
+    expect(person.lifecycleStage, 'Only a Free contact has eligible members').toBe('FREE');
+    expect(person.ownerId, 'An eligible contact has no owner').toBeNull();
+  }
 };

@@ -23,6 +23,7 @@
     "skipDefaultLibCheck": true,
     "resolveJsonModule": true,
     "paths": {
+      "twenty-shared/utils": ["../../../twenty-shared/dist/utils.mjs"],
       "src/*": ["./src/*"],
       "~/*": ["./*"]
     }

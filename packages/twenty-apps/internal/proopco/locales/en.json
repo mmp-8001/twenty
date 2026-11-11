@@ -1,18 +1,28 @@
 {
   "fieldMetadata.description": {
+    "Members who may claim this contact. Written by the app.": "Members who may claim this contact. Written by the app.",
     "Name": "Name"
   },
   "fieldMetadata.label": {
     "Active accounts": "Active accounts",
+    "Agent": "Agent",
+    "Agents": "Agents",
     "Attempts": "Attempts",
     "Birth date": "Birth date",
+    "Campaign": "Campaign",
+    "Campaigns": "Campaigns",
+    "Cool-down (days)": "Cool-down (days)",
     "Country": "Country",
     "Current stage": "Current stage",
+    "Eligible member IDs": "Eligible member IDs",
+    "Ends at": "Ends at",
     "Event ID": "Event ID",
     "Event type": "Event type",
     "Failed challenges": "Failed challenges",
+    "Frozen since": "Frozen since",
     "Has phone": "Has phone",
     "Has profit withdrawal": "Has profit withdrawal",
+    "Is active": "Is active",
     "Is referred": "Is referred",
     "KYC status": "KYC status",
     "Last challenge failed at": "Last challenge failed at",
@@ -21,9 +31,15 @@
     "Last purchase at": "Last purchase at",
     "Last rolled-up Jalali month": "Last rolled-up Jalali month",
     "Late event grace (minutes)": "Late event grace (minutes)",
+    "Lifecycle stage": "Lifecycle stage",
+    "Members": "Members",
     "Name": "Name",
     "Needs review": "Needs review",
     "Occurred at": "Occurred at",
+    "Owned contacts": "Owned contacts",
+    "Owned contacts count": "Owned contacts count",
+    "Owner": "Owner",
+    "Owner member": "Owner member",
     "Payload": "Payload",
     "Platform updated at": "Platform updated at",
     "Platform user ID": "Platform user ID",
@@ -33,25 +49,48 @@
     "Rebuy follow-up (days)": "Rebuy follow-up (days)",
     "Rebuy window (hours)": "Rebuy window (hours)",
     "Registration source": "Registration source",
+    "Segment": "Segment",
+    "Segments": "Segments",
     "Signed up at": "Signed up at",
     "SMS template": "SMS template",
+    "Starts at": "Starts at",
     "Status": "Status",
-    "Total paid (USDT)": "Total paid (USDT)"
+    "Total paid (USDT)": "Total paid (USDT)",
+    "Validation error": "Validation error",
+    "View ID": "View ID"
   },
   "objectMetadata.description": {
+    "A person who works contacts through the CRM": "A person who works contacts through the CRM",
+    "A saved Person view that selects contacts for campaigns": "A saved Person view that selects contacts for campaigns",
+    "A Tehran-dated sales campaign over segments and agents": "A Tehran-dated sales campaign over segments and agents",
     "Every message received from the platform, kept until processed": "Every message received from the platform, kept until processed",
+    "Links a segment to a campaign": "Links a segment to a campaign",
+    "Links an agent to a campaign": "Links an agent to a campaign",
     "The single settings record of the Proopco app": "The single settings record of the Proopco app"
   },
   "objectMetadata.labelPlural": {
+    "Agents": "Agents",
+    "Campaign agents": "Campaign agents",
+    "Campaign segments": "Campaign segments",
+    "Campaigns": "Campaigns",
     "Platform event inbox": "Platform event inbox",
-    "Proopco settings": "Proopco settings"
+    "Proopco settings": "Proopco settings",
+    "Segments": "Segments"
   },
   "objectMetadata.labelSingular": {
+    "Agent": "Agent",
+    "Campaign": "Campaign",
+    "Campaign agent": "Campaign agent",
+    "Campaign segment": "Campaign segment",
     "Platform event": "Platform event",
-    "Proopco settings": "Proopco settings"
+    "Proopco settings": "Proopco settings",
+    "Segment": "Segment"
   },
   "view.name": {
+    "Agents": "Agents",
+    "Campaigns": "Campaigns",
     "Contact list": "Contact list",
-    "Failed platform events": "Failed platform events"
+    "Failed platform events": "Failed platform events",
+    "Segments": "Segments"
   }
 }
