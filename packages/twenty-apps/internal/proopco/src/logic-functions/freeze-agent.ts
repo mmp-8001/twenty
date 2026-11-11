@@ -4,19 +4,16 @@ import { Response } from 'twenty-sdk/logic-function';
 import { FREEZE_AGENT_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { freezeAgent } from 'src/logic-functions/utils/freeze-agent.util';
 import { resolveStaffCaller } from 'src/logic-functions/utils/code-caller.util';
-import { refusalResponse } from 'src/logic-functions/utils/refusal.util';
+import { withRefusals } from 'src/logic-functions/utils/refusal.util';
 
-export const handleFreezeAgent = async (routePayload: RoutePayload<unknown>) => {
-  try {
+export const handleFreezeAgent = async (routePayload: RoutePayload<unknown>) =>
+  withRefusals(async () => {
     const { context, caller } = await resolveStaffCaller(routePayload);
 
     const body = routePayload.body as Record<string, unknown> | null;
 
     return new Response(await freezeAgent(context, { caller, agentId: body?.agentId, now: new Date() }));
-  } catch (error) {
-    return refusalResponse(error);
-  }
-};
+  });
 
 export default defineLogicFunction({
   universalIdentifier: FREEZE_AGENT_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,

@@ -4,10 +4,10 @@ import { Response } from 'twenty-sdk/logic-function';
 import { DEACTIVATE_AGENT_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { deactivateAgent } from 'src/logic-functions/utils/agent-lifecycle.util';
 import { requireFullAdmin, resolveStaffCaller } from 'src/logic-functions/utils/code-caller.util';
-import { refusalResponse } from 'src/logic-functions/utils/refusal.util';
+import { withRefusals } from 'src/logic-functions/utils/refusal.util';
 
-export const handleDeactivateAgent = async (routePayload: RoutePayload<unknown>) => {
-  try {
+export const handleDeactivateAgent = async (routePayload: RoutePayload<unknown>) =>
+  withRefusals(async () => {
     const { context, caller } = await resolveStaffCaller(routePayload);
 
     requireFullAdmin({ roles: caller.roles });
@@ -15,10 +15,7 @@ export const handleDeactivateAgent = async (routePayload: RoutePayload<unknown>)
     const body = routePayload.body as Record<string, unknown> | null;
 
     return new Response(await deactivateAgent(context, { caller, agentId: body?.agentId, now: new Date() }));
-  } catch (error) {
-    return refusalResponse(error);
-  }
-};
+  });
 
 export default defineLogicFunction({
   universalIdentifier: DEACTIVATE_AGENT_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,

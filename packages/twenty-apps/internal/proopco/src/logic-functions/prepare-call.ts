@@ -6,11 +6,11 @@ import { PREPARE_CALL_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER } from 'src/constants/
 import { loadAgentActor } from 'src/logic-functions/utils/agent-actor.util';
 import { applicationClients } from 'src/logic-functions/utils/default-clients.util';
 import { prepareCall } from 'src/logic-functions/utils/prepare-call.util';
-import { Refusal, refusalResponse } from 'src/logic-functions/utils/refusal.util';
+import { Refusal, withRefusals } from 'src/logic-functions/utils/refusal.util';
 import { resolveCallerMemberId } from 'src/logic-functions/utils/resolve-caller.util';
 
-export const handlePrepareCall = async (routePayload: RoutePayload<unknown>) => {
-  try {
+export const handlePrepareCall = async (routePayload: RoutePayload<unknown>) =>
+  withRefusals(async () => {
     const { client } = applicationClients();
     const actor = await loadAgentActor(client, await resolveCallerMemberId(routePayload));
     const personId = (routePayload.body as { personId?: unknown } | null)?.personId;
@@ -20,10 +20,7 @@ export const handlePrepareCall = async (routePayload: RoutePayload<unknown>) => 
     }
 
     return new Response(await prepareCall(client, actor, personId, new Date()));
-  } catch (error) {
-    return refusalResponse(error);
-  }
-};
+  });
 
 export default defineLogicFunction({
   universalIdentifier: PREPARE_CALL_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,

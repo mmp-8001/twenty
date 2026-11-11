@@ -9,10 +9,11 @@ import {
   useSelectedRecordIds,
 } from 'twenty-sdk/front-component';
 
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { DEACTIVATE_DISCOUNT_CODE_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { showServerError } from 'src/front-components/utils/server-error.util';
 
-const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
+const ERROR_MESSAGES: Partial<Record<RefusalCode, ReturnType<typeof msg>>> = {
   FULL_ADMIN_ONLY: msg('Only a Full Admin can do this.'),
   ALREADY_DEACTIVATED: msg('This code is already deactivated.'),
 };

@@ -2,6 +2,8 @@ import { isString } from '@sniptt/guards';
 import { RestApiClientError } from 'twenty-client-sdk/rest';
 import { closeSidePanel, enqueueSnackbar, unmountFrontComponent, type msg } from 'twenty-sdk/front-component';
 
+import { isRefusalCode, type RefusalCode } from 'src/constants/refusal-codes.constant';
+
 export type ServerError = { code: string | null; message: string | null };
 
 // Routes answer refusals as { error: { code, message } }; anything else is an unexpected failure.
@@ -21,19 +23,19 @@ type Translate = (descriptor: MessageDescriptor) => string;
 // The descriptors stay in each component file: message extraction only scans *.front-component.tsx.
 export const serverErrorMessage = (
   error: unknown,
-  descriptors: Record<string, MessageDescriptor>,
+  descriptors: Partial<Record<RefusalCode, MessageDescriptor>>,
   translate: Translate,
   fallback: MessageDescriptor,
 ) => {
   const { code, message } = readServerError(error);
-  const descriptor = code === null ? undefined : descriptors[code];
+  const descriptor = code !== null && isRefusalCode(code) ? descriptors[code] : undefined;
 
   return descriptor ? translate(descriptor) : (message ?? translate(fallback));
 };
 
 export const showServerError = (
   error: unknown,
-  descriptors: Record<string, MessageDescriptor>,
+  descriptors: Partial<Record<RefusalCode, MessageDescriptor>>,
   translate: Translate,
   fallback: MessageDescriptor,
 ) =>

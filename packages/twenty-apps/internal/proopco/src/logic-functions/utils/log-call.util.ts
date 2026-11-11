@@ -1,6 +1,7 @@
 import { isNonEmptyString } from '@sniptt/guards';
 import { isDefined } from 'twenty-sdk/utils';
 
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { type AgentActor } from 'src/logic-functions/utils/agent-actor.util';
 import {
   activateCodes,
@@ -69,7 +70,7 @@ export type LogCallResult = { callId: string; repeated: boolean; activations: Ac
 
 type ReasonRow = { id: string; kind: string; name: string; isActive: boolean; requiresText: boolean };
 
-const invalid = (code: string, message: string) => new Refusal(422, code, message);
+const invalid = (code: RefusalCode, message: string) => new Refusal(422, code, message);
 
 type SavedCall = {
   id: string;

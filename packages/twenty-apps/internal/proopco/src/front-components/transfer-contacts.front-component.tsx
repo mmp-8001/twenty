@@ -9,6 +9,7 @@ import {
   useTranslate,
 } from 'twenty-sdk/front-component';
 
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { TRANSFER_CONTACTS_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { formStyles as styles } from 'src/front-components/utils/form-styles.util';
 import { closeFormPanel, showServerError } from 'src/front-components/utils/server-error.util';
@@ -16,7 +17,7 @@ import { closeFormPanel, showServerError } from 'src/front-components/utils/serv
 type Result = { succeeded: string[]; failed: { personId: string; message: string }[] };
 type AgentOption = { id: string; name: string };
 
-const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
+const ERROR_MESSAGES: Partial<Record<RefusalCode, ReturnType<typeof msg>>> = {
   STAFF_ONLY: msg('Only a Supervisor or Full Admin can do this.'),
   REASON_REQUIRED: msg('A reason is required.'),
   INVALID_SELECTION: msg('Choose between 1 and 50 contacts.'),

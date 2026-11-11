@@ -19,6 +19,7 @@ import {
   updateRecordsWhere,
   type RecordsClient,
 } from 'src/logic-functions/utils/records.util';
+import { isRefusalCode } from 'src/constants/refusal-codes.constant';
 import { Refusal } from 'src/logic-functions/utils/refusal.util';
 
 export type CreateDiscountCodeInput = {
@@ -33,7 +34,7 @@ export type CreateDiscountCodeInput = {
 const platformRefusal = (error: unknown) =>
   new Refusal(
     error instanceof PlatformError && error.status === 409 ? 409 : 502,
-    error instanceof PlatformError ? error.code : 'PLATFORM_ERROR',
+    error instanceof PlatformError && isRefusalCode(error.code) ? error.code : 'PLATFORM_ERROR',
     error instanceof Error ? error.message : 'The platform call failed.',
   );
 

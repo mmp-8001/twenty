@@ -55,7 +55,20 @@ import {
 } from './fixtures';
 import { startStubServer, type StubRequest, type StubResponse } from './stub-server';
 import { TEST_PLATFORM_TOKEN } from './test-constants';
-import { assignRole, graphqlAs, listRoles, signInAs } from './user-session';
+import {
+  assignRole,
+  graphqlAs,
+  listRoles,
+  serverEnforcesRowRules,
+  signInAs,
+  SKIP_WITHOUT_ENTERPRISE_MESSAGE,
+} from './user-session';
+
+const rowRulesEnforced = await serverEnforcesRowRules();
+
+if (!rowRulesEnforced) {
+  console.warn(`Skipping row-rule tests. ${SKIP_WITHOUT_ENTERPRISE_MESSAGE}`);
+}
 
 const client = new CoreApiClient();
 const metadata = new MetadataApiClient();
@@ -558,7 +571,7 @@ describe('claim route', () => {
   });
 });
 
-describe.skipIf(!process.env.ENTERPRISE_KEY)('row rules on calls and deals (rls)', () => {
+describe.skipIf(!rowRulesEnforced)('row rules on calls and deals (rls)', () => {
   it('shows a call and its deal only to the owner agent (S2, S3)', async () => {
     const roles = await listRoles();
     const agentRole = roles.find(({ universalIdentifier }) => universalIdentifier === AGENT_ROLE_UNIVERSAL_IDENTIFIER)!;

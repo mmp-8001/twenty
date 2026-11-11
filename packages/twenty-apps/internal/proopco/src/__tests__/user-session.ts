@@ -1,3 +1,5 @@
+import { AGENT_ROLE_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
+
 import { metadataRequest } from './metadata-request';
 
 // Every dev-seed user shares one password; the origin is the workspace's front URL.
@@ -70,3 +72,24 @@ export const listRoles = async () =>
       }[];
     }>('{ getRoles { id universalIdentifier workspaceMembers { id } } }')
   ).getRoles;
+
+// The server refuses to install row rules unless it is Enterprise, so persisted Agent predicates prove it.
+export const serverEnforcesRowRules = async () => {
+  const { getRoles } = await metadataRequest<{
+    getRoles: {
+      universalIdentifier: string;
+      rowLevelPermissionPredicates: { id: string }[] | null;
+    }[];
+  }>(
+    '{ getRoles { universalIdentifier rowLevelPermissionPredicates { id } } }',
+  );
+
+  return getRoles.some(
+    ({ universalIdentifier, rowLevelPermissionPredicates }) =>
+      universalIdentifier === AGENT_ROLE_UNIVERSAL_IDENTIFIER &&
+      (rowLevelPermissionPredicates?.length ?? 0) > 0,
+  );
+};
+
+export const SKIP_WITHOUT_ENTERPRISE_MESSAGE =
+  'Row rules are not installed: the server has no valid ENTERPRISE_VALIDITY_TOKEN (see packages/twenty-server/.env.test)';

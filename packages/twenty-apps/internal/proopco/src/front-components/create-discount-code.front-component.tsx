@@ -8,10 +8,11 @@ import {
 } from 'twenty-sdk/front-component';
 
 import { TEHRAN_OFFSET_MS } from 'src/constants/time.constant';
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { CREATE_DISCOUNT_CODE_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { closeFormPanel, showServerError } from 'src/front-components/utils/server-error.util';
 
-const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
+const ERROR_MESSAGES: Partial<Record<RefusalCode, ReturnType<typeof msg>>> = {
   FULL_ADMIN_ONLY: msg('Only a Full Admin can do this.'),
   CODE_REQUIRED: msg('Enter the code text.'),
   CAPABILITY_REQUIRED: msg('Choose what the code does.'),

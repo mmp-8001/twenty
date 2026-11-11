@@ -9,12 +9,13 @@ import {
   useSelectedRecordIds,
 } from 'twenty-sdk/front-component';
 
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { MARK_INCOME_PAID_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { showServerError } from 'src/front-components/utils/server-error.util';
 
-type IncomeResult = { succeeded: string[]; failed: { incomeId: string; code: string; message: string }[] };
+type IncomeResult = { succeeded: string[]; failed: { incomeId: string; code: RefusalCode; message: string }[] };
 
-const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
+const ERROR_MESSAGES: Partial<Record<RefusalCode, ReturnType<typeof msg>>> = {
   FULL_ADMIN_ONLY: msg('Only a Full Admin can do this.'),
   ALREADY_PAID: msg('This income is already paid.'),
   NOT_PAID: msg('This income is not paid.'),
@@ -38,7 +39,7 @@ const MarkIncomePaid = () => {
 
     try {
       const { succeeded, failed } = await new RestApiClient().post<IncomeResult>('/s/incomes/paid', { incomeIds: recordIds });
-      const descriptor = ERROR_MESSAGES[failed[0]?.code ?? ''];
+      const descriptor = failed.length === 0 ? undefined : ERROR_MESSAGES[failed[0].code];
 
       await enqueueSnackbar({
         message:

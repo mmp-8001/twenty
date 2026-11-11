@@ -8,12 +8,13 @@ import {
   useSelectedRecordIds,
 } from 'twenty-sdk/front-component';
 
+import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { ADD_TO_FOLLOW_UP_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { showServerError } from 'src/front-components/utils/server-error.util';
 
 type ClaimResponse = { campaignName: string | null; kind: 'CAMPAIGN' | 'REBUY' };
 
-const ERROR_MESSAGES: Record<string, ReturnType<typeof msg>> = {
+const ERROR_MESSAGES: Partial<Record<RefusalCode, ReturnType<typeof msg>>> = {
   CLAIM_LOST: msg("This user is in another agent's follow-ups."),
   NOT_ELIGIBLE: msg('This contact is not in your lists.'),
   NO_ACTIVE_AGENT: msg('This user has no active agent.'),

@@ -4,19 +4,16 @@ import { Response } from 'twenty-sdk/logic-function';
 import { RELEASE_CONTACTS_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
 import { releaseContacts } from 'src/logic-functions/utils/transfer-contacts.util';
 import { resolveStaffCaller } from 'src/logic-functions/utils/code-caller.util';
-import { refusalResponse } from 'src/logic-functions/utils/refusal.util';
+import { withRefusals } from 'src/logic-functions/utils/refusal.util';
 
-export const handleReleaseContacts = async (routePayload: RoutePayload<unknown>) => {
-  try {
+export const handleReleaseContacts = async (routePayload: RoutePayload<unknown>) =>
+  withRefusals(async () => {
     const { context, caller } = await resolveStaffCaller(routePayload);
 
     const body = routePayload.body as Record<string, unknown> | null;
 
     return new Response(await releaseContacts(context, { caller, personIds: body?.personIds, reason: body?.reason, now: new Date() }));
-  } catch (error) {
-    return refusalResponse(error);
-  }
-};
+  });
 
 export default defineLogicFunction({
   universalIdentifier: RELEASE_CONTACTS_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER,
