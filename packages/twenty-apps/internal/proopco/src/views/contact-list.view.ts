@@ -1,19 +1,22 @@
 import {
   defineView,
+  ViewFilterOperand,
   STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS,
   ViewType,
 } from 'twenty-sdk/define';
 
 import {
+  CONTACT_LIST_VIEW_FILTER_UNIVERSAL_IDENTIFIER,
   CONTACT_LIST_VIEW_NAME_FIELD_UNIVERSAL_IDENTIFIER,
   CONTACT_LIST_VIEW_PLATFORM_USER_ID_FIELD_UNIVERSAL_IDENTIFIER,
   CONTACT_LIST_VIEW_SIGNUP_FIELD_UNIVERSAL_IDENTIFIER,
   CONTACT_LIST_VIEW_UNIVERSAL_IDENTIFIER,
 } from 'src/constants/universal-identifiers';
+import { PERSON_LIFECYCLE_STAGE_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/person-lifecycle-stage.field';
 import { PERSON_PLATFORM_USER_ID_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/person-platform-user-id.field';
 import { PERSON_SIGNUP_AT_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/person-signup-at.field';
 
-// Narrowed to Free contacts by the lifecycle ticket; the row rule narrows it per agent.
+// Free contacts only; the row rule narrows them further per Agent.
 export default defineView({
   universalIdentifier: CONTACT_LIST_VIEW_UNIVERSAL_IDENTIFIER,
   name: 'Contact list',
@@ -48,6 +51,15 @@ export default defineView({
       position: 2,
       isVisible: true,
       size: 160,
+    },
+  ],
+  filters: [
+    {
+      universalIdentifier: CONTACT_LIST_VIEW_FILTER_UNIVERSAL_IDENTIFIER,
+      fieldMetadataUniversalIdentifier:
+        PERSON_LIFECYCLE_STAGE_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: ViewFilterOperand.IS,
+      value: ['FREE'],
     },
   ],
 });

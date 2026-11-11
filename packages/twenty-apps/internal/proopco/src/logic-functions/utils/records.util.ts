@@ -75,3 +75,14 @@ export const updateRecord = async (
     [`update${singular}`]: { __args: { id, data }, id: true },
   });
 };
+
+export const updateRecordsWhere = async (
+  client: RecordsClient,
+  plural: string,
+  filter: Record<string, unknown>,
+  data: Record<string, unknown>,
+): Promise<void> => {
+  await client.mutation({
+    [`update${plural}`]: { __args: { filter, data }, id: true },
+  });
+};

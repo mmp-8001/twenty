@@ -136,7 +136,7 @@ export const isStaleSnapshot = (
 export const upsertContact = async (
   client: RecordsClient,
   event: PlatformEvent,
-): Promise<void> => {
+): Promise<string> => {
   const platformUserId = event.data.platformUserId;
 
   if (!isNonEmptyString(platformUserId)) {
@@ -150,12 +150,12 @@ export const upsertContact = async (
   }>(client, 'people', { platformUserId: { eq: platformUserId } }, { platformUpdatedAt: true }, 1);
 
   if (!isDefined(existing)) {
-    await createRecord(client, 'Person', { ...fields, platformUserId });
-
-    return;
+    return createRecord(client, 'Person', { ...fields, platformUserId });
   }
 
   if (!isStaleSnapshot(existing.platformUpdatedAt, fields.platformUpdatedAt as string)) {
     await updateRecord(client, 'Person', existing.id, fields);
   }
+
+  return existing.id;
 };

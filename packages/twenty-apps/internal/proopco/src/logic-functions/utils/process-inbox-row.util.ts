@@ -1,8 +1,14 @@
+import { MetadataApiClient } from 'twenty-client-sdk/metadata';
+
 import {
   MAX_ATTEMPTS,
   type PlatformEventType,
 } from 'src/constants/platform-events.constant';
 import { upsertContact } from 'src/logic-functions/utils/contact-upserted.util';
+import {
+  loadEligibilityPlan,
+  recomputeContactEligibility,
+} from 'src/logic-functions/utils/eligibility.util';
 import { type PlatformEvent } from 'src/logic-functions/utils/parse-platform-envelope.util';
 import {
   updateRecord,
@@ -20,7 +26,13 @@ type EventHandler = (client: RecordsClient, event: PlatformEvent) => Promise<'pr
 // Types without a handler stay Received; the sweeper skips them until their ticket registers one.
 const EVENT_HANDLERS: Partial<Record<PlatformEventType, EventHandler>> = {
   'contact.upserted': async (client, event) => {
-    await upsertContact(client, event);
+    const personId = await upsertContact(client, event);
+
+    await recomputeContactEligibility(
+      client,
+      await loadEligibilityPlan(client, new MetadataApiClient({ runAs: 'application' })),
+      personId,
+    );
 
     return 'processed';
   },

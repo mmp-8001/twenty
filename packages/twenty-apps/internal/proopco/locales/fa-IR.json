@@ -1,18 +1,28 @@
 {
   "fieldMetadata.description": {
+    "Members who may claim this contact. Written by the app.": "اعضایی که می‌توانند این مخاطب را بردارند. توسط برنامه نوشته می‌شود.",
     "Name": "نام"
   },
   "fieldMetadata.label": {
     "Active accounts": "حساب‌های فعال",
+    "Agent": "کارشناس",
+    "Agents": "کارشناسان",
     "Attempts": "تعداد تلاش",
     "Birth date": "تاریخ تولد",
+    "Campaign": "کمپین",
+    "Campaigns": "کمپین‌ها",
+    "Cool-down (days)": "دوره خنک‌سازی (روز)",
     "Country": "کشور",
     "Current stage": "مرحله فعلی",
+    "Eligible member IDs": "شناسه اعضای مجاز",
+    "Ends at": "پایان",
     "Event ID": "شناسه رویداد",
     "Event type": "نوع رویداد",
     "Failed challenges": "چالش‌های ناموفق",
+    "Frozen since": "مسدود از",
     "Has phone": "شماره تلفن دارد",
     "Has profit withdrawal": "برداشت سود داشته",
+    "Is active": "فعال است",
     "Is referred": "معرفی‌شده",
     "KYC status": "وضعیت احراز هویت",
     "Last challenge failed at": "آخرین شکست چالش",
@@ -21,9 +31,15 @@
     "Last purchase at": "آخرین خرید",
     "Last rolled-up Jalali month": "آخرین ماه جلالی تجمیع‌شده",
     "Late event grace (minutes)": "مهلت رویداد دیرهنگام (دقیقه)",
+    "Lifecycle stage": "مرحله چرخه عمر",
+    "Members": "اعضا",
     "Name": "نام",
     "Needs review": "نیازمند بررسی",
     "Occurred at": "زمان رخداد",
+    "Owned contacts": "مخاطبان در مالکیت",
+    "Owned contacts count": "تعداد مخاطبان در مالکیت",
+    "Owner": "مالک",
+    "Owner member": "عضو مالک",
     "Payload": "محتوای پیام",
     "Platform updated at": "آخرین به‌روزرسانی در پلتفرم",
     "Platform user ID": "شناسه کاربر در پلتفرم",
@@ -33,25 +49,48 @@
     "Rebuy follow-up (days)": "مدت پیگیری خرید مجدد (روز)",
     "Rebuy window (hours)": "بازه خرید مجدد (ساعت)",
     "Registration source": "منبع ثبت‌نام",
+    "Segment": "بخش",
+    "Segments": "بخش‌ها",
     "Signed up at": "زمان ثبت‌نام",
     "SMS template": "قالب پیامک",
+    "Starts at": "شروع",
     "Status": "وضعیت",
-    "Total paid (USDT)": "مجموع پرداخت (تتر)"
+    "Total paid (USDT)": "مجموع پرداخت (تتر)",
+    "Validation error": "خطای اعتبارسنجی",
+    "View ID": "شناسه نما"
   },
   "objectMetadata.description": {
+    "A person who works contacts through the CRM": "فردی که از طریق سامانه با مخاطبان کار می‌کند",
+    "A saved Person view that selects contacts for campaigns": "نمای ذخیره‌شده از افراد که مخاطبان کمپین‌ها را انتخاب می‌کند",
+    "A Tehran-dated sales campaign over segments and agents": "کمپین فروش با تاریخ تهران روی بخش‌ها و کارشناسان",
     "Every message received from the platform, kept until processed": "هر پیامی که از پلتفرم دریافت می‌شود، تا زمان پردازش نگهداری می‌شود",
+    "Links a segment to a campaign": "یک بخش را به یک کمپین پیوند می‌دهد",
+    "Links an agent to a campaign": "یک کارشناس را به یک کمپین پیوند می‌دهد",
     "The single settings record of the Proopco app": "رکورد تنظیمات یکتای برنامه پروپکو"
   },
   "objectMetadata.labelPlural": {
+    "Agents": "کارشناسان",
+    "Campaign agents": "کارشناسان کمپین",
+    "Campaign segments": "بخش‌های کمپین",
+    "Campaigns": "کمپین‌ها",
     "Platform event inbox": "صندوق رویدادهای پلتفرم",
-    "Proopco settings": "تنظیمات پروپکو"
+    "Proopco settings": "تنظیمات پروپکو",
+    "Segments": "بخش‌ها"
   },
   "objectMetadata.labelSingular": {
+    "Agent": "کارشناس",
+    "Campaign": "کمپین",
+    "Campaign agent": "کارشناس کمپین",
+    "Campaign segment": "بخش کمپین",
     "Platform event": "رویداد پلتفرم",
-    "Proopco settings": "تنظیمات پروپکو"
+    "Proopco settings": "تنظیمات پروپکو",
+    "Segment": "بخش"
   },
   "view.name": {
+    "Agents": "کارشناسان",
+    "Campaigns": "کمپین‌ها",
     "Contact list": "فهرست مخاطبان",
-    "Failed platform events": "رویدادهای ناموفق پلتفرم"
+    "Failed platform events": "رویدادهای ناموفق پلتفرم",
+    "Segments": "بخش‌ها"
   }
 }
