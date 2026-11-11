@@ -26,6 +26,9 @@ type AgentRow = {
 
 // One entry per Active campaign that can grant eligibility: the members it grants to, and a Person filter per valid segment.
 export type EligibilityPlan = {
+  campaignId: string;
+  startsAt: string;
+  createdAt: string;
   memberIds: string[];
   segmentFilters: Record<string, unknown>[];
 }[];
@@ -37,11 +40,11 @@ export const loadEligibilityPlan = async (
   client: RecordsClient,
   metadata: MetadataClient,
 ): Promise<EligibilityPlan> => {
-  const campaigns = await listRecords<{ id: string }>(
+  const campaigns = await listRecords<{ id: string; startsAt: string; createdAt: string }>(
     client,
     'campaigns',
     { status: { eq: 'ACTIVE' } },
-    {},
+    { startsAt: true, createdAt: true },
   );
 
   if (campaigns.length === 0) {
@@ -72,7 +75,7 @@ export const loadEligibilityPlan = async (
   const ruleByViewId = new Map<string, Record<string, unknown> | null>();
   const plan: EligibilityPlan = [];
 
-  for (const { id: campaignId } of campaigns) {
+  for (const { id: campaignId, startsAt, createdAt } of campaigns) {
     const memberIds = agentLinks
       .filter((link) => link.campaignId === campaignId)
       .map(({ agentId }) => (isDefined(agentId) ? agentById.get(agentId) : undefined))
@@ -99,7 +102,7 @@ export const loadEligibilityPlan = async (
     }
 
     if (memberIds.length > 0 && segmentFilters.length > 0) {
-      plan.push({ memberIds, segmentFilters });
+      plan.push({ campaignId, startsAt, createdAt, memberIds, segmentFilters });
     }
   }
 

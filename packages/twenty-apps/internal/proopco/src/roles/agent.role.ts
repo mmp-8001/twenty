@@ -10,21 +10,38 @@ import {
   CAMPAIGN_AGENT_OBJECT_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
   CAMPAIGN_SEGMENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  CALL_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER,
+  CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+  CALL_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER,
+  CALL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  CALL_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
+  DEAL_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER,
+  DEAL_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER,
+  DEAL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  REASON_OBJECT_UNIVERSAL_IDENTIFIER,
   PERSON_ELIGIBLE_PREDICATE_UNIVERSAL_IDENTIFIER,
   PERSON_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER,
   PERSON_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
   SEGMENT_OBJECT_UNIVERSAL_IDENTIFIER,
   SETTINGS_OBJECT_UNIVERSAL_IDENTIFIER,
 } from 'src/constants/universal-identifiers';
+import { CALL_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/call-agent-member.field';
+import { CALL_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/call-contact-owner-member.field';
+import { OPPORTUNITY_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/opportunity-agent-member.field';
+import { OPPORTUNITY_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/opportunity-contact-owner-member.field';
 import { PERSON_ELIGIBLE_MEMBER_IDS_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/person-eligible-member-ids.field';
 import { PERSON_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/person-owner-member.field';
 import { READ_ONLY_GRANT } from 'src/roles/role-grants.util';
 
-const { person, workspaceMember } = STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS;
+const { person, opportunity, workspaceMember } = STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS;
 
-// Objects the Agent reads outright; Person is scoped by the row rule below.
+// Objects the Agent reads outright; Person, Opportunity and Call are scoped by the row rules below.
 const READABLE_OBJECT_UNIVERSAL_IDENTIFIERS = [
   person.universalIdentifier,
+  opportunity.universalIdentifier,
+  CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+  CALL_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
+  REASON_OBJECT_UNIVERSAL_IDENTIFIER,
   workspaceMember.universalIdentifier,
   AGENT_OBJECT_UNIVERSAL_IDENTIFIER,
   SEGMENT_OBJECT_UNIVERSAL_IDENTIFIER,
@@ -64,6 +81,16 @@ export default defineRole({
       objectUniversalIdentifier: person.universalIdentifier,
       logicalOperator: 'OR',
     },
+    {
+      universalIdentifier: CALL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+      logicalOperator: 'OR',
+    },
+    {
+      universalIdentifier: DEAL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: opportunity.universalIdentifier,
+      logicalOperator: 'OR',
+    },
   ],
   // The owner side binds ownerMember (a WorkspaceMember): row rules compare a member, not an Agent.
   rowLevelPermissionPredicates: [
@@ -88,5 +115,21 @@ export default defineRole({
       predicateGroupUniversalIdentifier:
         PERSON_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
     },
+    ...[
+      [CALL_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER, CALL_OBJECT_UNIVERSAL_IDENTIFIER, CALL_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, CALL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+      [CALL_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER, CALL_OBJECT_UNIVERSAL_IDENTIFIER, CALL_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, CALL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+      [DEAL_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER, opportunity.universalIdentifier, OPPORTUNITY_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, DEAL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+      [DEAL_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER, opportunity.universalIdentifier, OPPORTUNITY_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, DEAL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+    ].map(
+      ([universalIdentifier, objectUniversalIdentifier, fieldUniversalIdentifier, predicateGroupUniversalIdentifier]) => ({
+        universalIdentifier,
+        objectUniversalIdentifier,
+        fieldUniversalIdentifier,
+        operand: 'IS' as const,
+        workspaceMemberFieldUniversalIdentifier:
+          workspaceMember.fields.id.universalIdentifier,
+        predicateGroupUniversalIdentifier,
+      }),
+    ),
   ],
 });

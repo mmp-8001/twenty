@@ -13,6 +13,7 @@ import {
   SEGMENT_OBJECT_UNIVERSAL_IDENTIFIER,
   SEGMENT_VALIDATION_ERROR_FIELD_UNIVERSAL_IDENTIFIER,
   SETTINGS_LAST_ROLLED_UP_JALALI_MONTH_FIELD_UNIVERSAL_IDENTIFIER,
+  REASON_OBJECT_UNIVERSAL_IDENTIFIER,
   SETTINGS_OBJECT_UNIVERSAL_IDENTIFIER,
 } from 'src/constants/universal-identifiers';
 import {
@@ -58,6 +59,10 @@ export default defineRole({
     },
     {
       objectUniversalIdentifier: SETTINGS_OBJECT_UNIVERSAL_IDENTIFIER,
+      ...READ_WRITE_GRANT,
+    },
+    {
+      objectUniversalIdentifier: REASON_OBJECT_UNIVERSAL_IDENTIFIER,
       ...READ_WRITE_GRANT,
     },
   ],
