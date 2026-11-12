@@ -307,7 +307,9 @@ The CRM writes the text from its template. The platform picks the phone number f
 - [ ] Each outbound endpoint passes against the platform's staging, including a timeout followed by a retry with the same key.
 - [ ] Initial replay runs and the CRM's Failed platform events view is empty.
 - [ ] The nightly resend runs at 23:30 UTC.
-- [ ] Add the Reports navigation item by hand: Reports is a hand-made dashboard, and the app manifest cannot target it, so it is not installed with the app.
+- [ ] Right after creating the workspace, the technical admin finishes Twenty's onboarding and skips "Invite your team". Until the creator does, every member who signs in is held on that screen, and Agents cannot skip it.
+- [ ] Delete the sample people, companies and opportunities Twenty creates with a new workspace.
+- [ ] Create the Reports dashboard by hand, named «گزارش‌ها», with the Report widget titled «گزارش», and add a navigation item «گزارش‌ها» pointing at it. The app manifest cannot target a hand-made dashboard, so none of this is installed with the app.
 
 ## 7. Open questions for the platform team
 

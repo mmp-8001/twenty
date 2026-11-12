@@ -1,4 +1,4 @@
-import { defineCommandMenuItem, isSelectAll } from 'twenty-sdk/define';
+import { defineCommandMenuItem, isSelectAll, targetObjectReadPermissions } from 'twenty-sdk/define';
 
 import {
   CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
@@ -14,5 +14,5 @@ export default defineCommandMenuItem({
   availabilityType: 'RECORD_SELECTION',
   availabilityObjectUniversalIdentifier: CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
   frontComponentUniversalIdentifier: END_CAMPAIGN_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER,
-  conditionalAvailabilityExpression: !isSelectAll,
+  conditionalAvailabilityExpression: !isSelectAll && targetObjectReadPermissions.auditLog,
 });

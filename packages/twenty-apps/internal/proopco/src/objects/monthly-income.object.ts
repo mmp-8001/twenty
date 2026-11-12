@@ -63,8 +63,8 @@ export default defineObject({
       icon: 'IconProgressCheck',
       defaultValue: "'AWAITING_PAYMENT'",
       options: [
-        { id: 'f2c2e2f6-6d3b-4b6a-9c5e-0b8f5a1d7c11', value: 'AWAITING_PAYMENT', label: 'Awaiting payment', position: 0, color: 'orange' },
-        { id: '3a8c1d52-9f0e-4c8b-a1d4-6e2b7f93c5a2', value: 'PAID', label: 'Paid', position: 1, color: 'green' },
+        { id: 'f2c2e2f6-6d3b-4b6a-9c5e-0b8f5a1d7c11', value: 'AWAITING_PAYMENT', label: 'در انتظار پرداخت', position: 0, color: 'orange' },
+        { id: '3a8c1d52-9f0e-4c8b-a1d4-6e2b7f93c5a2', value: 'PAID', label: 'پرداخت‌شده', position: 1, color: 'green' },
       ],
     },
     {

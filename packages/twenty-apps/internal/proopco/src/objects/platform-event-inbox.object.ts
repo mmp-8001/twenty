@@ -73,10 +73,10 @@ export default defineObject({
       icon: 'IconProgress',
       defaultValue: "'RECEIVED'",
       options: [
-        { id: '701293fb-df5b-4ba2-97c3-3021e8551fef', value: 'RECEIVED', label: 'Received', position: 0, color: 'blue' },
-        { id: 'c764a746-6240-4370-8436-1451c75a1545', value: 'PROCESSED', label: 'Processed', position: 1, color: 'green' },
-        { id: 'caaa36d2-ab1d-4d97-88a3-968428331261', value: 'WAITING_FOR_CONTACT', label: 'Waiting for contact', position: 2, color: 'orange' },
-        { id: 'ad8c317d-c8b0-48fa-96fc-19781b465351', value: 'FAILED', label: 'Failed', position: 3, color: 'red' },
+        { id: '701293fb-df5b-4ba2-97c3-3021e8551fef', value: 'RECEIVED', label: 'دریافت‌شده', position: 0, color: 'blue' },
+        { id: 'c764a746-6240-4370-8436-1451c75a1545', value: 'PROCESSED', label: 'پردازش‌شده', position: 1, color: 'green' },
+        { id: 'caaa36d2-ab1d-4d97-88a3-968428331261', value: 'WAITING_FOR_CONTACT', label: 'در انتظار مخاطب', position: 2, color: 'orange' },
+        { id: 'ad8c317d-c8b0-48fa-96fc-19781b465351', value: 'FAILED', label: 'ناموفق', position: 3, color: 'red' },
       ],
     },
     {

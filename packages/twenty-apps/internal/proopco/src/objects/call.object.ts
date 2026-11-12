@@ -53,8 +53,8 @@ export default defineObject({
       icon: 'IconTag',
       defaultValue: "'FOLLOW_UP'",
       options: [
-        { id: '4282ed29-66cf-4365-afec-2dd1c6e2cda7', value: 'FOLLOW_UP', label: 'Follow-up', position: 0, color: 'blue' },
-        { id: '864f5898-1082-4cf3-83b1-bda445364a1c', value: 'RETENTION', label: 'Retention', position: 1, color: 'purple' },
+        { id: '4282ed29-66cf-4365-afec-2dd1c6e2cda7', value: 'FOLLOW_UP', label: 'پیگیری', position: 0, color: 'blue' },
+        { id: '864f5898-1082-4cf3-83b1-bda445364a1c', value: 'RETENTION', label: 'نگهداشت', position: 1, color: 'purple' },
       ],
     },
     {
@@ -65,12 +65,12 @@ export default defineObject({
       icon: 'IconPhoneCheck',
       defaultValue: "'ANSWERED'",
       options: [
-        { id: '044f6713-5ba8-49f9-8902-2e6476f51075', value: 'ANSWERED', label: 'Answered', position: 0, color: 'green' },
-        { id: '1a4d25bb-c923-408c-b337-11654645690b', value: 'NO_ANSWER', label: 'No answer', position: 1, color: 'gray' },
-        { id: 'dc08ed88-7a30-464e-a55f-63351b7d0ef9', value: 'BUSY', label: 'Busy', position: 2, color: 'orange' },
-        { id: '4f577415-9b84-4de7-9dbc-db16e78a4432', value: 'SWITCHED_OFF', label: 'Switched off', position: 3, color: 'gray' },
-        { id: '6d4d648c-8b90-49e3-9645-e3afbc00fc4c', value: 'REJECTED', label: 'Rejected', position: 4, color: 'red' },
-        { id: '8c839453-0bdc-4620-9b49-f2a1a1275089', value: 'INVALID_NUMBER', label: 'Invalid number', position: 5, color: 'red' },
+        { id: '044f6713-5ba8-49f9-8902-2e6476f51075', value: 'ANSWERED', label: 'پاسخ داد', position: 0, color: 'green' },
+        { id: '1a4d25bb-c923-408c-b337-11654645690b', value: 'NO_ANSWER', label: 'پاسخ نداد', position: 1, color: 'gray' },
+        { id: 'dc08ed88-7a30-464e-a55f-63351b7d0ef9', value: 'BUSY', label: 'مشغول', position: 2, color: 'orange' },
+        { id: '4f577415-9b84-4de7-9dbc-db16e78a4432', value: 'SWITCHED_OFF', label: 'خاموش', position: 3, color: 'gray' },
+        { id: '6d4d648c-8b90-49e3-9645-e3afbc00fc4c', value: 'REJECTED', label: 'رد کرد', position: 4, color: 'red' },
+        { id: '8c839453-0bdc-4620-9b49-f2a1a1275089', value: 'INVALID_NUMBER', label: 'شماره نامعتبر', position: 5, color: 'red' },
       ],
     },
     {
@@ -112,8 +112,8 @@ export default defineObject({
       label: 'Outside plan reason',
       icon: 'IconCalendarOff',
       options: [
-        { id: '170176c6-6761-48d5-9439-73359bbe4d61', value: 'USER_REQUEST', label: 'User request', position: 0, color: 'blue' },
-        { id: '51081978-2740-4666-a0a2-7c9cce2b62a0', value: 'ADMIN_DECISION', label: 'Admin decision', position: 1, color: 'orange' },
+        { id: '170176c6-6761-48d5-9439-73359bbe4d61', value: 'USER_REQUEST', label: 'درخواست کاربر', position: 0, color: 'blue' },
+        { id: '51081978-2740-4666-a0a2-7c9cce2b62a0', value: 'ADMIN_DECISION', label: 'تصمیم مدیر', position: 1, color: 'orange' },
       ],
       isNullable: true,
     },

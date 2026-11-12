@@ -177,7 +177,7 @@ describe('reports (RS3, RS4)', () => {
     const personId = await track('Person', createRecord(client, 'Person', { name: { firstName: 'Rs', lastName: randomUUID().slice(0, 8) }, platformUserId: `u_${randomUUID()}` }));
 
     // Added 25 Mehr, answered call 28 Mehr, purchase and win 10 Aban.
-    await track(
+    const dealId = await track(
       'Opportunity',
       createRecord(client, 'Opportunity', {
         name: 'rs3',
@@ -201,14 +201,23 @@ describe('reports (RS3, RS4)', () => {
         callKind: 'FOLLOW_UP',
         technicalStatus: 'ANSWERED',
         answered: true,
+        dealId,
         idempotencyKey: randomUUID(),
       }),
     );
     await newPurchase(agentK, '2025-11-01T10:00:00Z', 100, 2);
     await newPurchase(agentL, '2025-11-02T10:00:00Z', 300, 6);
 
-    return { agentK, agentL };
+    return { agentK, agentL, campaignId };
   };
+
+  it('counts a follow-up call in its source campaign row, not Retention', async () => {
+    const { agentK, campaignId } = await scene();
+    const [campaign] = await listRecords<{ name: string }>(client, 'campaigns', { id: { eq: campaignId } }, { name: true });
+    const report = await loadReport(client, { caller: { roles: [AGENT_ROLE_UNIVERSAL_IDENTIFIER], memberAgentId: agentK }, body: { period: 'MONTH', offset: -1 }, now: inAban });
+
+    expect(report.campaigns).toEqual([expect.objectContaining({ kind: 'CAMPAIGN', label: campaign.name, calls: 1 })]);
+  });
 
   it('puts Added in Mehr and Successful and revenue in Aban (RS3)', async () => {
     const { agentK } = await scene();

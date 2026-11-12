@@ -36,11 +36,20 @@ test('Log call saves a call through the form', async ({ page }) => {
   await page.getByRole('button', { name: 'Log call' }).first().click();
   await page.getByText('No answer').first().click();
 
-  for (let step = 0; step < 6 && !(await page.getByRole('button', { name: 'Save', exact: true }).isVisible()); step += 1) {
-    await page.getByRole('button', { name: 'Next', exact: true }).click();
+  const next = page.getByRole('button', { name: 'Next', exact: true });
+  const save = page.getByRole('button', { name: 'Save', exact: true });
+
+  for (let step = 0; step < 6; step += 1) {
+    await next.or(save).first().waitFor();
+
+    if (await save.isVisible()) {
+      break;
+    }
+
+    await next.click();
   }
 
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await save.click();
   await expect(page.getByText('Call saved.')).toBeVisible();
 
   const calls = await listRecords<{ id: string }>(client, 'calls', { contactId: { eq: scene.personId } }, {});

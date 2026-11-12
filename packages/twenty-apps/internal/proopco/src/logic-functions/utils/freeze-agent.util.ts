@@ -2,6 +2,7 @@ import { isString } from '@sniptt/guards';
 import { isDefined } from 'twenty-sdk/utils';
 
 import { DAY_MS } from 'src/constants/time.constant';
+import { FROZEN_PLAN_PROGRESS } from 'src/utils/deal-clock.util';
 import {
   FULL_ADMIN_ROLE_UNIVERSAL_IDENTIFIER,
   SUPERVISOR_ROLE_UNIVERSAL_IDENTIFIER,
@@ -90,7 +91,7 @@ const executeFreeze: AuditExecutor = async (context, audit) => {
     await updateRecord(client, 'AuditLog', audit.id, { freezePeriodId });
   }
 
-  await updateRecordsWhere(client, 'People', { and: [{ ownerId: { eq: agentId } }, { deletedAt: { is: 'NULL' } }] }, { planProgress: 'Frozen' });
+  await updateRecordsWhere(client, 'People', { and: [{ ownerId: { eq: agentId } }, { deletedAt: { is: 'NULL' } }] }, { planProgress: FROZEN_PLAN_PROGRESS });
   await recomputeEligibility(context);
 };
 
@@ -160,7 +161,7 @@ const executeUnfreeze: AuditExecutor = async (context, audit) => {
   await updateRecordsWhere(
     client,
     'People',
-    { and: [{ ownerId: { eq: agentId } }, { lifecycleStage: { eq: 'CUSTOMER' } }, { planProgress: { eq: 'Frozen' } }] },
+    { and: [{ ownerId: { eq: agentId } }, { lifecycleStage: { eq: 'CUSTOMER' } }, { planProgress: { eq: FROZEN_PLAN_PROGRESS } }] },
     { planProgress: null },
   );
   await updateRecordsWhere(client, 'Agents', { and: [{ id: { eq: agentId } }, { frozenSince: { eq: frozenSince } }] }, { frozenSince: null });

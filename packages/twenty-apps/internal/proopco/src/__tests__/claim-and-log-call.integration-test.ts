@@ -369,8 +369,8 @@ describe('claim (S1, S4)', () => {
       ownerId: agentB.agentId,
       ownerMemberId: agentB.memberId,
       eligibleMemberIds: [],
-      planProgress: 'Day 1 of 7',
-      dealTypeLabel: 'Campaign',
+      planProgress: 'روز ۱ از ۷',
+      dealTypeLabel: 'کمپین',
     });
     expect(others).toEqual([]);
     expect(deal).toMatchObject({
@@ -695,7 +695,7 @@ describe('Log call', () => {
     const after = await openDealOf(personId);
 
     expect(person).toMatchObject({ lifecycleStage: 'AWAITING_FIRST_CALL', nextCallAt: at(deal, 1).toISOString() });
-    expect(person.lastCallSummary).toBe('Busy');
+    expect(person.lastCallSummary).toBe('مشغول');
     expect(after.deadlineAt).toBe(deal.deadlineAt);
     expect(await callsOf(personId)).toHaveLength(1);
   });
@@ -728,7 +728,7 @@ describe('Log call', () => {
     expect(call).toMatchObject({ answered: true, slotNumber: 1, completedSlot: 1, otherReasonText: 'wants a demo' });
     expect(person.lifecycleStage).toBe('IN_FOLLOW_UP');
     expect(person.deadlineAt).toBe(after.deadlineAt);
-    expect(person.planProgress).toBe('Slot 1 of 5 · day 1 of 30');
+    expect(person.planProgress).toBe('نوبت ۱ از ۵ · روز ۱ از ۳۰');
     expect(person.lastCallSummary).toContain('wants a demo');
 
     const callReasons = await listRecords<{ reasonId: string }>(client, 'callReasons', { callId: { eq: (await listRecords<{ id: string }>(client, 'calls', { contactId: { eq: personId } }, {}))[0].id } }, { reasonId: true });
@@ -942,7 +942,7 @@ describe('Log call', () => {
     await log(actor, customer, now, { technicalStatus: 'ANSWERED', reasonIds: [reasonId], next: { mode: 'none' } });
 
     expect(await callsOf(customer)).toMatchObject([{ callKind: 'RETENTION', answered: true, slotNumber: null }]);
-    expect(await readPerson(customer)).toMatchObject({ lifecycleStage: 'CUSTOMER', nextCallAt: null, dealTypeLabel: 'Retention' });
+    expect(await readPerson(customer)).toMatchObject({ lifecycleStage: 'CUSTOMER', nextCallAt: null, dealTypeLabel: 'نگهداشت' });
     expect(await dealsOf(customer)).toEqual([]);
 
     const leaving = await newCustomer();
@@ -1188,7 +1188,7 @@ describe('purchases', () => {
     expect(won).toMatchObject({ dealStage: 'WON' });
     expect(won.openDealKey ?? '').toBe('');
     expect(purchase).toMatchObject({ amountUsdt: 250.25, commissionUsdt: 5.01, creditedAgentId: actor.agentId, dealId: won.id });
-    expect(await readPerson(personId)).toMatchObject({ lifecycleStage: 'CUSTOMER', ownerId: actor.agentId, nextCallAt: null, dealTypeLabel: 'Retention' });
+    expect(await readPerson(personId)).toMatchObject({ lifecycleStage: 'CUSTOMER', ownerId: actor.agentId, nextCallAt: null, dealTypeLabel: 'نگهداشت' });
   });
 
   it('voids the deal when the user bought before the first call (RS1)', async () => {
@@ -1305,7 +1305,7 @@ describe('rebuy (S5, S6, S7, S10, U2, SL1)', () => {
     expect(deal).toMatchObject({ dealType: 'REBUY', dealStage: 'REBUY_WINDOW', openDealKey: customer, agentId: actor.agentId, sourceCampaignId: null });
     expect(deal.deadlineAt).toBe(new Date(occurredAt.getTime() + 72 * HOUR_MS).toISOString());
     expect(await dealsOf(customer)).toHaveLength(1);
-    expect(await readPerson(customer)).toMatchObject({ lifecycleStage: 'REBUY_WINDOW', ownerId: actor.agentId, dealTypeLabel: 'Rebuy', planProgress: '72h left' });
+    expect(await readPerson(customer)).toMatchObject({ lifecycleStage: 'REBUY_WINDOW', ownerId: actor.agentId, dealTypeLabel: 'خرید مجدد', planProgress: '۷۲ ساعت مانده' });
 
     await sweepAt(new Date(new Date(deal.deadlineAt).getTime() + GRACE_MS + 60_000));
 
@@ -1880,7 +1880,7 @@ describe('queue (QS3, QS4)', () => {
     const queue = await queueOf(actor, scene.country);
 
     expect(queue).toHaveLength(13);
-    expect(queue.filter(({ dealTypeLabel }) => dealTypeLabel === 'Retention')).toHaveLength(1);
+    expect(queue.filter(({ dealTypeLabel }) => dealTypeLabel === 'نگهداشت')).toHaveLength(1);
     expect(queue.some(({ id }) => id === quiet)).toBe(false);
     expect(queue.some(({ id }) => id === scheduled)).toBe(true);
     expect(await rebuyListOf(actor, scene.country)).toHaveLength(1);
@@ -1890,7 +1890,7 @@ describe('queue (QS3, QS4)', () => {
     const afterAdd = await queueOf(actor, scene.country);
 
     expect(afterAdd).toHaveLength(14);
-    expect(afterAdd.filter(({ dealTypeLabel }) => dealTypeLabel === 'Rebuy')).toHaveLength(1);
+    expect(afterAdd.filter(({ dealTypeLabel }) => dealTypeLabel === 'خرید مجدد')).toHaveLength(1);
     expect(await rebuyListOf(actor, scene.country)).toHaveLength(0);
   });
 
