@@ -1,4 +1,4 @@
-import { defineCommandMenuItem, isSelectAll } from 'twenty-sdk/define';
+import { defineCommandMenuItem, isSelectAll, targetObjectWritePermissions } from 'twenty-sdk/define';
 
 import {
   DEACTIVATE_DISCOUNT_CODE_COMMAND_UNIVERSAL_IDENTIFIER,
@@ -14,5 +14,5 @@ export default defineCommandMenuItem({
   availabilityType: 'RECORD_SELECTION',
   availabilityObjectUniversalIdentifier: DISCOUNT_CODE_OBJECT_UNIVERSAL_IDENTIFIER,
   frontComponentUniversalIdentifier: DEACTIVATE_DISCOUNT_CODE_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER,
-  conditionalAvailabilityExpression: !isSelectAll,
+  conditionalAvailabilityExpression: !isSelectAll && targetObjectWritePermissions.proopcoSettings,
 });

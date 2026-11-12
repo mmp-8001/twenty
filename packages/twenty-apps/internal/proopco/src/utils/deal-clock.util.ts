@@ -6,6 +6,11 @@ import {
 } from 'src/constants/time.constant';
 import { startOfTehranDay } from 'src/utils/tehran-day.util';
 
+// Logic functions have no viewer locale and every member works in Persian, so stored text is written in Persian.
+const persianNumber = (value: number) => value.toLocaleString('fa-IR');
+
+export const FROZEN_PLAN_PROGRESS = 'مسدود';
+
 export type SlotStatus = 'PENDING' | 'DONE' | 'MISSED' | 'MOVED';
 export type DealStage = 'AWAITING_FIRST_CALL' | 'IN_FOLLOW_UP' | 'REBUY_WINDOW';
 export type CallUrgency = 'LATER' | 'TODAY' | 'DUE' | 'OVERDUE';
@@ -200,15 +205,15 @@ export const planProgressOf = (clock: DealClock, now: Date): string => {
       windowContaining(windows, now)?.slot ?? windows[windows.length - 1]?.slot ?? 1;
     const total = Math.round((clock.deadlineAt.getTime() - anchor.getTime()) / DAY_MS);
 
-    return `Slot ${slot} of 5 · day ${dayOf(anchor, now, total)} of ${total}`;
+    return `نوبت ${persianNumber(slot)} از ${persianNumber(5)} · روز ${persianNumber(dayOf(anchor, now, total))} از ${persianNumber(total)}`;
   }
 
   const total = Math.round(
     (clock.deadlineAt.getTime() - clock.openedAt.getTime() - clock.frozenMs) / DAY_MS,
-  );
+  ) || AWAITING_FIRST_CALL_DAYS;
 
-  return `Day ${dayOf(clock.openedAt, now, total || AWAITING_FIRST_CALL_DAYS)} of ${total || AWAITING_FIRST_CALL_DAYS}`;
+  return `روز ${persianNumber(dayOf(clock.openedAt, now, total))} از ${persianNumber(total)}`;
 };
 
 export const rebuyWindowProgressOf = (deadlineAt: Date, now: Date): string =>
-  `${Math.max(0, Math.ceil((deadlineAt.getTime() - now.getTime()) / HOUR_MS))}h left`;
+  `${persianNumber(Math.max(0, Math.ceil((deadlineAt.getTime() - now.getTime()) / HOUR_MS)))} ساعت مانده`;

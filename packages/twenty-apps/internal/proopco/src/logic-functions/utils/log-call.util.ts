@@ -43,12 +43,12 @@ import {
 
 const TECHNICAL_STATUSES = ['ANSWERED', 'NO_ANSWER', 'BUSY', 'SWITCHED_OFF', 'REJECTED', 'INVALID_NUMBER'];
 const STATUS_LABELS: Record<string, string> = {
-  ANSWERED: 'Answered',
-  NO_ANSWER: 'No answer',
-  BUSY: 'Busy',
-  SWITCHED_OFF: 'Switched off',
-  REJECTED: 'Rejected',
-  INVALID_NUMBER: 'Invalid number',
+  ANSWERED: 'پاسخ داد',
+  NO_ANSWER: 'پاسخ نداد',
+  BUSY: 'مشغول',
+  SWITCHED_OFF: 'خاموش',
+  REJECTED: 'رد کرد',
+  INVALID_NUMBER: 'شماره نامعتبر',
 };
 const OUTSIDE_PLAN_REASONS = ['USER_REQUEST', 'ADMIN_DECISION'];
 
@@ -201,7 +201,7 @@ const applyCallOutcome = async ({
     // the Report counts it in the Retention row, never in Rebuy.
     if (!isDefined(existing)) {
       await createRecord(client, 'Opportunity', {
-        name: `${personDisplayName(person.name)} · Retention`,
+        name: `${personDisplayName(person.name)} · نگهداشت`,
         pointOfContactId: person.id,
         dealType: 'CAMPAIGN',
         dealStage: 'LOST',
@@ -253,7 +253,7 @@ const applyCallOutcome = async ({
 };
 
 const summaryOf = (technicalStatus: string, reasonNames: string[]) =>
-  [STATUS_LABELS[technicalStatus], reasonNames.join(', ')]
+  [STATUS_LABELS[technicalStatus], reasonNames.join('، ')]
     .filter((part) => part !== '')
     .join(' · ')
     .slice(0, 200);

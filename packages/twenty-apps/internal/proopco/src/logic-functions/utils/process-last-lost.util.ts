@@ -2,6 +2,7 @@ import { isNonEmptyString } from '@sniptt/guards';
 import { isDefined } from 'twenty-sdk/utils';
 
 import { HOUR_MS } from 'src/constants/time.constant';
+import { FROZEN_PLAN_PROGRESS } from 'src/utils/deal-clock.util';
 import { personDisplayName } from 'src/logic-functions/utils/call-context.util';
 import {
   loadOpenDeal,
@@ -58,7 +59,7 @@ export const processAccountLastLost = async (
 
   try {
     await createRecord(client, 'Opportunity', {
-      name: `${personDisplayName(contact.name)} · Rebuy`,
+      name: `${personDisplayName(contact.name)} · خرید مجدد`,
       pointOfContactId: contact.id,
       dealType: 'REBUY',
       dealStage: 'REBUY_WINDOW',
@@ -97,7 +98,7 @@ export const processAccountLastLost = async (
   const [owner] = await listRecords<{ frozenSince: string | null }>(client, 'agents', { id: { eq: contact.ownerId } }, { frozenSince: true }, 1);
 
   if (isDefined(owner?.frozenSince)) {
-    await updateRecordsWhere(client, 'People', { id: { eq: contact.id } }, { planProgress: 'Frozen' });
+    await updateRecordsWhere(client, 'People', { id: { eq: contact.id } }, { planProgress: FROZEN_PLAN_PROGRESS });
   }
 
   return 'processed';

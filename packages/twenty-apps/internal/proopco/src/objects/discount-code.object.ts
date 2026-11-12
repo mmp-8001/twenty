@@ -56,9 +56,9 @@ export default defineObject({
       icon: 'IconTag',
       defaultValue: "'DISCOUNT'",
       options: [
-        { id: 'e50cf568-4e3c-497b-8c98-cd9780e57230', value: 'DISCOUNT', label: 'Discount', position: 0, color: 'blue' },
-        { id: 'd4741138-3f90-4760-9587-7655467fe447', value: 'RESET', label: 'Reset', position: 1, color: 'orange' },
-        { id: 'a0738c63-2d70-4101-94d6-0aea867a1d82', value: 'TWO_STEP_PAYMENT', label: 'Two-step payment', position: 2, color: 'purple' },
+        { id: 'e50cf568-4e3c-497b-8c98-cd9780e57230', value: 'DISCOUNT', label: 'تخفیف', position: 0, color: 'blue' },
+        { id: 'd4741138-3f90-4760-9587-7655467fe447', value: 'RESET', label: 'بازنشانی', position: 1, color: 'orange' },
+        { id: 'a0738c63-2d70-4101-94d6-0aea867a1d82', value: 'TWO_STEP_PAYMENT', label: 'پرداخت دو مرحله‌ای', position: 2, color: 'purple' },
       ],
     },
     {

@@ -19,9 +19,9 @@ import {
 } from 'src/utils/report.util';
 import { workingDaysOf } from 'src/utils/working-days.util';
 
-type DealRef = { dealType: string; sourceCampaign: { id: string; name: string } | null } | null;
+type DealRef = { dealType: string; sourceCampaignId: string | null } | null;
 
-const campaignOf = (deal: DealRef, isRetention: boolean): CampaignKey => {
+const campaignOf = (deal: DealRef, isRetention: boolean, campaignNames: Map<string, string>): CampaignKey => {
   if (isRetention || !isDefined(deal)) {
     return { kind: 'RETENTION' };
   }
@@ -30,10 +30,13 @@ const campaignOf = (deal: DealRef, isRetention: boolean): CampaignKey => {
     return { kind: 'REBUY' };
   }
 
-  return isDefined(deal.sourceCampaign) ? { kind: 'CAMPAIGN', ...deal.sourceCampaign } : { kind: 'RETENTION' };
+  const name = isDefined(deal.sourceCampaignId) ? campaignNames.get(deal.sourceCampaignId) : undefined;
+
+  return isDefined(name) ? { kind: 'CAMPAIGN', id: deal.sourceCampaignId as string, name } : { kind: 'RETENTION' };
 };
 
-const DEAL_REF = { dealType: true, sourceCampaign: { id: true, name: true } };
+// The API returns a relation nested two levels deep (call -> deal -> campaign) as null, so names are loaded once on their own.
+const DEAL_REF = { dealType: true, sourceCampaignId: true };
 const PERIOD_KINDS = ['DAY', 'WEEK', 'MONTH', 'ALL'];
 
 export type ReportCaller = { roles: string[]; memberAgentId: string | null };
@@ -75,7 +78,7 @@ export const loadReport = async (
     { name: true, createdAt: true },
   );
   const agentFilter = scope.isStaff ? {} : { agentId: { eq: scope.ownAgentId } };
-  const [calls, dealsOpened, dealsClosed, purchases, activated, used, freezes, incomes] = await Promise.all([
+  const [calls, dealsOpened, dealsClosed, purchases, activated, used, freezes, incomes, campaigns] = await Promise.all([
     listRecords<{ agentId: string; answered: boolean; callKind: 'FOLLOW_UP' | 'RETENTION'; wasOverdue: boolean; deal: DealRef; callReasons: { edges: { node: { reason: { name: string } | null } }[] } }>(
       client,
       'calls',
@@ -106,7 +109,9 @@ export const loadReport = async (
           { agentId: true, totalUsdt: true, status: true },
         )
       : Promise.resolve([]),
+    listRecords<{ id: string; name: string }>(client, 'campaigns', {}, { name: true }),
   ]);
+  const campaignNames = new Map(campaigns.map(({ id, name }) => [id, name]));
   const periodEnd = new Date(Math.min(end.getTime(), now.getTime()));
   const agents: ReportAgent[] = allAgents.map((agent) => ({
     id: agent.id,
@@ -129,7 +134,7 @@ export const loadReport = async (
       answered: call.answered,
       callKind: call.callKind,
       wasOverdue: call.wasOverdue,
-      campaign: campaignOf(call.deal, call.callKind === 'RETENTION'),
+      campaign: campaignOf(call.deal, call.callKind === 'RETENTION', campaignNames),
       reasons: call.callReasons.edges.flatMap(({ node }) => (node.reason ? [node.reason.name] : [])),
     })),
     dealsOpened: dealsOpened.map(({ agentId }) => ({ agentId })),
@@ -143,7 +148,7 @@ export const loadReport = async (
       agentId: purchase.creditedAgentId,
       amountUsdt: purchase.amountUsdt ?? 0,
       commissionUsdt: purchase.commissionUsdt ?? 0,
-      campaign: campaignOf(purchase.deal, false),
+      campaign: campaignOf(purchase.deal, false, campaignNames),
     })),
     codesActivated: activated.map(({ activatingAgentId }) => ({ agentId: activatingAgentId })),
     codesUsed: used.map(({ activatingAgentId }) => ({ agentId: activatingAgentId })),

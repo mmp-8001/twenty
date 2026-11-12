@@ -32,6 +32,7 @@ import { runEligibilityRefresh } from 'src/logic-functions/utils/refresh-eligibi
 import { Refusal } from 'src/logic-functions/utils/refusal.util';
 import { resumeAudits } from 'src/logic-functions/utils/resume-audits.util';
 import { releaseContacts, transferContacts } from 'src/logic-functions/utils/transfer-contacts.util';
+import { FROZEN_PLAN_PROGRESS } from 'src/utils/deal-clock.util';
 
 import { assertInvariants } from './assert-invariants';
 import {
@@ -554,7 +555,7 @@ describe('freeze and unfreeze (S12, S13, S14, AS2)', () => {
     await freezeAgent(context, { caller: supervisorCaller(), agentId: agentA.agentId, now: frozenAt });
 
     expect((await readAgent(agentA.agentId)).frozenSince).toBe(frozenAt.toISOString());
-    expect((await readPerson(p)).planProgress).toBe('Frozen');
+    expect((await readPerson(p)).planProgress).toBe(FROZEN_PLAN_PROGRESS);
     expect((await refusalOf(loadAgentActor(client, agentA.memberId))).code).toBe('AGENT_FROZEN');
     expect(await closeExpiredDeals(client, await loadEligibilityPlan(client, metadata), new Date(t0.getTime() + 100 * DAY_MS))).toBe(0);
     expect((await openDealOf(p)).deadlineAt).toBe(before.deadlineAt);
@@ -566,7 +567,7 @@ describe('freeze and unfreeze (S12, S13, S14, AS2)', () => {
     expect(new Date(after.deadlineAt).getTime() - unfrozenAt.getTime()).toBe(25 * DAY_MS);
     expect(after.frozenMs).toBe(10 * DAY_MS);
     expect((await readPerson(p)).deadlineAt).toBe(after.deadlineAt);
-    expect((await readPerson(p)).planProgress).toContain('of 30');
+    expect((await readPerson(p)).planProgress).toContain('از ۳۰');
     expect((await readAgent(agentA.agentId)).frozenSince).toBeNull();
 
     const [unfreezeAudit] = await auditsOf({ and: [{ subjectAgentId: { eq: agentA.agentId } }, { action: { eq: 'UNFREEZE' } }] });
@@ -628,13 +629,13 @@ describe('freeze and unfreeze (S12, S13, S14, AS2)', () => {
     const rebuy = await openDealOf(m);
 
     expect(rebuy.dealStage).toBe('REBUY_WINDOW');
-    expect((await readPerson(m)).planProgress).toBe('Frozen');
+    expect((await readPerson(m)).planProgress).toBe(FROZEN_PLAN_PROGRESS);
     created.push({ singular: 'Opportunity', id: rebuy.id });
 
     await unfreezeAgent(context, { caller: supervisorCaller(), agentId: agentA.agentId, now: saturday });
 
     expect(new Date((await openDealOf(m)).deadlineAt).getTime()).toBe(saturday.getTime() + 72 * HOUR_MS);
-    expect((await readPerson(m)).planProgress).toBe('72h left');
+    expect((await readPerson(m)).planProgress).toBe('۷۲ ساعت مانده');
   });
 
   it('keeps a long freeze frozen, tags it from day 7 and still allows transfers from it (S14)', async () => {

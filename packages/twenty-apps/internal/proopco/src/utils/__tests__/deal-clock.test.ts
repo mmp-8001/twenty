@@ -144,7 +144,7 @@ describe('urgencyOf', () => {
 
 describe('planProgressOf', () => {
   it('counts days and slots', () => {
-    expect(planProgressOf(awaiting, at(1, 3))).toBe('Day 2 of 7');
-    expect(planProgressOf(followUp, at(5))).toBe('Slot 3 of 5 · day 6 of 30');
+    expect(planProgressOf(awaiting, at(1, 3))).toBe('روز ۲ از ۷');
+    expect(planProgressOf(followUp, at(5))).toBe('نوبت ۳ از ۵ · روز ۶ از ۳۰');
   });
 });

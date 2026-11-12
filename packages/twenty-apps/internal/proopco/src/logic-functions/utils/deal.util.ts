@@ -110,6 +110,8 @@ export const progressMirrorFields = ({
       : planProgressOf(clock, now),
 });
 
+const DEAL_TYPE_LABELS = { Campaign: 'کمپین', Rebuy: 'خرید مجدد', Retention: 'نگهداشت' } as const;
+
 type MirrorInput = ProgressInput & {
   dealTypeLabel: 'Campaign' | 'Rebuy' | 'Retention' | null;
   sourceCampaignId?: string | null;
@@ -125,7 +127,7 @@ export const personMirrorFields = ({
   now,
 }: MirrorInput) => ({
   nextCallAt: nextCallAt?.toISOString() ?? null,
-  dealTypeLabel,
+  dealTypeLabel: dealTypeLabel === null ? null : DEAL_TYPE_LABELS[dealTypeLabel],
   ...(sourceCampaignId === undefined ? {} : { sourceCampaignId }),
   deadlineAt: (rebuyWindowDeadlineAt ?? clock?.deadlineAt)?.toISOString() ?? null,
   ...progressMirrorFields({ clock, rebuyWindowDeadlineAt, nextCallAt, now }),

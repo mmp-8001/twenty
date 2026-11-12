@@ -17,8 +17,8 @@ describe('rebuyWindowProgressOf', () => {
   it('counts whole hours left and stops at zero', () => {
     const now = new Date('2026-01-01T00:00:00.000Z');
 
-    expect(rebuyWindowProgressOf(new Date('2026-01-04T00:00:00.000Z'), now)).toBe('72h left');
-    expect(rebuyWindowProgressOf(new Date('2026-01-01T00:30:00.000Z'), now)).toBe('1h left');
-    expect(rebuyWindowProgressOf(new Date('2025-12-31T00:00:00.000Z'), now)).toBe('0h left');
+    expect(rebuyWindowProgressOf(new Date('2026-01-04T00:00:00.000Z'), now)).toBe('۷۲ ساعت مانده');
+    expect(rebuyWindowProgressOf(new Date('2026-01-01T00:30:00.000Z'), now)).toBe('۱ ساعت مانده');
+    expect(rebuyWindowProgressOf(new Date('2025-12-31T00:00:00.000Z'), now)).toBe('۰ ساعت مانده');
   });
 });

@@ -35,9 +35,9 @@ export default defineObject({
       icon: 'IconCategory',
       defaultValue: "'SATISFACTION'",
       options: [
-        { id: 'aad55c74-8187-48d7-916e-a547323a9753', value: 'SATISFACTION', label: 'Satisfaction', position: 0, color: 'green' },
-        { id: 'dd8b17bf-b8f1-4708-83ec-e3354d3cc9ca', value: 'DISSATISFACTION', label: 'Dissatisfaction', position: 1, color: 'orange' },
-        { id: 'eca322c2-29f5-4db0-8b09-3b04e74b8319', value: 'DO_NOT_CONTACT', label: 'Do not contact', position: 2, color: 'red' },
+        { id: 'aad55c74-8187-48d7-916e-a547323a9753', value: 'SATISFACTION', label: 'رضایت', position: 0, color: 'green' },
+        { id: 'dd8b17bf-b8f1-4708-83ec-e3354d3cc9ca', value: 'DISSATISFACTION', label: 'نارضایتی', position: 1, color: 'orange' },
+        { id: 'eca322c2-29f5-4db0-8b09-3b04e74b8319', value: 'DO_NOT_CONTACT', label: 'عدم تماس', position: 2, color: 'red' },
       ],
     },
     {

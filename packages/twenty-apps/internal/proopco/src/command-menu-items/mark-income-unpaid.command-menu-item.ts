@@ -1,4 +1,4 @@
-import { defineCommandMenuItem, isSelectAll } from 'twenty-sdk/define';
+import { defineCommandMenuItem, isSelectAll, targetObjectWritePermissions } from 'twenty-sdk/define';
 
 import {
   MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
@@ -14,5 +14,5 @@ export default defineCommandMenuItem({
   availabilityType: 'RECORD_SELECTION',
   availabilityObjectUniversalIdentifier: MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
   frontComponentUniversalIdentifier: MARK_INCOME_UNPAID_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER,
-  conditionalAvailabilityExpression: !isSelectAll,
+  conditionalAvailabilityExpression: !isSelectAll && targetObjectWritePermissions.proopcoSettings,
 });
