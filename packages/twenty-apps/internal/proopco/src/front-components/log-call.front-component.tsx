@@ -11,6 +11,7 @@ import {
 import { TEHRAN_OFFSET_MS } from 'src/constants/time.constant';
 import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { LOG_CALL_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
+import { newIdempotencyKey } from 'src/front-components/utils/new-idempotency-key.util';
 import { closeFormPanel, showServerError } from 'src/front-components/utils/server-error.util';
 
 type ReasonOption = { id: string; kind: string; name: string };
@@ -113,7 +114,7 @@ const LogCallForm = () => {
   const personId = recordIds.length === 1 ? recordIds[0] : null;
   const { t, locale } = useTranslate();
   const [preparation, setPreparation] = useState<Preparation | null>(null);
-  const [idempotencyKey] = useState(() => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const [idempotencyKey] = useState(newIdempotencyKey);
   const [step, setStep] = useState(0);
   const [answered, setAnswered] = useState<boolean | null>(null);
   const [technicalStatus, setTechnicalStatus] = useState('NO_ANSWER');
