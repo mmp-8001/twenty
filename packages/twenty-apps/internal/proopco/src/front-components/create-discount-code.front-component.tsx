@@ -10,6 +10,7 @@ import {
 import { TEHRAN_OFFSET_MS } from 'src/constants/time.constant';
 import { type RefusalCode } from 'src/constants/refusal-codes.constant';
 import { CREATE_DISCOUNT_CODE_FRONT_COMPONENT_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
+import { newIdempotencyKey } from 'src/front-components/utils/new-idempotency-key.util';
 import { closeFormPanel, showServerError } from 'src/front-components/utils/server-error.util';
 
 const ERROR_MESSAGES: Partial<Record<RefusalCode, ReturnType<typeof msg>>> = {
@@ -60,7 +61,7 @@ const styles: Record<string, CSSProperties> = {
 const CreateDiscountCode = () => {
   const { t } = useTranslate();
   // One key per opened form: a second click repeats the same platform create instead of making another.
-  const [idempotencyKey] = useState(() => globalThis.crypto.randomUUID());
+  const [idempotencyKey] = useState(newIdempotencyKey);
   const [code, setCode] = useState('');
   const [capability, setCapability] = useState('DISCOUNT');
   const [expiry, setExpiry] = useState('');
