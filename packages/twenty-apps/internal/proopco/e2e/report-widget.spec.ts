@@ -1,16 +1,15 @@
 import { expect, test } from '@playwright/test';
 
-import { createReportDashboard, logBrowserProblems, removeReportDashboard, setLocale, signIn } from './utils';
+import { findReportPageId, logBrowserProblems, setLocale, signIn } from './utils';
 
-let dashboard: Awaited<ReturnType<typeof createReportDashboard>>;
+let reportPageId: string;
 
 test.beforeAll(async () => {
-  dashboard = await createReportDashboard();
+  reportPageId = await findReportPageId();
 });
 
 test.afterAll(async () => {
   await setLocale('en');
-  await removeReportDashboard(dashboard);
 });
 
 test.beforeEach(async ({ page }) => {
@@ -18,18 +17,18 @@ test.beforeEach(async ({ page }) => {
   await signIn(page);
 });
 
-test('the Report widget renders its period bar on a dashboard', async ({ page }) => {
-  await page.goto(`/object/dashboard/${dashboard.dashboardId}`);
-  await expect(page.getByRole('button', { name: 'Month' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'All time' })).toBeVisible();
+// The e2e user is the technical admin with no Proopco role, so the page answers with its refusal; the report data itself is covered by the integration suite.
+test('the Report page the app ships renders and refuses a member without a Proopco role', async ({ page }) => {
+  await page.goto(`/page/${reportPageId}`);
+  await expect(page.getByText('You have no access to reports.')).toBeVisible();
 });
 
-test('in fa-IR the Report widget and the Log call form read right to left', async ({ page }) => {
+test('in fa-IR the Report page is translated and reads right to left', async ({ page }) => {
   await setLocale('fa-IR');
-  await page.goto(`/object/dashboard/${dashboard.dashboardId}`);
+  await page.goto(`/page/${reportPageId}`);
 
-  const month = page.getByRole('button', { name: 'ماه' });
+  const refusal = page.getByText('به گزارش‌ها دسترسی ندارید.');
 
-  await expect(month).toBeVisible();
-  expect(await month.evaluate((element) => getComputedStyle(element).direction)).toBe('rtl');
+  await expect(refusal).toBeVisible();
+  expect(await refusal.evaluate((element) => getComputedStyle(element).direction)).toBe('rtl');
 });
