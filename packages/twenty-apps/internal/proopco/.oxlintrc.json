@@ -1,0 +1,48 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript"
+  ],
+  "categories": {
+    "correctness": "off"
+  },
+  "ignorePatterns": [
+    "node_modules",
+    "dist"
+  ],
+  "rules": {
+    "no-unused-vars": "off",
+    "typescript/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "typescript/no-explicit-any": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.logic-function.ts",
+        "**/logic-functions/**/*.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "twenty-shared",
+                  "twenty-shared/*",
+                  "!twenty-shared/utils"
+                ],
+                "message": "Logic functions must not import from twenty-shared, except twenty-shared/utils (segment filter conversion). Import runtime types and helpers from `twenty-sdk/logic-function` instead."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
