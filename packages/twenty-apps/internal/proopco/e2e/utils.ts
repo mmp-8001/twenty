@@ -31,43 +31,11 @@ export const setLocale = async (locale: string) => {
   await client.mutation({ updateWorkspaceMember: { __args: { id: memberId, data: { locale } }, id: true } } as never);
 };
 
-// A Dashboard record whose page layout holds the Report widget, as the runbook builds it by hand.
-export const createReportDashboard = async () => {
-  const { frontComponents } = await metadataRequest<{ frontComponents: { id: string; name: string }[] }>(
-    '{ frontComponents { id name } }',
-  );
-  const frontComponentId = frontComponents.find(({ name }) => name === 'report')!.id;
-  const { createPageLayout } = await metadataRequest<{ createPageLayout: { id: string } }>(
-    'mutation ($input: CreatePageLayoutInput!) { createPageLayout(input: $input) { id } }',
-    { input: { name: 'E2E Reports', type: 'DASHBOARD' } },
-  );
-  const { createPageLayoutTab } = await metadataRequest<{ createPageLayoutTab: { id: string } }>(
-    'mutation ($input: CreatePageLayoutTabInput!) { createPageLayoutTab(input: $input) { id } }',
-    { input: { title: 'Reports', position: 0, pageLayoutId: createPageLayout.id, layoutMode: 'GRID' } },
+// The app ships the Report as a standalone page; the test variant gives it its own id, so it is looked up by name.
+export const findReportPageId = async () => {
+  const { getPageLayouts } = await metadataRequest<{ getPageLayouts: { id: string; name: string }[] }>(
+    '{ getPageLayouts(pageLayoutType: STANDALONE_PAGE) { id name } }',
   );
 
-  await metadataRequest(
-    'mutation ($input: CreatePageLayoutWidgetInput!) { createPageLayoutWidget(input: $input) { id } }',
-    {
-      input: {
-        pageLayoutTabId: createPageLayoutTab.id,
-        title: 'Report',
-        type: 'FRONT_COMPONENT',
-        position: { layoutMode: 'GRID', row: 0, column: 0, rowSpan: 12, columnSpan: 12 },
-        configuration: { configurationType: 'FRONT_COMPONENT', frontComponentId },
-      },
-    },
-  );
-
-  const client = new CoreApiClient();
-  const { createDashboard } = (await client.mutation({
-    createDashboard: { __args: { data: { title: 'E2E Reports', pageLayoutId: createPageLayout.id } }, id: true },
-  } as never)) as unknown as { createDashboard: { id: string } };
-
-  return { dashboardId: createDashboard.id, pageLayoutId: createPageLayout.id };
-};
-
-export const removeReportDashboard = async ({ dashboardId, pageLayoutId }: { dashboardId: string; pageLayoutId: string }) => {
-  await new CoreApiClient().mutation({ deleteDashboard: { __args: { id: dashboardId }, id: true } } as never).catch(() => undefined);
-  await metadataRequest('mutation ($id: String!) { deletePageLayout(id: $id) { id } }', { id: pageLayoutId }).catch(() => undefined);
+  return getPageLayouts.find(({ name }) => name === 'Report')!.id;
 };
