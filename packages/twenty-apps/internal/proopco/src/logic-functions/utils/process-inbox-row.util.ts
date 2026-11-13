@@ -12,6 +12,7 @@ import {
 import { processAccountLastLost } from 'src/logic-functions/utils/process-last-lost.util';
 import { processPurchase } from 'src/logic-functions/utils/process-purchase.util';
 import { type PlatformEvent } from 'src/logic-functions/utils/parse-platform-envelope.util';
+import { isRateLimitError } from 'src/logic-functions/utils/rate-limit-error.util';
 import {
   updateRecord,
   type RecordsClient,
@@ -75,7 +76,8 @@ export const processInboxRow = async (
           },
     );
   } catch (error) {
-    const attempts = row.attempts + 1;
+    // Rate limiting is the API's backpressure, not a bad event: retry without spending an attempt.
+    const attempts = isRateLimitError(error) ? row.attempts : row.attempts + 1;
 
     await updateRecord(client, 'PlatformEventInbox', row.id, {
       status: 'FAILED',

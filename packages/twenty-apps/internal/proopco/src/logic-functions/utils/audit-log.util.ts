@@ -1,5 +1,6 @@
 import { type MetadataApiClient } from 'twenty-client-sdk/metadata';
 
+import { isRateLimitError } from 'src/logic-functions/utils/rate-limit-error.util';
 import {
   createRecord,
   listRecords,
@@ -105,6 +106,7 @@ export const runAudit = async (
 ): Promise<{ ok: true } | { ok: false; error: string }> => {
   let current = audit;
   let lastError = '';
+  let lastWasRateLimited = false;
 
   for (let attempt = 0; attempt < IN_PROCESS_TRIES; attempt += 1) {
     try {
@@ -114,6 +116,7 @@ export const runAudit = async (
       return { ok: true };
     } catch (error) {
       lastError = error instanceof Error ? error.message : String(error);
+      lastWasRateLimited = isRateLimitError(error);
 
       if (error instanceof AuditAbort) {
         await updateRecord(context.client, 'AuditLog', audit.id, { status: 'FAILED', lastError });
@@ -126,7 +129,8 @@ export const runAudit = async (
   }
 
   await updateRecord(context.client, 'AuditLog', audit.id, {
-    attempts: (audit.attempts ?? 0) + 1,
+    // Rate limiting is backpressure, not a broken operation: the sweeper retries it without spending an attempt.
+    attempts: (audit.attempts ?? 0) + (lastWasRateLimited ? 0 : 1),
     lastError,
   });
 

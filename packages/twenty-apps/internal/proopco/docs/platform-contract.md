@@ -311,6 +311,25 @@ The CRM writes the text from its template. The platform picks the phone number f
 - [ ] Delete the sample people, companies and opportunities Twenty creates with a new workspace.
 - [ ] The «گزارش» page and its navigation item install with the app (0.1.12 and later). On a workspace that still has the hand-made «گزارش‌ها» dashboard and nav item, delete both.
 
+### 6.1 Server setup (technical admin, before installing the app)
+
+From Twenty's self-host guides (setup, security, Docker Compose, upgrade guide). Without the first two, nothing in the app runs and nothing reports an error.
+
+- [ ] `LOGIC_FUNCTION_TYPE=LOCAL` (or `LAMBDA` with its AWS settings) on the server and the worker. Production defaults to `DISABLED`. `LOCAL` runs code on the host without a sandbox, which is acceptable for this first-party app only.
+- [ ] The worker container runs, and crons are registered with `yarn command:prod cron:register:all`. The official image does this at startup unless `DISABLE_CRON_JOBS_REGISTRATION=true`. App crons (the every-minute sweeper, the nightly jobs) only fire once this is done.
+- [ ] The instance is private (VPN, Cloudflare Access or a reverse proxy). Only `/s/platform/events` is reachable from outside, ideally limited to the platform's IPs. Postgres and Redis are not published.
+- [ ] `TAG` is pinned to the Twenty version the app was built against (2.58).
+- [ ] After installing, fill the three app settings (Platform HMAC secret, Platform API token, Platform base URL). The app's settings page shows an "unconfigured" banner until all three are set.
+
+### 6.2 Operating the app
+
+- [ ] Daily `pg_dump` backups, and one restore tested before go-live.
+- [ ] **Never uninstall the app in prod.** Uninstalling deletes its objects and every row in them: calls, deals, agents, purchases, incomes, the audit log.
+- [ ] Before every upgrade: take a `pg_dump`, run `twenty app plan` against prod and read the `to destroy` list. A release that stops declaring an object or field drops its data.
+- [ ] Watch rate limits. Twenty allows the app 500 API calls per minute in its own name (`APPLICATION_API_RATE_LIMITING_LIMIT`, adjustable in Admin Panel → Configuration Variables). Rejections show on the app's Monitoring page and in Settings → General → Logs as `API_RATE_LIMIT`. A rejected call is retried on the next sweeper tick without using up an event's or an operation's five attempts.
+- [ ] Failed platform events: a row that failed five times on a real error is no longer retried and is flagged for review. Fix the cause, then the technical admin sets **Attempts** back to `0` on the row in the Failed platform events view; the sweeper picks it up within a minute. Full Admins can read these rows but not edit them.
+- [ ] Campaign, segment and agent changes queue one full eligibility pass, run about a minute after the last change. A contact can take up to that long to appear in or leave an Agent's Contact list.
+
 ## 7. Open questions for the platform team
 
 1. **Code parameters.** Besides `code`, `capability` and `expiresAt`, what does the platform need to create a code (discount percent, which products or challenge sizes it applies to)? The CRM stores only those three fields today, so adding more is a CRM data model change.
