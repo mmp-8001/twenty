@@ -41,6 +41,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 *.d.ts
+!src/types/css.d.ts
 .twenty-test-variant
 
 # playwright

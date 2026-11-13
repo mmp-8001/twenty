@@ -255,4 +255,29 @@ describe('reports (RS3, RS4)', () => {
 
     expect(typeof admin.failedEvents).toBe('number');
   });
+
+  it('tags frozen agents, warns staff about freezes of 7 days or more, and gives an Agent their income history', async () => {
+    const { agentK, agentL } = await scene();
+    const frozenSince = '2025-10-25T10:00:00Z';
+
+    await updateRecord(client, 'Agent', agentL, { frozenSince });
+    await track('FreezePeriod', createRecord(client, 'FreezePeriod', { name: 'rs freeze', agentId: agentL, startedAt: frozenSince, daysFrozen: 11, waitingContacts: 3, longFreeze: true }));
+    await createRecord(client, 'MonthlyIncome', { name: 'rs income', agentId: agentK, jalaliMonth: '1404-06', totalUsdt: 4, status: 'PAID' });
+    await createRecord(client, 'MonthlyIncome', { name: 'rs income', agentId: agentK, jalaliMonth: '1404-07', totalUsdt: 6, status: 'AWAITING_PAYMENT' });
+
+    const team = await loadReport(client, { caller: { roles: [SUPERVISOR_ROLE_UNIVERSAL_IDENTIFIER], memberAgentId: null }, body: { period: 'MONTH' }, now: inAban });
+    const statusOf = (agentId: string) => team.rows.find((row) => row.agentId === agentId)?.status;
+
+    expect([statusOf(agentK), statusOf(agentL)]).toEqual([{ kind: 'ACTIVE' }, { kind: 'FROZEN', days: 11 }]);
+    expect(team.longFreezes.filter(({ agentId }) => agentId === agentL)).toEqual([{ agentId: agentL, name: expect.any(String), days: 11, waitingContacts: 3 }]);
+    expect(team.incomeHistory).toEqual([]);
+
+    const own = await loadReport(client, { caller: { roles: [AGENT_ROLE_UNIVERSAL_IDENTIFIER], memberAgentId: agentK }, body: { period: 'DAY' }, now: inAban });
+
+    expect(own.longFreezes).toEqual([]);
+    expect(own.incomeHistory.map(({ jalaliMonth, totalUsdt, status }) => [jalaliMonth, totalUsdt, status])).toEqual([
+      ['1404-07', 6, 'AWAITING_PAYMENT'],
+      ['1404-06', 4, 'PAID'],
+    ]);
+  });
 });

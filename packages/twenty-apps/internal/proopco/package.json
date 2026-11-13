@@ -1,7 +1,7 @@
 {
   "name": "proopco",
   "description": "Proopco sales and retention CRM app for Twenty.",
-  "version": "0.1.2",
+  "version": "0.1.14",
   "private": true,
   "license": "MIT",
   "engines": {
@@ -37,6 +37,7 @@
     "react-dom": "^19.2.0",
     "twenty-client-sdk": "2.57.0",
     "twenty-sdk": "2.57.0",
+    "twenty-ui": "2.58.0",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^4.2.1",
     "vitest": "^4.1.12"

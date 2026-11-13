@@ -6,6 +6,7 @@ import {
   FULL_ADMIN_ROLE_UNIVERSAL_IDENTIFIER,
   SUPERVISOR_ROLE_UNIVERSAL_IDENTIFIER,
 } from 'src/constants/universal-identifiers';
+import { daysFrozenOf, LONG_FREEZE_DAYS } from 'src/logic-functions/utils/freeze-agent.util';
 import { countRecords, listRecords, type RecordsClient } from 'src/logic-functions/utils/records.util';
 import { Refusal } from 'src/logic-functions/utils/refusal.util';
 import { formatJalaliMonth, jalaliPartsOf } from 'src/utils/jalali.util';
@@ -39,6 +40,10 @@ const campaignOf = (deal: DealRef, isRetention: boolean, campaignNames: Map<stri
 const DEAL_REF = { dealType: true, sourceCampaignId: true };
 const PERIOD_KINDS = ['DAY', 'WEEK', 'MONTH', 'ALL'];
 
+const INCOME_HISTORY_MONTHS = 6;
+
+export type ReportAgentStatus = { kind: 'ACTIVE' } | { kind: 'INACTIVE' } | { kind: 'FROZEN'; days: number };
+
 export type ReportCaller = { roles: string[]; memberAgentId: string | null };
 
 // Scope is decided here, from the caller's role, and never from the request.
@@ -71,14 +76,14 @@ export const loadReport = async (
   const within = (field: string) => [{ [field]: { gte: start.toISOString() } }, { [field]: { lt: end.toISOString() } }];
   const requestedAgentId = scope.isStaff && typeof body?.agentId === 'string' && body.agentId !== 'ALL' ? body.agentId : null;
 
-  const allAgents = await listRecords<{ id: string; name: string; createdAt: string }>(
+  const allAgents = await listRecords<{ id: string; name: string; createdAt: string; isActive: boolean; frozenSince: string | null }>(
     client,
     'agents',
     scope.isStaff ? {} : { id: { eq: scope.ownAgentId } },
-    { name: true, createdAt: true },
+    { name: true, createdAt: true, isActive: true, frozenSince: true },
   );
   const agentFilter = scope.isStaff ? {} : { agentId: { eq: scope.ownAgentId } };
-  const [calls, dealsOpened, dealsClosed, purchases, activated, used, freezes, incomes, campaigns] = await Promise.all([
+  const [calls, dealsOpened, dealsClosed, purchases, activated, used, freezes, incomes, campaigns, incomeHistory] = await Promise.all([
     listRecords<{ agentId: string; answered: boolean; callKind: 'FOLLOW_UP' | 'RETENTION'; wasOverdue: boolean; deal: DealRef; callReasons: { edges: { node: { reason: { name: string } | null } }[] } }>(
       client,
       'calls',
@@ -100,7 +105,12 @@ export const loadReport = async (
     ),
     listRecords<{ activatingAgentId: string }>(client, 'codeActivations', { and: [...within('activatedAt'), { activatingAgentId: scope.isStaff ? { is: 'NOT_NULL' } : { eq: scope.ownAgentId } }] }, { activatingAgentId: true }),
     listRecords<{ activatingAgentId: string }>(client, 'codeActivations', { and: [...within('usedAt'), { activatingAgentId: scope.isStaff ? { is: 'NOT_NULL' } : { eq: scope.ownAgentId } }] }, { activatingAgentId: true }),
-    listRecords<{ agentId: string; startedAt: string; endedAt: string | null }>(client, 'freezePeriods', agentFilter, { agentId: true, startedAt: true, endedAt: true }),
+    listRecords<{ agentId: string; startedAt: string; endedAt: string | null; waitingContacts: number | null }>(
+      client,
+      'freezePeriods',
+      agentFilter,
+      { agentId: true, startedAt: true, endedAt: true, waitingContacts: true },
+    ),
     kind === 'MONTH'
       ? listRecords<{ agentId: string; totalUsdt: number | null; status: string }>(
           client,
@@ -110,6 +120,14 @@ export const loadReport = async (
         )
       : Promise.resolve([]),
     listRecords<{ id: string; name: string }>(client, 'campaigns', {}, { name: true }),
+    scope.isStaff
+      ? Promise.resolve([])
+      : listRecords<{ jalaliMonth: string; totalUsdt: number | null; status: string; paidAt: string | null }>(
+          client,
+          'monthlyIncomes',
+          agentFilter,
+          { jalaliMonth: true, totalUsdt: true, status: true, paidAt: true },
+        ),
   ]);
   const campaignNames = new Map(campaigns.map(({ id, name }) => [id, name]));
   const periodEnd = new Date(Math.min(end.getTime(), now.getTime()));
@@ -154,9 +172,29 @@ export const loadReport = async (
     codesUsed: used.map(({ activatingAgentId }) => ({ agentId: activatingAgentId })),
   };
 
+  const report = buildReport({ agents, data, withTeam: scope.isStaff, campaignAgentId: scope.ownAgentId ?? requestedAgentId });
+  const statusOf = new Map(
+    allAgents.map((agent): [string, ReportAgentStatus] => [
+      agent.id,
+      !agent.isActive ? { kind: 'INACTIVE' } : isDefined(agent.frozenSince) ? { kind: 'FROZEN', days: daysFrozenOf(agent.frozenSince, now) } : { kind: 'ACTIVE' },
+    ]),
+  );
+  const agentNames = new Map(allAgents.map(({ id, name }) => [id, name]));
+
   return {
     period: { kind, offset, start: start.toISOString(), end: end.toISOString() },
-    ...buildReport({ agents, data, withTeam: scope.isStaff, campaignAgentId: scope.ownAgentId ?? requestedAgentId }),
+    ...report,
+    rows: report.rows.map((row) => ({ ...row, status: statusOf.get(row.agentId) ?? ({ kind: 'ACTIVE' } as ReportAgentStatus) })),
+    longFreezes: scope.isStaff
+      ? freezes
+          .filter((freeze) => freeze.endedAt === null && daysFrozenOf(freeze.startedAt, now) >= LONG_FREEZE_DAYS)
+          .map((freeze) => ({ agentId: freeze.agentId, name: agentNames.get(freeze.agentId) ?? '', days: daysFrozenOf(freeze.startedAt, now), waitingContacts: freeze.waitingContacts ?? 0 }))
+          .sort((left, right) => right.days - left.days)
+      : [],
+    incomeHistory: incomeHistory
+      .map((income) => ({ jalaliMonth: income.jalaliMonth, totalUsdt: income.totalUsdt ?? 0, status: income.status, paidAt: income.paidAt }))
+      .sort((left, right) => right.jalaliMonth.localeCompare(left.jalaliMonth))
+      .slice(0, INCOME_HISTORY_MONTHS),
     agents: scope.isStaff ? allAgents.map(({ id, name }) => ({ id, name })) : [],
     failedEvents: scope.isFullAdmin ? await countRecords(client, 'platformEventInboxes', { status: { eq: 'FAILED' } }) : null,
   };

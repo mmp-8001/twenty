@@ -1,11 +1,11 @@
 import { type AgentActor } from 'src/logic-functions/utils/agent-actor.util';
 import { loadOfferedCodes } from 'src/logic-functions/utils/code-activation.util';
-import { loadCallContext } from 'src/logic-functions/utils/call-context.util';
+import { loadCallContext, personDisplayName } from 'src/logic-functions/utils/call-context.util';
 import {
   listRecords,
   type RecordsClient,
 } from 'src/logic-functions/utils/records.util';
-import { applyCall, defaultNextCallAt, slotWindowsOf } from 'src/utils/deal-clock.util';
+import { applyCall, defaultNextCallAt, planProgressOf, slotWindowsOf } from 'src/utils/deal-clock.util';
 
 // What the Log call form needs before the agent answers anything; the save re-checks all of it.
 export const prepareCall = async (
@@ -31,12 +31,21 @@ export const prepareCall = async (
       defaultNextCallAt: defaultNextCallAt({ now, answered, clock: applied })?.toISOString() ?? null,
       deadlineAt: applied?.deadlineAt.toISOString() ?? null,
       planTargetEndsAt: target?.endsAt.toISOString() ?? null,
+      planTargetStartsAt: target?.startsAt.toISOString() ?? null,
+      planTargetSlot: target?.slot ?? null,
     };
   };
+  const campaignId = deal?.sourceCampaignId ?? person.sourceCampaignId;
+  const [campaign] = campaignId === null
+    ? []
+    : await listRecords<{ id: string; name: string }>(client, 'campaigns', { id: { eq: campaignId } }, { name: true }, 1);
 
   return {
     kind,
     now: now.toISOString(),
+    contactName: personDisplayName(person.name),
+    campaignName: campaign?.name ?? null,
+    progress: clock === null ? null : planProgressOf(clock, now),
     allowsNoNextCall: kind === 'RETENTION',
     reasons,
     codes: await loadOfferedCodes(client, { kind, deal, personId: person.id, now }),
