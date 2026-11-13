@@ -22,6 +22,7 @@ export default defineApplication({
       description: 'Shared secret that signs the events the platform sends.',
       type: FieldType.TEXT,
       isSecret: true,
+      isRequired: true,
     },
     PLATFORM_API_TOKEN: {
       universalIdentifier: API_TOKEN_VARIABLE_UNIVERSAL_IDENTIFIER,
@@ -29,12 +30,14 @@ export default defineApplication({
       description: 'Bearer token for the platform endpoints the CRM calls.',
       type: FieldType.TEXT,
       isSecret: true,
+      isRequired: true,
     },
     PLATFORM_BASE_URL: {
       universalIdentifier: BASE_URL_VARIABLE_UNIVERSAL_IDENTIFIER,
       label: 'Platform base URL',
       description: 'Base URL of the platform API, without a trailing slash.',
       type: FieldType.TEXT,
+      isRequired: true,
     },
   },
 });
