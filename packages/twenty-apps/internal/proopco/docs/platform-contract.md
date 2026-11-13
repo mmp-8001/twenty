@@ -309,7 +309,7 @@ The CRM writes the text from its template. The platform picks the phone number f
 - [ ] The nightly resend runs at 23:30 UTC.
 - [ ] Right after creating the workspace, the technical admin finishes Twenty's onboarding and skips "Invite your team". Until the creator does, every member who signs in is held on that screen, and Agents cannot skip it.
 - [ ] Delete the sample people, companies and opportunities Twenty creates with a new workspace.
-- [ ] Create the Reports dashboard by hand, named «گزارش‌ها», with the Report widget titled «گزارش», and add a navigation item «گزارش‌ها» pointing at it. The app manifest cannot target a hand-made dashboard, so none of this is installed with the app.
+- [ ] The «گزارش» page and its navigation item install with the app (0.1.12 and later). On a workspace that still has the hand-made «گزارش‌ها» dashboard and nav item, delete both.
 
 ## 7. Open questions for the platform team
 
