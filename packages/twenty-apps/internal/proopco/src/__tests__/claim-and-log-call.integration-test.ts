@@ -1021,7 +1021,7 @@ const buy = async (personId: string, occurredAt: Date, amountUsdt = '500.00', no
   processPurchase(
     client,
     platformEvent('purchase.settled', occurredAt, {
-      platformPurchaseId: `p_${randomUUID()}`,
+      purchaseId: `p_${randomUUID()}`,
       platformUserId: await platformUserIdOf(personId),
       amountUsdt,
       codeUsed: null,
@@ -1249,7 +1249,7 @@ describe('purchases', () => {
     await sweepAt(new Date(deadline.getTime() + GRACE_MS + 60_000));
 
     const event = platformEvent('purchase.settled', new Date(deadline.getTime() - 60_000), {
-      platformPurchaseId: `p_${randomUUID()}`,
+      purchaseId: `p_${randomUUID()}`,
       platformUserId: await platformUserIdOf(personId),
       amountUsdt: '80.00',
       codeUsed: null,
@@ -1278,7 +1278,7 @@ describe('purchases', () => {
 
   it('waits for an unknown contact', async () => {
     const event = platformEvent('purchase.settled', new Date(), {
-      platformPurchaseId: `p_${randomUUID()}`,
+      purchaseId: `p_${randomUUID()}`,
       platformUserId: `u_${randomUUID()}`,
       amountUsdt: '10.00',
       codeUsed: null,
@@ -1699,7 +1699,7 @@ describe('Codes and SMS (DS1-DS6, RS2)', () => {
     await processPurchase(
       client,
       platformEvent('purchase.settled', occurredAt, {
-        platformPurchaseId: `p_${randomUUID()}`,
+        purchaseId: `p_${randomUUID()}`,
         platformUserId: await platformUserIdOf(personId),
         amountUsdt: '200.00',
         codeUsed: code.code,

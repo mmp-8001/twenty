@@ -130,10 +130,10 @@ export const processPurchase = async (
   event: PlatformEvent,
   now: Date,
 ): Promise<EventOutcome> => {
-  const { platformPurchaseId, platformUserId, codeUsed } = event.data;
+  const { purchaseId: platformPurchaseId, platformUserId, codeUsed } = event.data;
 
   if (!isNonEmptyString(platformPurchaseId) || !isNonEmptyString(platformUserId)) {
-    throw new Error('platformPurchaseId and platformUserId are required');
+    throw new Error('purchaseId and platformUserId are required');
   }
 
   const amountUsdt = readMoney(event.data, 'amountUsdt');

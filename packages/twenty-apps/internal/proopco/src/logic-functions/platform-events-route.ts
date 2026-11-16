@@ -8,60 +8,20 @@ import {
   TIMESTAMP_HEADER,
 } from 'src/constants/platform-events.constant';
 import { PLATFORM_EVENTS_ROUTE_LOGIC_FUNCTION_UNIVERSAL_IDENTIFIER } from 'src/constants/universal-identifiers';
-import {
-  parsePlatformEnvelope,
-  type PlatformEvent,
-} from 'src/logic-functions/utils/parse-platform-envelope.util';
+import { parsePlatformEnvelope } from 'src/logic-functions/utils/parse-platform-envelope.util';
 import { verifyPlatformSignature } from 'src/logic-functions/utils/platform-signature.util';
 import {
   processInboxRow,
   type InboxRow,
 } from 'src/logic-functions/utils/process-inbox-row.util';
+import { type RecordsClient } from 'src/logic-functions/utils/records.util';
 import {
-  createRecord,
-  listRecords,
-  type RecordsClient,
-} from 'src/logic-functions/utils/records.util';
+  findStoredEventIds,
+  storePlatformEvent,
+} from 'src/logic-functions/utils/store-platform-event.util';
 
 const errorResponse = (status: number, code: string, message: string) =>
   new Response({ error: { code, message } }, { status });
-
-const findStoredEventIds = async (client: RecordsClient, eventIds: string[]) =>
-  new Set(
-    (
-      await listRecords<{ eventId: string }>(
-        client,
-        'platformEventInboxes',
-        { eventId: { in: eventIds } },
-        { eventId: true },
-      )
-    ).map(({ eventId }) => eventId),
-  );
-
-const storeEvent = async (
-  client: RecordsClient,
-  event: PlatformEvent,
-): Promise<InboxRow | null> => {
-  try {
-    const id = await createRecord(client, 'PlatformEventInbox', {
-      eventId: event.eventId,
-      eventType: event.type,
-      platformUserId: event.data.platformUserId,
-      occurredAt: event.occurredAt,
-      payload: event,
-      status: 'RECEIVED',
-    });
-
-    return { id, attempts: 0, payload: event };
-  } catch (error) {
-    // A concurrent request may have stored the same eventId first: that is a duplicate, not a failure.
-    if ((await findStoredEventIds(client, [event.eventId])).has(event.eventId)) {
-      return null;
-    }
-
-    throw error;
-  }
-};
 
 export const handlePlatformEvents = async (
   routePayload: RoutePayload<unknown>,
@@ -98,7 +58,7 @@ export const handlePlatformEvents = async (
   for (const event of envelope.events) {
     const row = alreadyStored.has(event.eventId)
       ? null
-      : await storeEvent(client, event);
+      : await storePlatformEvent(client, event);
 
     if (row === null) {
       duplicates += 1;

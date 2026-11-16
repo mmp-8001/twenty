@@ -68,6 +68,7 @@ export const REFUSAL_CODES = [
   'TARGET_FROZEN',
   'TARGET_INACTIVE',
   'TARGET_ROLE',
+  'TECHNICAL_ADMIN_ONLY',
   'TOO_MANY',
 ] as const;
 
