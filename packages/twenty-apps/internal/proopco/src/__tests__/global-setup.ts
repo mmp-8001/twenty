@@ -8,7 +8,7 @@ import {
 } from './test-constants';
 
 const DEFERRED_SCHEMA_RETRY_MESSAGE =
-  'deferred schema action(s) are still running';
+  'deferred schema';
 const INSTALL_ATTEMPTS = 60;
 
 const findApplicationId = async (): Promise<string | undefined> => {
@@ -126,7 +126,18 @@ export async function setup() {
 
 export async function teardown() {
   const variantRoot = buildTestVariant();
-  const result = await runTwenty(['app', 'uninstall', '--yes'], variantRoot);
+  let result = await runTwenty(['app', 'uninstall', '--yes'], variantRoot);
+
+  for (
+    let attempt = 1;
+    !result.ok &&
+    result.error.message.includes(DEFERRED_SCHEMA_RETRY_MESSAGE) &&
+    attempt < INSTALL_ATTEMPTS;
+    attempt += 1
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, 5_000));
+    result = await runTwenty(['app', 'uninstall', '--yes'], variantRoot);
+  }
 
   if (
     !result.ok &&

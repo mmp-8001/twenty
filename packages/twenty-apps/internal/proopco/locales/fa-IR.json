@@ -1,4 +1,5 @@
 {
+  "Could not rebuild your sidebar. Try again.": "بازسازی منوی شما انجام نشد. دوباره تلاش کنید.",
   "(optional, codes of {campaign})": "(اختیاری · کدهای کمپین «{campaign}»)",
   "(optional, editable later)": "(اختیاری · بعداً قابل ویرایش)",
   "(optional)": "(اختیاری)",
@@ -274,6 +275,8 @@
   "You cannot freeze yourself.": "نمی‌توانید خودتان را مسدود کنید.",
   "You have no access to reports.": "به گزارش‌ها دسترسی ندارید.",
   "You have no agent record.": "برای شما کارشناسی ثبت نشده است.",
+  "Your sidebar is rebuilt. Refresh the page to see it.": "منوی شما بازسازی شد. برای دیدن آن صفحه را رفرش کنید.",
+  "Your sidebar was updated. Refresh the page to see it.": "منوی شما به‌روز شد. برای دیدن آن صفحه را رفرش کنید.",
   "commandMenuItem.label": {
     "Add to follow-up": "افزودن به پیگیری",
     "Clear showcase data": "پاک کردن داده‌های نمایشی",
@@ -287,6 +290,7 @@
     "Mark as paid": "ثبت به‌عنوان پرداخت‌شده",
     "Reactivate agent": "فعال‌سازی دوباره کارشناس",
     "Resend SMS": "ارسال مجدد پیامک",
+    "Reset my sidebar": "بازسازی منوی من",
     "Retry": "تلاش مجدد",
     "Seed showcase data": "ساخت داده‌های نمایشی",
     "Transfer or release contacts": "انتقال یا آزاد کردن مخاطبان",
@@ -306,6 +310,7 @@
     "Mark as paid": "ثبت به‌عنوان پرداخت‌شده",
     "Reactivate agent": "فعال‌سازی دوباره کارشناس",
     "Resend SMS": "ارسال مجدد پیامک",
+    "Reset sidebar": "بازسازی منو",
     "Retry": "تلاش مجدد",
     "Seed showcase": "ساخت نمایشی",
     "Transfer": "انتقال",
@@ -495,8 +500,7 @@
     "Was overdue": "عقب‌افتاده بود"
   },
   "navigationMenuItem.name": {
-    "My follow-ups": "پیگیری‌های من",
-    "Report": "گزارش"
+    "Home": "خانه"
   },
   "objectMetadata.description": {
     "A code activated for one contact; never deleted, one per code and contact": "کدی که برای یک مخاطب فعال شده؛ هرگز حذف نمی‌شود و برای هر کد و مخاطب یکی است",
@@ -591,13 +595,17 @@
     "Calls": "تماس‌ها",
     "Campaigns": "کمپین‌ها",
     "Contact list": "فهرست مخاطبان",
+    "Discount codes": "کدهای تخفیف",
     "Failed platform events": "رویدادهای ناموفق پلتفرم",
     "Frozen agents": "کارشناسان مسدودشده",
+    "Monthly incomes": "درآمدهای ماهانه",
     "My customers": "مشتریان من",
     "My follow-ups": "پیگیری‌های من",
     "My history": "سابقه من",
     "My rebuy list": "فهرست خرید مجدد من",
+    "Reasons": "دلایل",
     "Segments": "بخش‌ها",
+    "Settings": "تنظیمات",
     "Today": "امروز"
   }
 }

@@ -5,7 +5,7 @@ import 'twenty-ui/theme-light.css';
 import { type CSSProperties, type ReactNode, useEffect, useState } from 'react';
 import { RestApiClient } from 'twenty-client-sdk/rest';
 import { defineFrontComponent, PageLayoutType } from 'twenty-sdk/define';
-import { AppPath, msg, openSidePanelPage, useColorScheme, useTranslate } from 'twenty-sdk/front-component';
+import { AppPath, enqueueSnackbar, msg, openSidePanelPage, useColorScheme, useTranslate } from 'twenty-sdk/front-component';
 import { Tag } from 'twenty-ui/primitives/data-display';
 import { Skeleton } from 'twenty-ui/primitives/feedback';
 import { Button, ButtonGroup, Select } from 'twenty-ui/primitives/input';
@@ -178,6 +178,16 @@ const Report = () => {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [report, setReport] = useState<ReportResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    new RestApiClient()
+      .post<{ changed: boolean }>('/s/sidebar/sync', {})
+      .then((response) => {
+        // The sandbox cannot reload the page, so the user does it.
+        response.changed && enqueueSnackbar({ message: t(msg('Your sidebar was updated. Refresh the page to see it.')), variant: 'info' });
+      })
+      .catch((caught) => console.error('Sidebar sync failed', caught));
+  }, []);
 
   useEffect(() => {
     let current = true;

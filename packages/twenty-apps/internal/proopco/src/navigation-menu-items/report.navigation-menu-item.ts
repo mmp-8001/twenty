@@ -10,9 +10,9 @@ import {
 
 export default defineNavigationMenuItem({
   universalIdentifier: REPORT_NAV_UNIVERSAL_IDENTIFIER,
-  name: 'Report',
-  icon: 'IconLayoutDashboard',
-  position: 6,
+  name: 'Home',
+  icon: 'IconHome',
+  position: 0,
   type: NavigationMenuItemType.PAGE_LAYOUT,
   pageLayoutUniversalIdentifier: REPORT_PAGE_LAYOUT_UNIVERSAL_IDENTIFIER,
 });
