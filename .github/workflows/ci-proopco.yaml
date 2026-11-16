@@ -1,0 +1,103 @@
+name: CI Proopco
+
+on:
+  pull_request:
+    paths:
+      - 'packages/twenty-apps/internal/proopco/**'
+      - '.github/workflows/ci-proopco.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_DIR: packages/twenty-apps/internal/proopco
+
+jobs:
+  proopco:
+    name: Lint, typecheck, unit, integration and Playwright
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+
+      - name: Install monorepo dependencies
+        run: yarn install --immutable
+
+      - name: Install app dependencies
+        working-directory: ${{ env.APP_DIR }}
+        run: yarn install --immutable
+
+      - name: Lint
+        working-directory: ${{ env.APP_DIR }}
+        run: yarn lint
+
+      # The app resolves twenty-shared/utils from the monorepo build, so it is built before anything else runs.
+      - name: Build twenty-shared and the CLI
+        run: npx nx run-many -t build -p twenty-shared twenty-cli
+
+      - name: Typecheck
+        working-directory: ${{ env.APP_DIR }}
+        run: yarn typecheck
+
+      - name: Unit tests
+        working-directory: ${{ env.APP_DIR }}
+        run: yarn test:unit
+
+      - name: Start Postgres and Redis and initialise the database
+        run: bash packages/twenty-utils/setup-dev-env.sh
+
+      # NODE_ENV=test loads packages/twenty-server/.env.test: the test database and the dev-signed
+      # ENTERPRISE_VALIDITY_TOKEN, which is what lets the server install and enforce row rules.
+      - name: Seed the test database
+        run: NODE_ENV=test npx nx database:reset twenty-server
+
+      - name: Start server, worker and front
+        run: |
+          echo "127.0.0.1 apple.localhost" | sudo tee -a /etc/hosts
+          (cd packages/twenty-server && NODE_ENV=test node dist/main > /tmp/twenty-server.log 2>&1 &)
+          (cd packages/twenty-server && NODE_ENV=test node dist/queue-worker/queue-worker > /tmp/twenty-worker.log 2>&1 &)
+          npx nx start twenty-front > /tmp/twenty-front.log 2>&1 &
+          for attempt in $(seq 1 90); do
+            curl -sf http://localhost:3000/healthz > /dev/null && curl -sf http://localhost:3001 > /dev/null && exit 0
+            sleep 5
+          done
+          echo "::error::The Twenty stack did not come up"
+          tail -n 80 /tmp/twenty-server.log /tmp/twenty-front.log
+          exit 1
+
+      - name: Install Playwright browser
+        working-directory: ${{ env.APP_DIR }}
+        run: npx playwright install --with-deps chromium
+
+      - name: Integration tests and Playwright
+        working-directory: ${{ env.APP_DIR }}
+        env:
+          NO_PROXY: apple.localhost,localhost,127.0.0.1,.localhost
+          TWENTY_CLI: ${{ github.workspace }}/packages/twenty-cli/dist/cli.cjs
+          TWENTY_API_URL: http://apple.localhost:3000
+          # The claim race (S4) talks to Postgres directly.
+          PG_DATABASE_URL: postgres://postgres:postgres@localhost:5432/test
+        run: |
+          LOGIN_TOKEN=$(curl -s "$TWENTY_API_URL/metadata" -H 'content-type: application/json' -d '{"query":"mutation($e:String!,$p:String!,$o:String!){getLoginTokenFromCredentials(email:$e,password:$p,origin:$o){loginToken{token}}}","variables":{"e":"tim@apple.dev","p":"tim@apple.dev","o":"http://apple.localhost:3001"}}' | jq -r '.data.getLoginTokenFromCredentials.loginToken.token')
+          export TWENTY_API_KEY=$(curl -s "$TWENTY_API_URL/metadata" -H 'content-type: application/json' -d "{\"query\":\"mutation(\$t:String!,\$o:String!){getAuthTokensFromLoginToken(loginToken:\$t,origin:\$o){tokens{accessOrWorkspaceAgnosticToken{token}}}}\",\"variables\":{\"t\":\"$LOGIN_TOKEN\",\"o\":\"http://apple.localhost:3001\"}}" | jq -r '.data.getAuthTokensFromLoginToken.tokens.accessOrWorkspaceAgnosticToken.token')
+          yarn test
+          yarn test:e2e
+
+      - name: Dump server and worker logs on failure
+        if: failure()
+        run: tail -n 150 /tmp/twenty-server.log /tmp/twenty-worker.log || true

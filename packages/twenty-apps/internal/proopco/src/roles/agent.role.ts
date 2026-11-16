@@ -1,0 +1,185 @@
+import {
+  defineRole,
+  STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS,
+  SystemPermissionFlag,
+} from 'twenty-sdk/define';
+
+import {
+  AGENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  AGENT_ROLE_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_AGENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_CODE_OBJECT_UNIVERSAL_IDENTIFIER,
+  CODE_ACTIVATION_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER,
+  CODE_ACTIVATION_OBJECT_UNIVERSAL_IDENTIFIER,
+  CODE_ACTIVATION_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER,
+  CODE_ACTIVATION_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  DISCOUNT_CODE_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_SEGMENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  CALL_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER,
+  CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+  CALL_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER,
+  CALL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  CALL_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
+  DEAL_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER,
+  DEAL_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER,
+  DEAL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  PURCHASE_COMMISSION_USDT_FIELD_UNIVERSAL_IDENTIFIER,
+  PURCHASE_CREDITED_PREDICATE_UNIVERSAL_IDENTIFIER,
+  PURCHASE_OBJECT_UNIVERSAL_IDENTIFIER,
+  PURCHASE_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER,
+  PURCHASE_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  REASON_OBJECT_UNIVERSAL_IDENTIFIER,
+  PERSON_ELIGIBLE_PREDICATE_UNIVERSAL_IDENTIFIER,
+  PERSON_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER,
+  PERSON_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+  SEGMENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  SETTINGS_OBJECT_UNIVERSAL_IDENTIFIER,
+} from 'src/constants/universal-identifiers';
+import { CODE_ACTIVATION_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/code-activation-agent-member.field';
+import { CODE_ACTIVATION_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/code-activation-contact-owner-member.field';
+import { CALL_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/call-agent-member.field';
+import { CALL_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/call-contact-owner-member.field';
+import { MONTHLY_INCOME_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/monthly-income-agent-member.field';
+import { OPPORTUNITY_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/opportunity-agent-member.field';
+import { OPPORTUNITY_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/opportunity-contact-owner-member.field';
+import { PERSON_ELIGIBLE_MEMBER_IDS_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/person-eligible-member-ids.field';
+import { PERSON_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/person-owner-member.field';
+import { PURCHASE_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/purchase-contact-owner-member.field';
+import { PURCHASE_CREDITED_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER } from 'src/fields/purchase-credited-agent-member.field';
+import { hiddenField, READ_ONLY_GRANT } from 'src/roles/role-grants.util';
+
+const { person, opportunity, workspaceMember, dashboard } = STANDARD_OBJECT_UNIVERSAL_IDENTIFIERS;
+
+// Objects the Agent reads outright; Person, Opportunity, Call and Purchase are scoped by the row rules below.
+const READABLE_OBJECT_UNIVERSAL_IDENTIFIERS = [
+  person.universalIdentifier,
+  opportunity.universalIdentifier,
+  CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+  CALL_REASON_OBJECT_UNIVERSAL_IDENTIFIER,
+  PURCHASE_OBJECT_UNIVERSAL_IDENTIFIER,
+  MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
+  REASON_OBJECT_UNIVERSAL_IDENTIFIER,
+  workspaceMember.universalIdentifier,
+  AGENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  SEGMENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_SEGMENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_AGENT_OBJECT_UNIVERSAL_IDENTIFIER,
+  CAMPAIGN_CODE_OBJECT_UNIVERSAL_IDENTIFIER,
+  DISCOUNT_CODE_OBJECT_UNIVERSAL_IDENTIFIER,
+  CODE_ACTIVATION_OBJECT_UNIVERSAL_IDENTIFIER,
+  SETTINGS_OBJECT_UNIVERSAL_IDENTIFIER,
+  dashboard.universalIdentifier,
+];
+
+export default defineRole({
+  universalIdentifier: AGENT_ROLE_UNIVERSAL_IDENTIFIER,
+  label: 'Agent',
+  description:
+    'Works the contacts of their campaigns. Sees only owned and eligible contacts.',
+  icon: 'IconHeadset',
+  canReadAllObjectRecords: false,
+  canUpdateAllObjectRecords: false,
+  canSoftDeleteAllObjectRecords: false,
+  canDestroyAllObjectRecords: false,
+  canUpdateAllSettings: false,
+  canBeAssignedToUsers: true,
+  canBeAssignedToAgents: false,
+  canBeAssignedToApiKeys: false,
+  objectPermissions: READABLE_OBJECT_UNIVERSAL_IDENTIFIERS.map(
+    (objectUniversalIdentifier) => ({
+      objectUniversalIdentifier,
+      ...READ_ONLY_GRANT,
+    }),
+  ),
+  fieldPermissions: [
+    hiddenField(
+      PURCHASE_OBJECT_UNIVERSAL_IDENTIFIER,
+      PURCHASE_COMMISSION_USDT_FIELD_UNIVERSAL_IDENTIFIER,
+    ),
+  ],
+  permissionFlagUniversalIdentifiers: [
+    SystemPermissionFlag.PROFILE_INFORMATION,
+  ],
+  rowLevelPermissionPredicateGroups: [
+    {
+      universalIdentifier: PERSON_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: person.universalIdentifier,
+      logicalOperator: 'OR',
+    },
+    {
+      universalIdentifier: CALL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: CALL_OBJECT_UNIVERSAL_IDENTIFIER,
+      logicalOperator: 'OR',
+    },
+    {
+      universalIdentifier: DEAL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: opportunity.universalIdentifier,
+      logicalOperator: 'OR',
+    },
+    {
+      universalIdentifier: PURCHASE_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: PURCHASE_OBJECT_UNIVERSAL_IDENTIFIER,
+      logicalOperator: 'OR',
+    },
+    {
+      universalIdentifier: CODE_ACTIVATION_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: CODE_ACTIVATION_OBJECT_UNIVERSAL_IDENTIFIER,
+      logicalOperator: 'OR',
+    },
+    {
+      universalIdentifier: MONTHLY_INCOME_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER,
+      logicalOperator: 'OR',
+    },
+  ],
+  // The owner side binds ownerMember (a WorkspaceMember): row rules compare a member, not an Agent.
+  rowLevelPermissionPredicates: [
+    {
+      universalIdentifier: PERSON_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: person.universalIdentifier,
+      fieldUniversalIdentifier: PERSON_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: 'IS',
+      workspaceMemberFieldUniversalIdentifier:
+        workspaceMember.fields.id.universalIdentifier,
+      predicateGroupUniversalIdentifier:
+        PERSON_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+    },
+    {
+      universalIdentifier: PERSON_ELIGIBLE_PREDICATE_UNIVERSAL_IDENTIFIER,
+      objectUniversalIdentifier: person.universalIdentifier,
+      fieldUniversalIdentifier:
+        PERSON_ELIGIBLE_MEMBER_IDS_FIELD_UNIVERSAL_IDENTIFIER,
+      operand: 'CONTAINS',
+      workspaceMemberFieldUniversalIdentifier:
+        workspaceMember.fields.id.universalIdentifier,
+      predicateGroupUniversalIdentifier:
+        PERSON_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER,
+    },
+    ...[
+      [CALL_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER, CALL_OBJECT_UNIVERSAL_IDENTIFIER, CALL_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, CALL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+      [CALL_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER, CALL_OBJECT_UNIVERSAL_IDENTIFIER, CALL_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, CALL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+      [DEAL_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER, opportunity.universalIdentifier, OPPORTUNITY_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, DEAL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+      [DEAL_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER, opportunity.universalIdentifier, OPPORTUNITY_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, DEAL_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+      [PURCHASE_CREDITED_PREDICATE_UNIVERSAL_IDENTIFIER, PURCHASE_OBJECT_UNIVERSAL_IDENTIFIER, PURCHASE_CREDITED_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, PURCHASE_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+      [CODE_ACTIVATION_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER, CODE_ACTIVATION_OBJECT_UNIVERSAL_IDENTIFIER, CODE_ACTIVATION_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, CODE_ACTIVATION_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+      [CODE_ACTIVATION_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER, CODE_ACTIVATION_OBJECT_UNIVERSAL_IDENTIFIER, CODE_ACTIVATION_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, CODE_ACTIVATION_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+      [MONTHLY_INCOME_AGENT_PREDICATE_UNIVERSAL_IDENTIFIER, MONTHLY_INCOME_OBJECT_UNIVERSAL_IDENTIFIER, MONTHLY_INCOME_AGENT_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, MONTHLY_INCOME_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+      [PURCHASE_OWNER_PREDICATE_UNIVERSAL_IDENTIFIER, PURCHASE_OBJECT_UNIVERSAL_IDENTIFIER, PURCHASE_CONTACT_OWNER_MEMBER_FIELD_UNIVERSAL_IDENTIFIER, PURCHASE_PREDICATE_GROUP_UNIVERSAL_IDENTIFIER],
+    ].map(
+      ([universalIdentifier, objectUniversalIdentifier, fieldUniversalIdentifier, predicateGroupUniversalIdentifier]) => ({
+        universalIdentifier,
+        objectUniversalIdentifier,
+        fieldUniversalIdentifier,
+        operand: 'IS' as const,
+        workspaceMemberFieldUniversalIdentifier:
+          workspaceMember.fields.id.universalIdentifier,
+        predicateGroupUniversalIdentifier,
+      }),
+    ),
+  ],
+});
