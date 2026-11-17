@@ -12,7 +12,7 @@ export default defineNavigationMenuItem({
   universalIdentifier: REPORT_NAV_UNIVERSAL_IDENTIFIER,
   name: 'Home',
   icon: 'IconHome',
-  position: 0,
+  position: -17,
   type: NavigationMenuItemType.PAGE_LAYOUT,
   pageLayoutUniversalIdentifier: REPORT_PAGE_LAYOUT_UNIVERSAL_IDENTIFIER,
 });

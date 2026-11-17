@@ -702,6 +702,7 @@ export class ObjectMetadataService {
       nativePageKey: null,
       icon: null,
       color: null,
+      visibleToRoleUniversalIdentifiers: null,
       position: nextPosition,
       workspaceId,
       applicationId: workspaceCustomApplicationId,

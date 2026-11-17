@@ -239,6 +239,7 @@ const NAVIGATION_MENU_ITEM_MANIFEST: Required<NavigationMenuItemManifest> = {
   viewUniversalIdentifier: VIEW_UID,
   targetObjectUniversalIdentifier: OBJECT_UID,
   pageLayoutUniversalIdentifier: '99999999-9999-4999-8999-999999999999',
+  visibleToRoleUniversalIdentifiers: ['20202020-02c2-43f2-b94d-cab1f2b532eb'],
 };
 
 const PAGE_LAYOUT_KIND_GAPS = {

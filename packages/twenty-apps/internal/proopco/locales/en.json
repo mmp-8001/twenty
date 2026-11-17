@@ -1,5 +1,4 @@
 {
-  "Could not rebuild your sidebar. Try again.": "Could not rebuild your sidebar. Try again.",
   "(optional, codes of {campaign})": "(optional, codes of {campaign})",
   "(optional, editable later)": "(optional, editable later)",
   "(optional)": "(optional)",
@@ -275,8 +274,6 @@
   "You cannot freeze yourself.": "You cannot freeze yourself.",
   "You have no access to reports.": "You have no access to reports.",
   "You have no agent record.": "You have no agent record.",
-  "Your sidebar is rebuilt. Refresh the page to see it.": "Your sidebar is rebuilt. Refresh the page to see it.",
-  "Your sidebar was updated. Refresh the page to see it.": "Your sidebar was updated. Refresh the page to see it.",
   "commandMenuItem.label": {
     "Add to follow-up": "Add to follow-up",
     "Clear showcase data": "Clear showcase data",
@@ -290,7 +287,6 @@
     "Mark as paid": "Mark as paid",
     "Reactivate agent": "Reactivate agent",
     "Resend SMS": "Resend SMS",
-    "Reset my sidebar": "Reset my sidebar",
     "Retry": "Retry",
     "Seed showcase data": "Seed showcase data",
     "Transfer or release contacts": "Transfer or release contacts",
@@ -310,7 +306,6 @@
     "Mark as paid": "Mark as paid",
     "Reactivate agent": "Reactivate agent",
     "Resend SMS": "Resend SMS",
-    "Reset sidebar": "Reset sidebar",
     "Retry": "Retry",
     "Seed showcase": "Seed showcase",
     "Transfer": "Transfer",
@@ -500,7 +495,8 @@
     "Was overdue": "Was overdue"
   },
   "navigationMenuItem.name": {
-    "Home": "Home"
+    "Home": "Home",
+    "My follow-ups": "My follow-ups"
   },
   "objectMetadata.description": {
     "A code activated for one contact; never deleted, one per code and contact": "A code activated for one contact; never deleted, one per code and contact",

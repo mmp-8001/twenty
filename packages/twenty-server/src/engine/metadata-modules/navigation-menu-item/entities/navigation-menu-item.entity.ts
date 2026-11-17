@@ -16,6 +16,7 @@ import { type NativePageKey } from 'twenty-shared/types';
 import { ADD_AGENT_CHAT_CHANNEL_NAVIGATION_MENU_ITEM_UPGRADE_COMMAND_NAME } from 'src/database/commands/upgrade-version-command/2-51/add-agent-chat-channel-navigation-menu-item-upgrade-command-name.constant';
 import { ADD_NATIVE_PAGE_NAVIGATION_MENU_ITEM_UPGRADE_COMMAND_NAME } from 'src/database/commands/upgrade-version-command/2-56/add-native-page-navigation-menu-item-upgrade-command-name.constant';
 import { ADD_WORKFLOW_AND_AGENT_NAVIGATION_MENU_ITEMS_UPGRADE_COMMAND_NAME } from 'src/database/commands/upgrade-version-command/2-58/add-workflow-and-agent-navigation-menu-items-upgrade-command-name.constant';
+import { ADD_NAVIGATION_MENU_ITEM_VISIBLE_TO_ROLE_UNIVERSAL_IDENTIFIERS_UPGRADE_COMMAND_NAME } from 'src/database/commands/upgrade-version-command/2-59/add-navigation-menu-item-visible-to-role-universal-identifiers-upgrade-command-name.constant';
 import { WasIntroducedInUpgrade } from 'src/engine/core-modules/upgrade/decorators/was-introduced-in-upgrade.decorator';
 import { UserWorkspaceEntity } from 'src/engine/core-modules/user-workspace/user-workspace.entity';
 import { WorkflowEntity } from 'src/engine/core-modules/workflow/entities/workflow.entity';
@@ -138,6 +139,14 @@ export class NavigationMenuItemEntity
 
   @Column({ nullable: true, type: 'text' })
   color: string | null;
+
+  // Sidebar visibility only, not access: null shows the item to every role.
+  @WasIntroducedInUpgrade({
+    upgradeCommandName:
+      ADD_NAVIGATION_MENU_ITEM_VISIBLE_TO_ROLE_UNIVERSAL_IDENTIFIERS_UPGRADE_COMMAND_NAME,
+  })
+  @Column({ nullable: true, type: 'jsonb' })
+  visibleToRoleUniversalIdentifiers: string[] | null;
 
   @ManyToOne(() => NavigationMenuItemEntity, {
     onDelete: 'CASCADE',

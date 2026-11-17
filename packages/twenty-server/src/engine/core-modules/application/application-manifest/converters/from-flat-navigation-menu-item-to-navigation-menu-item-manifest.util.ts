@@ -20,6 +20,12 @@ export const fromFlatNavigationMenuItemToNavigationMenuItemManifest = ({
   ...(isDefined(flatNavigationMenuItem.color)
     ? { color: flatNavigationMenuItem.color }
     : {}),
+  ...(isDefined(flatNavigationMenuItem.visibleToRoleUniversalIdentifiers)
+    ? {
+        visibleToRoleUniversalIdentifiers:
+          flatNavigationMenuItem.visibleToRoleUniversalIdentifiers,
+      }
+    : {}),
   ...(isDefined(flatNavigationMenuItem.link)
     ? { link: flatNavigationMenuItem.link }
     : {}),

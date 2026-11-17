@@ -12,7 +12,9 @@ import { type MetadataEventBatch } from 'src/engine/subscriptions/metadata-event
 import { enrichFieldMetadataEventRecord } from 'src/engine/subscriptions/metadata-event/utils/enrich-field-metadata-event-record.util';
 import { filterMorphRelationDuplicateFieldMetadataEvents } from 'src/engine/subscriptions/metadata-event/utils/filter-morph-relation-duplicate-field-metadata-events.util';
 import { getRequiredPermissionFlagForBroadcastEntityName } from 'src/engine/subscriptions/constants/required-permission-flag-by-broadcast-entity-name.constant';
+import { splitNavigationMenuItemEventByAudience } from 'src/engine/subscriptions/metadata-event/utils/split-navigation-menu-item-event-by-audience.util';
 import { pickBroadcastEventProperties } from 'src/engine/subscriptions/utils/pick-broadcast-event-properties.util';
+import { type WorkspaceBroadcastEvent } from 'src/engine/subscriptions/workspace-event-broadcaster/types/workspace-broadcast-event.type';
 import { WorkspaceEventBroadcaster } from 'src/engine/subscriptions/workspace-event-broadcaster/workspace-event-broadcaster.service';
 
 type BroadcastEventRecord = {
@@ -65,10 +67,8 @@ export class MetadataEventPublisher {
     const recipientUserWorkspaceIdsByRecordId =
       await this.resolveRecipientUserWorkspaceIdsByRecordId(enrichedBatch);
 
-    await this.workspaceEventBroadcaster.broadcast({
-      workspaceId: enrichedBatch.workspaceId,
-      updatedCollectionHash: enrichedBatch.updatedCollectionHash,
-      events: enrichedBatch.events.map((event) => {
+    const events = enrichedBatch.events.map(
+      (event): WorkspaceBroadcastEvent => {
         const recipientUserWorkspaceIds =
           recipientUserWorkspaceIdsByRecordId.get(event.recordId);
 
@@ -84,8 +84,51 @@ export class MetadataEventPublisher {
           requiredPermissionFlag:
             getRequiredPermissionFlagForBroadcastEntityName(event.metadataName),
         };
-      }),
+      },
+    );
+
+    const roleAssignments =
+      enrichedBatch.metadataName === 'navigationMenuItem'
+        ? await this.resolveRoleAssignments(enrichedBatch.workspaceId)
+        : undefined;
+
+    await this.workspaceEventBroadcaster.broadcast({
+      workspaceId: enrichedBatch.workspaceId,
+      updatedCollectionHash: enrichedBatch.updatedCollectionHash,
+      events: isDefined(roleAssignments)
+        ? events.flatMap((event) =>
+            splitNavigationMenuItemEventByAudience(event, roleAssignments),
+          )
+        : events,
     });
+  }
+
+  private async resolveRoleAssignments(workspaceId: string) {
+    const { flatRoleTargetMaps, flatRoleMaps } =
+      await this.workspaceManyOrAllFlatEntityMapsCacheService.getOrRecomputeManyOrAllFlatEntityMaps(
+        { workspaceId, flatMapsKeys: ['flatRoleTargetMaps', 'flatRoleMaps'] },
+      );
+
+    return Object.values(flatRoleTargetMaps.byUniversalIdentifier).flatMap(
+      (roleTarget) => {
+        const roleUniversalIdentifier = isDefined(roleTarget)
+          ? findFlatEntityByIdInFlatEntityMaps({
+              flatEntityMaps: flatRoleMaps,
+              flatEntityId: roleTarget.roleId,
+            })?.universalIdentifier
+          : undefined;
+
+        return isNonEmptyString(roleTarget?.userWorkspaceId) &&
+          isNonEmptyString(roleUniversalIdentifier)
+          ? [
+              {
+                userWorkspaceId: roleTarget.userWorkspaceId,
+                roleUniversalIdentifier,
+              },
+            ]
+          : [];
+      },
+    );
   }
 
   // Unowned private workflows stay workspace-wide on purpose, as the read path opens them once the creator leaves;
@@ -133,10 +176,6 @@ export class MetadataEventPublisher {
           return isDefined(record)
             ? getViewRecipientUserWorkspaceIds(record)
             : [];
-        case 'navigationMenuItem':
-          return isNonEmptyString(record?.userWorkspaceId)
-            ? [record.userWorkspaceId]
-            : undefined;
         case 'workflow': {
           const ownerUserWorkspaceId = getPrivateWorkflowOwner(record);
 

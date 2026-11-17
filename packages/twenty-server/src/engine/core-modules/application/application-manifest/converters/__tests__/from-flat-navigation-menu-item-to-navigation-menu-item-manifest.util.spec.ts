@@ -26,6 +26,7 @@ const NAVIGATION_MENU_ITEM_MANIFEST: Required<NavigationMenuItemManifest> = {
   viewUniversalIdentifier: VIEW_UID,
   targetObjectUniversalIdentifier: OBJECT_UID,
   pageLayoutUniversalIdentifier: PAGE_LAYOUT_UID,
+  visibleToRoleUniversalIdentifiers: ['20202020-02c2-43f2-b94d-cab1f2b532eb'],
 };
 
 const MINIMAL_NAVIGATION_MENU_ITEM_MANIFEST: NavigationMenuItemManifest = {

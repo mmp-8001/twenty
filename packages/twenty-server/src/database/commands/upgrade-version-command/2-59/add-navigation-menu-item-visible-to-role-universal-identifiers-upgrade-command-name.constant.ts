@@ -1,0 +1,2 @@
+export const ADD_NAVIGATION_MENU_ITEM_VISIBLE_TO_ROLE_UNIVERSAL_IDENTIFIERS_UPGRADE_COMMAND_NAME =
+  '2.59.0_AddNavigationMenuItemVisibleToRoleUniversalIdentifiersFastInstanceCommand_1794841896840';

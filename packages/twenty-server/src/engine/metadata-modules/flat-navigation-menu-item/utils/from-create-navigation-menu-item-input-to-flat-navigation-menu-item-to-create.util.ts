@@ -115,6 +115,7 @@ export const fromCreateNavigationMenuItemInputToFlatNavigationMenuItemToCreate =
       nativePageKey: createNavigationMenuItemInput.nativePageKey ?? null,
       icon: createNavigationMenuItemInput.icon ?? null,
       color: createNavigationMenuItemInput.color ?? null,
+      visibleToRoleUniversalIdentifiers: null,
       position,
       workspaceId,
       applicationId: flatApplication.id,

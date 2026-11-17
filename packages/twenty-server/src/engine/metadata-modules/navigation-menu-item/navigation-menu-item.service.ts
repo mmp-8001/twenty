@@ -7,6 +7,8 @@ import { type WorkspaceAuthContext } from 'src/engine/core-modules/auth/types/wo
 import { WorkspaceManyOrAllFlatEntityMapsCacheService } from 'src/engine/metadata-modules/flat-entity/services/workspace-many-or-all-flat-entity-maps-cache.service';
 import { findFlatEntityByIdInFlatEntityMapsOrThrow } from 'src/engine/metadata-modules/flat-entity/utils/find-flat-entity-by-id-in-flat-entity-maps-or-throw.util';
 import { findFlatEntityByIdInFlatEntityMaps } from 'src/engine/metadata-modules/flat-entity/utils/find-flat-entity-by-id-in-flat-entity-maps.util';
+import { type FlatRoleTargetMaps } from 'src/engine/metadata-modules/flat-role-target/types/flat-role-target-maps.type';
+import { type FlatRoleMaps } from 'src/engine/metadata-modules/flat-role/types/flat-role-maps.type';
 import { type FlatNavigationMenuItem } from 'src/engine/metadata-modules/flat-navigation-menu-item/types/flat-navigation-menu-item.type';
 import { addFlatNavigationMenuItemToMapsAndUpdateIndex } from 'src/engine/metadata-modules/flat-navigation-menu-item/utils/add-flat-navigation-menu-item-to-maps-and-update-index.util';
 import { fromCreateNavigationMenuItemInputToFlatNavigationMenuItemToCreate } from 'src/engine/metadata-modules/flat-navigation-menu-item/utils/from-create-navigation-menu-item-input-to-flat-navigation-menu-item-to-create.util';
@@ -56,13 +58,44 @@ export class NavigationMenuItemService {
     type?: NavigationMenuItemType;
     limit?: number;
   }): Promise<NavigationMenuItemDTO[]> {
-    const { flatNavigationMenuItemMaps } =
+    const { flatNavigationMenuItemMaps, flatRoleTargetMaps, flatRoleMaps } =
       await this.workspaceManyOrAllFlatEntityMapsCacheService.getOrRecomputeManyOrAllFlatEntityMaps(
         {
           workspaceId,
-          flatMapsKeys: ['flatNavigationMenuItemMaps'],
+          flatMapsKeys: [
+            'flatNavigationMenuItemMaps',
+            'flatRoleTargetMaps',
+            'flatRoleMaps',
+          ],
         },
       );
+
+    const callerRoleUniversalIdentifier = isDefined(userWorkspaceId)
+      ? this.findRoleUniversalIdentifierOfUserWorkspace({
+          userWorkspaceId,
+          flatRoleTargetMaps,
+          flatRoleMaps,
+        })
+      : undefined;
+
+    const isVisibleToCaller = (item: FlatNavigationMenuItem) =>
+      !isDefined(userWorkspaceId) ||
+      !isDefined(item.visibleToRoleUniversalIdentifiers) ||
+      (isDefined(callerRoleUniversalIdentifier) &&
+        item.visibleToRoleUniversalIdentifiers.includes(
+          callerRoleUniversalIdentifier,
+        ));
+
+    const hiddenFolderIds = new Set(
+      Object.values(flatNavigationMenuItemMaps.byUniversalIdentifier)
+        .filter(isDefined)
+        .filter(
+          (item) =>
+            item.type === NavigationMenuItemType.FOLDER &&
+            !isVisibleToCaller(item),
+        )
+        .map(({ id }) => id),
+    );
 
     const filtered = Object.values(
       flatNavigationMenuItemMaps.byUniversalIdentifier,
@@ -86,6 +119,11 @@ export class NavigationMenuItemService {
         // scope === 'user'
         return itemIsUserScoped && item.userWorkspaceId === userWorkspaceId;
       })
+      .filter(
+        (item) =>
+          isVisibleToCaller(item) &&
+          !(isDefined(item.folderId) && hiddenFolderIds.has(item.folderId)),
+      )
       .filter((item) => !isDefined(folderId) || item.folderId === folderId)
       .filter((item) => !isDefined(type) || item.type === type)
       .sort((a, b) => a.position - b.position);
@@ -93,6 +131,27 @@ export class NavigationMenuItemService {
     const bounded = isDefined(limit) ? filtered.slice(0, limit) : filtered;
 
     return bounded.map(fromFlatNavigationMenuItemToNavigationMenuItemDto);
+  }
+
+  private findRoleUniversalIdentifierOfUserWorkspace({
+    userWorkspaceId,
+    flatRoleTargetMaps,
+    flatRoleMaps,
+  }: {
+    userWorkspaceId: string;
+    flatRoleTargetMaps: FlatRoleTargetMaps;
+    flatRoleMaps: FlatRoleMaps;
+  }): string | undefined {
+    const roleId = Object.values(flatRoleTargetMaps.byUniversalIdentifier).find(
+      (roleTarget) => roleTarget?.userWorkspaceId === userWorkspaceId,
+    )?.roleId;
+
+    return isDefined(roleId)
+      ? findFlatEntityByIdInFlatEntityMaps({
+          flatEntityId: roleId,
+          flatEntityMaps: flatRoleMaps,
+        })?.universalIdentifier
+      : undefined;
   }
 
   async findById({
